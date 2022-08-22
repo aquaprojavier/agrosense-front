@@ -789,7 +789,7 @@ export const MENU: MenuItem[] = [
             {
                 id: 123,
                 label: 'MENUITEMS.MAPS.LIST.GOOGLEMAP',
-                link: '/',
+                link: '/maps/google',
                 parentId: 122
             }
         ]
