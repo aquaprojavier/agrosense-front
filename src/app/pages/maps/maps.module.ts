@@ -7,9 +7,10 @@ import { UIModule } from '../../shared/ui/ui.module';
 
 import { MapsRoutingModule } from './maps-routing.module';
 import { GoogleComponent } from './google/google.component';
+import { LeafletComponent } from './leaflet/leaflet.component';
 
 @NgModule({
-  declarations: [GoogleComponent],
+  declarations: [GoogleComponent, LeafletComponent],
   imports: [
     CommonModule,
     MapsRoutingModule,

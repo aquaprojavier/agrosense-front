@@ -294,7 +294,8 @@
     "MAPS": {
       "TEXT": "Mapas",
       "LIST": {
-        "GOOGLEMAP": "mapas de Google"
+        "GOOGLEMAP": "mapas de Google",
+        "LEAFLETMAP": "Mapas de Leaflet"
       }
     },
     "MULTILEVEL": {

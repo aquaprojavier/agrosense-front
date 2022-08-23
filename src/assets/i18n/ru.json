@@ -294,7 +294,8 @@
     "MAPS": {
       "TEXT": "Карты",
       "LIST": {
-        "GOOGLEMAP": "Карты Гугл"
+        "GOOGLEMAP": "Карты Гугл",
+        "LEAFLETMAP": "Leaflet Maps"
       }
     },
     "MULTILEVEL": {

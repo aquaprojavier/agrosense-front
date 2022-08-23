@@ -788,8 +788,8 @@ export const MENU: MenuItem[] = [
         subItems: [
             {
                 id: 123,
-                label: 'MENUITEMS.MAPS.LIST.GOOGLEMAP',
-                link: '/maps/google',
+                label: 'MENUITEMS.MAPS.LIST.LEAFLETMAP',
+                link: '/maps/leaflet',
                 parentId: 122
             }
         ]
