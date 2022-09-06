@@ -1,0 +1,64 @@
+<div class="container-fluid">
+  <!-- start page title -->
+  <app-page-title
+    title="Form Layouts"
+    [breadcrumbItems]="breadCrumbItems"
+  ></app-page-title>
+  <!-- end page title -->
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <p>
+            Name: {{ nameField.value }} {{ nameField.valid }}
+            <input type="text" [formControl]="nameField" />
+            <button [disabled]="nameField.invalid" (click)="getNameValue()">
+              get value
+            </button>
+          </p>
+          <p>
+            Email: {{ emailField.value }}
+            <input type="email" [formControl]="emailField" />
+          </p>
+          <p>
+            Phone: {{ phoneField.value }}
+            <input type="tel" [formControl]="phoneField" />
+          </p>
+          <p>
+            Color: {{ colorField.value }}
+            <input type="color" [formControl]="colorField" />
+          </p>
+          <p>
+            Date: {{ dateField.value }}
+            <input type="date" [formControl]="dateField" />
+          </p>
+          <p>
+            Age: {{ ageField.value }}
+            <input type="number" [formControl]="ageField" />
+          </p>
+          <p>
+            Category: {{ categoryField.value }}
+            <select [formControl]="categoryField">
+              <option value="cat 1"></option>
+              <option value="cat 2"></option>
+              <option value="cat 3"></option>
+              <option value="cat 4"></option>
+            </select>
+          </p>
+
+          <p>
+            Tags: {{ tagsField.value }}
+            <select [formControl]="tagsField" multiple>
+              <option value="tag 1"></option>
+              <option value="tag 2"></option>
+              <option value="tag 3"></option>
+              <option value="tag 4"></option>
+            </select>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end row -->
+</div>

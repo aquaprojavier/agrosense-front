@@ -636,68 +636,25 @@ export const MENU: MenuItem[] = [
         ]
     },
     {
-        id: 99,
+        id: 100,
         label: 'MENUITEMS.FORMS.TEXT',
         icon: 'bxs-eraser',
-        badge: {
-            variant: 'danger',
-            text: 'MENUITEMS.FORMS.BADGE',
-        },
         subItems: [
-            {
-                id: 100,
-                label: 'MENUITEMS.FORMS.LIST.ELEMENTS',
-                link: '/',
-                parentId: 99
-            },
-            {
-                id: 101,
-                label: 'MENUITEMS.FORMS.LIST.LAYOUTS',
-                link: '/',
-                parentId: 99
-            },
+           
             {
                 id: 102,
-                label: 'MENUITEMS.FORMS.LIST.VALIDATION',
-                link: '/',
-                parentId: 99
+                label: 'MENUITEMS.FORMS.LIST.LAYOUTS',
+                link: '/form/layouts',
+                parentId: 100
             },
+
             {
                 id: 103,
-                label: 'MENUITEMS.FORMS.LIST.ADVANCED',
-                link: '/',
-                parentId: 99
+                label: 'MENUITEMS.FORMS.LIST.FORMARRAY',
+                link: '/form/formarray',
+                parentId: 100
             },
-            {
-                id: 104,
-                label: 'MENUITEMS.FORMS.LIST.EDITOR',
-                link: '/',
-                parentId: 99
-            },
-            {
-                id: 105,
-                label: 'MENUITEMS.FORMS.LIST.FILEUPLOAD',
-                link: '/',
-                parentId: 99
-            },
-            {
-                id: 106,
-                label: 'MENUITEMS.FORMS.LIST.REPEATER',
-                link: '/',
-                parentId: 99
-            },
-            {
-                id: 107,
-                label: 'MENUITEMS.FORMS.LIST.WIZARD',
-                link: '/',
-                parentId: 99
-            },
-            {
-                id: 108,
-                label: 'MENUITEMS.FORMS.LIST.MASK',
-                link: '/',
-                parentId: 99
-            }
+           
         ]
     },
     {
@@ -708,12 +665,6 @@ export const MENU: MenuItem[] = [
             {
                 id: 110,
                 label: 'MENUITEMS.TABLES.LIST.BASIC',
-                link: '/',
-                parentId: 109
-            },
-            {
-                id: 111,
-                label: 'MENUITEMS.TABLES.LIST.ADVANCED',
                 link: '/',
                 parentId: 109
             }

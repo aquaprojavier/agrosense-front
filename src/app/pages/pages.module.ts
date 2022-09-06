@@ -19,6 +19,7 @@ import { PagesRoutingModule } from './pages-routing.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MapsModule } from './maps/maps.module';
+import { FormModule } from './form/form.module';
 
 FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   dayGridPlugin,
@@ -48,7 +49,7 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
     SimplebarAngularModule,
     LightboxModule,
     MapsModule,
-    FormsModule
+    FormModule
   ],
 })
 export class PagesModule { }
