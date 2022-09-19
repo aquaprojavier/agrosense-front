@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
     constructor(
         private router: Router,
         private authenticationService: AuthenticationService,
-        private authFackservice: AuthfakeauthenticationService
+        private authFakeservice: AuthfakeauthenticationService
     ) { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
                 return true;
             }
         } else {
-            const currentUser = this.authFackservice.currentUserValue;
+            const currentUser = this.authFakeservice.currentUserValue;
             if (currentUser) {
                 // logged in so return true
                 return true;

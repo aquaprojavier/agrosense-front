@@ -31,7 +31,7 @@ export class SignupComponent implements OnInit {
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-    });
+    },);
   }
 
   // convenience getter for easy access to form fields
@@ -42,7 +42,8 @@ export class SignupComponent implements OnInit {
    */
   onSubmit() {
     this.submitted = true;
-
+    //para ver los valores
+    console.log(this.signupForm.value);
     // stop here if form is invalid
     if (this.signupForm.invalid) {
       return;

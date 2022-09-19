@@ -28,12 +28,6 @@ export const MENU: MenuItem[] = [
                 parentId: 2
             },
             {
-                id: 5,
-                label: 'MENUITEMS.DASHBOARDS.LIST.CRYPTO',
-                link: '/',
-                parentId: 2
-            },
-            {
                 id: 6,
                 label: 'MENUITEMS.DASHBOARDS.LIST.BLOG',
                 link: '/',
@@ -58,85 +52,85 @@ export const MENU: MenuItem[] = [
             {
                 id: 58,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.LOGIN',
-                link: '/',
+                link: '/account/login',
                 parentId: 57
             },
             {
                 id: 59,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.LOGIN2',
-                link: '/',
+                link: '/account/login-2',
                 parentId: 57
             },
             {
                 id: 60,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.REGISTER',
-                link: '/',
+                link: '/account/signup',
                 parentId: 57
             },
             {
                 id: 61,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.REGISTER2',
-                link: '/',
+                link: '/account/signup-2',
                 parentId: 57
             },
             {
                 id: 62,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.RECOVERPWD',
-                link: '/',
+                link: '/account/reset-password',
                 parentId: 57
             },
             {
                 id: 63,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.RECOVERPWD2',
-                link: '/',
+                link: '/account/recoverpwd-2',
                 parentId: 57
             },
             {
                 id: 64,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.LOCKSCREEN',
-                link: '/',
+                link: '/pages/lock-screen-1',
                 parentId: 57
             },
             {
                 id: 65,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.LOCKSCREEN2',
-                link: '/',
+                link: '/pages/lock-screen-2',
                 parentId: 57
             },
             {
                 id: 66,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.CONFIRMMAIL',
-                link: '/',
+                link: '/pages/confirm-mail',
                 parentId: 57
             },
             {
                 id: 67,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.CONFIRMMAIL2',
-                link: '/',
+                link: '/pages/confirm-mail-2',
                 parentId: 57
             },
             {
                 id: 68,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.EMAILVERIFICATION',
-                link: '/',
+                link: '/pages/email-verification',
                 parentId: 57
             },
             {
                 id: 69,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.EMAILVERIFICATION2',
-                link: '/',
+                link: '/pages/email-verification-2',
                 parentId: 57
             },
             {
                 id: 70,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.TWOSTEPVERIFICATION',
-                link: '/',
+                link: '/pages/two-step-verification',
                 parentId: 57
             },
             {
                 id: 71,
                 label: 'MENUITEMS.AUTHENTICATION.LIST.TWOSTEPVERIFICATION2',
-                link: '/',
+                link: '/pages/two-step-verification-2',
                 parentId: 57
             }
         ]
