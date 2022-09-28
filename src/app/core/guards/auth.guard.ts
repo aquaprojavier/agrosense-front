@@ -5,13 +5,16 @@ import { AuthenticationService } from '../services/auth.service';
 import { AuthfakeauthenticationService } from '../services/authfake.service';
 
 import { environment } from '../../../environments/environment';
+import { UserProfileService } from '../services/user.service';
+import { LoginService } from '../services/login.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
     constructor(
         private router: Router,
         private authenticationService: AuthenticationService,
-        private authFakeservice: AuthfakeauthenticationService
+        private authFakeservice: AuthfakeauthenticationService,
+        private loginService: LoginService
     ) { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
@@ -22,7 +25,8 @@ export class AuthGuard implements CanActivate {
                 return true;
             }
         } else {
-            const currentUser = this.authFakeservice.currentUserValue;
+            const currentUser = this.loginService.getCurrentUser();
+            console.log("hhhhhhhhhhhhhhhhh");
             if (currentUser) {
                 // logged in so return true
                 return true;

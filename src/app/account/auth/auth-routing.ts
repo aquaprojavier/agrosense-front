@@ -10,6 +10,8 @@ import { Register2Component } from './register2/register2.component';
 import { Recoverpwd2Component } from './recoverpwd2/recoverpwd2.component';
 
 const routes: Routes = [
+    { 
+        path: '', redirectTo: 'login', pathMatch: 'full'},
     {
         path: 'login',
         component: LoginComponent

@@ -4,7 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { DefaultComponent } from './dashboards/default/default.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'dashboard' },
+  { path: '', redirectTo: 'maps' },
   { path: 'dashboard', component: DefaultComponent },
   { path: 'form', loadChildren: () => import('./form/form.module').then(m => m.FormModule) },
   { path: 'dashboards', loadChildren: () => import('./dashboards/dashboards.module').then(m => m.DashboardsModule) },

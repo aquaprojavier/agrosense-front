@@ -6,11 +6,10 @@ import { AgmCoreModule } from '@agm/core';
 import { UIModule } from '../../shared/ui/ui.module';
 
 import { MapsRoutingModule } from './maps-routing.module';
-import { GoogleComponent } from './google/google.component';
 import { LeafletComponent } from './leaflet/leaflet.component';
 
 @NgModule({
-  declarations: [GoogleComponent, LeafletComponent],
+  declarations: [LeafletComponent],
   imports: [
     CommonModule,
     MapsRoutingModule,
