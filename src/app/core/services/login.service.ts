@@ -18,14 +18,15 @@ export class LoginService {
     return this.http.post(`${baserUrl}/generate-token`,loginData);
   }
 
-  public getCurrentUser(){
-    return this.http.get(`${baserUrl}/actual-usuario`);
-  }
-
   //iniciamos sesión y establecemos el token en el localStorage
   public loginUser(token:any){
     localStorage.setItem('token',token);
     return true;
+  }
+
+  public getCurrentUser()
+  {
+    return this.http.get(`${baserUrl}/actual-usuario`);
   }
 
   public isLoggedIn(){

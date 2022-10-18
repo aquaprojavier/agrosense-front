@@ -4,9 +4,11 @@ import baserUrl from '../helpers/helper';
 import { User } from '../models/auth.models';
 
 @Injectable({ providedIn: 'root' })
+
 export class UserProfileService {
-    constructor(private http: HttpClient) { }
     
+    constructor(private http: HttpClient) { }
+
     // cambiar aca
     getAll() {
         return this.http.get<User[]>(`/api/login`);
@@ -15,4 +17,9 @@ export class UserProfileService {
     register(user: User) {
         return this.http.post(`${baserUrl}/usuarios`, user);
     }
+
+
+    getData() { 
+        return this.http.get(`${baserUrl}/graf/verJson/1`); }
+
 }

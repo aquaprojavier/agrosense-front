@@ -12,6 +12,7 @@ import { SimplebarAngularModule } from 'simplebar-angular';
 
 import { DefaultComponent } from './default/default.component';
 
+
 @NgModule({
   declarations: [DefaultComponent],
   imports: [

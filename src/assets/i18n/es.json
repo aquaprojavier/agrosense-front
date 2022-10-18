@@ -279,7 +279,8 @@
         "APEX": "Gráfico de Apex",
         "CHARTJS": "Chartjs Chart",
         "CHARTIST": "Chartist Chart",
-        "ECHART": "Gráfico E"
+        "ECHART": "Gráfico E",
+        "AMCHART": "Gráfico linea"
       }
     },
     "ICONS": {

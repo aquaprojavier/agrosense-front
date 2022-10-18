@@ -270,10 +270,8 @@
     "CHARTS": {
       "TEXT": "Charts",
       "LIST": {
-        "APEX": "Apex Chart",
-        "CHARTJS": "Chartjs Chart",
-        "CHARTIST": "Chartist Chart",
-        "ECHART": "E Chart"
+        "AMCHART": "Line Chart",
+        "CHARTJS": "Chartjs Chart"
       }
     },
     "ICONS": {

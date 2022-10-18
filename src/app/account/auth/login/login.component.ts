@@ -30,8 +30,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
-      username: ['usuario', [Validators.required]],
-      password: ['12345', [Validators.required]],
+      username: ['tomi', [Validators.required]],
+      password: ['123', [Validators.required]],
     });
      // reset login status
     // this.authenticationService.logout();
@@ -62,10 +62,10 @@ export class LoginComponent implements OnInit {
               console.log(user);
     
               if(this.loginService.getUserRole() == 'ADMIN'){
-                this.router.navigate(['admin']);
+                this.router.navigate(['']);
                 this.loginService.loginStatusSubjec.next(true); }
               else if(this.loginService.getUserRole() == 'USER'){
-                this.router.navigate(['user/dashboard']);
+                this.router.navigate(['maps']);
                 this.loginService.loginStatusSubjec.next(true);
               }
               else{

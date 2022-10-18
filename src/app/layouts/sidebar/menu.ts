@@ -41,101 +41,6 @@ export const MENU: MenuItem[] = [
         isTitle: true
     },
     {
-        id: 57,
-        label: 'MENUITEMS.AUTHENTICATION.TEXT',
-        icon: 'bx-user-circle',
-        badge: {
-            variant: 'success',
-            text: 'MENUITEMS.AUTHENTICATION.BADGE',
-        },
-        subItems: [
-            {
-                id: 58,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.LOGIN',
-                link: '/account/login',
-                parentId: 57
-            },
-            {
-                id: 59,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.LOGIN2',
-                link: '/account/login-2',
-                parentId: 57
-            },
-            {
-                id: 60,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.REGISTER',
-                link: '/account/signup',
-                parentId: 57
-            },
-            {
-                id: 61,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.REGISTER2',
-                link: '/account/signup-2',
-                parentId: 57
-            },
-            {
-                id: 62,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.RECOVERPWD',
-                link: '/account/reset-password',
-                parentId: 57
-            },
-            {
-                id: 63,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.RECOVERPWD2',
-                link: '/account/recoverpwd-2',
-                parentId: 57
-            },
-            {
-                id: 64,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.LOCKSCREEN',
-                link: '/pages/lock-screen-1',
-                parentId: 57
-            },
-            {
-                id: 65,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.LOCKSCREEN2',
-                link: '/pages/lock-screen-2',
-                parentId: 57
-            },
-            {
-                id: 66,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.CONFIRMMAIL',
-                link: '/pages/confirm-mail',
-                parentId: 57
-            },
-            {
-                id: 67,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.CONFIRMMAIL2',
-                link: '/pages/confirm-mail-2',
-                parentId: 57
-            },
-            {
-                id: 68,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.EMAILVERIFICATION',
-                link: '/pages/email-verification',
-                parentId: 57
-            },
-            {
-                id: 69,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.EMAILVERIFICATION2',
-                link: '/pages/email-verification-2',
-                parentId: 57
-            },
-            {
-                id: 70,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.TWOSTEPVERIFICATION',
-                link: '/pages/two-step-verification',
-                parentId: 57
-            },
-            {
-                id: 71,
-                label: 'MENUITEMS.AUTHENTICATION.LIST.TWOSTEPVERIFICATION2',
-                link: '/pages/two-step-verification-2',
-                parentId: 57
-            }
-        ]
-    },
-    {
         id: 72,
         label: 'MENUITEMS.UTILITY.TEXT',
         icon: 'bx-file',
@@ -207,13 +112,6 @@ export const MENU: MenuItem[] = [
                 link: '/form/layouts',
                 parentId: 100
             },
-
-            {
-                id: 103,
-                label: 'MENUITEMS.FORMS.LIST.FORMARRAY',
-                link: '/form/formarray',
-                parentId: 100
-            },
            
         ]
     },
@@ -237,25 +135,13 @@ export const MENU: MenuItem[] = [
         subItems: [
             {
                 id: 113,
-                label: 'MENUITEMS.CHARTS.LIST.APEX',
-                link: '/',
+                label: 'MENUITEMS.CHARTS.LIST.AMCHART',
+                link: '/linechart',
                 parentId: 112
             },
             {
                 id: 114,
                 label: 'MENUITEMS.CHARTS.LIST.CHARTJS',
-                link: '/',
-                parentId: 112
-            },
-            {
-                id: 115,
-                label: 'MENUITEMS.CHARTS.LIST.CHARTIST',
-                link: '/',
-                parentId: 112
-            },
-            {
-                id: 116,
-                label: 'MENUITEMS.CHARTS.LIST.ECHART',
                 link: '/',
                 parentId: 112
             }

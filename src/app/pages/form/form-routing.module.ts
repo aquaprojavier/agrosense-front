@@ -4,7 +4,11 @@ import { Routes, RouterModule } from '@angular/router';
 import { LayoutsComponent } from './layouts/layouts.component';
 
 const routes: Routes = [
-    
+    {
+        path: '',
+        redirectTo: 'layouts',
+        pathMatch: 'full'
+    },    
     {
         path: 'layouts',
         component: LayoutsComponent

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgbNavModule, NgbDropdownModule, NgbModalModule, NgbTooltipModule , NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin
@@ -20,6 +19,7 @@ import { DashboardsModule } from './dashboards/dashboards.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MapsModule } from './maps/maps.module';
 import { FormModule } from './form/form.module';
+import { LineChartComponent } from './charts/line-chart/line-chart.component';
 
 FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   dayGridPlugin,
@@ -28,7 +28,8 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
 ]);
 
 @NgModule({
-  declarations: [
+  declarations: [ 
+    LineChartComponent
   ],
   imports: [
     CommonModule,
@@ -36,7 +37,6 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
     NgbDropdownModule,
     NgbModalModule,
     PagesRoutingModule,
-    NgApexchartsModule,
     ReactiveFormsModule,
     DashboardsModule,
     HttpClientModule,
