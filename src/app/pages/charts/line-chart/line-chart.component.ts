@@ -2,6 +2,8 @@ import { Component, Inject, NgZone, PLATFORM_ID, OnInit } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { DataService } from 'src/app/core/services/data.service';
+import { UserProfileService } from 'src/app/core/services/user.service'
+
 import { Data } from '../../../core/models/data.models';
 
 import * as am5 from '@amcharts/amcharts5';
@@ -17,8 +19,12 @@ export class LineChartComponent {
   
   private root!: am5.Root;
   datas: Data [] = [];
+  deviceId: number = 1;
  
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private zone: NgZone, private dataService: DataService) { }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, 
+              private zone: NgZone, 
+              private dataService: DataService, 
+              private userService: UserProfileService) { }
 
 
   // Run the function only in the browser
@@ -72,7 +78,7 @@ export class LineChartComponent {
       }
       
       //request data from service
-      this.dataService.dataGraf().subscribe(datos => {
+      this.dataService.dataGraf(this.deviceId).subscribe(datos => {
         this.datas = datos;
         console.log(this.datas);
         dataLoaded(this.datas);

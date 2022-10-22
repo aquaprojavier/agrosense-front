@@ -70,8 +70,8 @@
       "TEXT": "Menú"
     },
     "DASHBOARDS": {
-      "TEXT": "Tableros",
-      "BADGE": "04",
+      "TEXT": "Propiedades",
+      "BADGE": "03",
       "LIST": {
         "DEFAULT": "Defecto",
         "SAAS": "Saas",

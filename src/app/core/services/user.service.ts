@@ -17,9 +17,4 @@ export class UserProfileService {
     register(user: User) {
         return this.http.post(`${baserUrl}/usuarios`, user);
     }
-
-
-    getData() { 
-        return this.http.get(`${baserUrl}/graf/verJson/1`); }
-
 }

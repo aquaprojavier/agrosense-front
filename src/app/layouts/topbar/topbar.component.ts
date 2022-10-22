@@ -27,7 +27,9 @@ export class TopbarComponent implements OnInit {
   countryName;
   valueset;
 
-  constructor(@Inject(DOCUMENT) private document: any, private router: Router, private loginService: LoginService,
+  constructor(@Inject(DOCUMENT) private document: any, 
+              private router: Router, 
+              private loginService: LoginService,
               public languageService: LanguageService,
               public translate: TranslateService,
               public _cookiesService: CookieService) {

@@ -9,11 +9,15 @@ import { Map, marker, tileLayer } from 'leaflet';
 export class LeafletComponent implements OnInit {
   // bread crumb items
   breadCrumbItems: Array<{}>;
+  coordProperty: [number, number] = [-33.046659, -68.064864];
 
   constructor() { }
 
   ngAfterViewInit(): void {
-    const map = new Map('map').setView([-33.046659, -68.064864], 15);
+    
+    console.log(this.coordProperty);
+    const center = this.coordProperty;
+    const map = new Map('map').setView(this.coordProperty, 15);
     tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(map);

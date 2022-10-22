@@ -28,18 +28,20 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
-  constructor(private eventService: EventService, private router: Router, public translate: TranslateService, private http: HttpClient) {
-    router.events.forEach((event) => {
-      if (event instanceof NavigationEnd) {
-        this._activateMenuDropdown();
-        this._scrollElement();
+  constructor(
+      private eventService: EventService, 
+      private router: Router, 
+      public translate: TranslateService, 
+      private http: HttpClient) {router.events.forEach((event) => {
+        if (event instanceof NavigationEnd) {
+          this._activateMenuDropdown();
+          this._scrollElement();
+          }
+        });
       }
-    });
-  }
 
   ngOnInit() {
     this.initialize();
-
     this._scrollElement();
   }
 
