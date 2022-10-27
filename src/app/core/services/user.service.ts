@@ -17,4 +17,9 @@ export class UserProfileService {
     register(user: User) {
         return this.http.post(`${baserUrl}/usuarios`, user);
     }
+
+    getProperties (userId: any){
+        return this.http.get(`${baserUrl}/property/list/${userId}`)
+    }
+    
 }
