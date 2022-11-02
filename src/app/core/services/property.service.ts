@@ -15,4 +15,8 @@ export class PropertyService {
     return this.http.get(`${baserUrl}/graf/verJson/`)
   }
 
+  public getDevicesByPropertyId ( id : number ){
+    return this.http.get(`${baserUrl}/property/listDev/${id}`)
+  }
+
 }
