@@ -12,6 +12,10 @@ const routes: Routes = [
         path: 'leaflet',
         component: LeafletComponent
     },
+    {
+        path: 'leaflet/:id',
+        component: LeafletComponent
+    },
 ];
 
 @NgModule({

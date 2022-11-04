@@ -25,8 +25,11 @@ export class LoginComponent implements OnInit {
   year: number = new Date().getFullYear();
 
   // tslint:disable-next-line: max-line-length
-  constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private router: Router,
-     private loginService:LoginService, private snack: MatSnackBar) { }
+  constructor(private formBuilder: FormBuilder, 
+              private route: ActivatedRoute, 
+              private router: Router,
+              private loginService:LoginService, 
+              private snack: MatSnackBar) { }
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
@@ -55,17 +58,23 @@ export class LoginComponent implements OnInit {
     } else {
         this.loginService.generateToken(this.loginForm.value).subscribe(
           (data:any) => {
-            console.log(data);
+            // console.log(data);
             this.loginService.loginUser(data.token);
             this.loginService.getCurrentUser().subscribe((user:any) => {
               this.loginService.setUser(user);
-              console.log(user);
+              // console.log(user);
     
               if(this.loginService.getUserRole() == 'ADMIN'){
                 this.router.navigate(['']);
                 this.loginService.loginStatusSubjec.next(true); }
               else if(this.loginService.getUserRole() == 'USER'){
-                this.router.navigate(['maps']);
+                let propId
+                user.propiedades.forEach(element => {
+                  if (element.propDefault === 1){
+                    propId = element.propId
+                  }
+                });  
+                this.router.navigate([`maps/leaflet/${propId}`]);
                 this.loginService.loginStatusSubjec.next(true);
               }
               else{

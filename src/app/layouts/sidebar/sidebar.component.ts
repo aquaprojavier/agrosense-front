@@ -50,7 +50,7 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   ngOnInit() {
     this._scrollElement();
     this.user = this.loginService.getUser()
-    this.props= Object.values(this.user.propiedades)
+    this.props= this.user.propiedades;
     // console.log(this.props);
     
     // this.userService.getProperties(this.user.id).subscribe((data)=> {console.log(data)})

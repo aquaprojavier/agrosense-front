@@ -16,7 +16,8 @@
           </a>
           <ul class="sub-menu" >
             <li  *ngFor="let prop of props">
-              <a href="javascript:void(0);" class="side-nav-link-ref" routerLinkActive="active">
+              <!-- <a [routerLink] = "['/maps/leaflet/', prop.propId]" class="side-nav-link-ref" routerLinkActive="active"> -->
+              <a routerLink = "/maps/leaflet/{{prop.propId}}" class="side-nav-link-ref" routerLinkActive="active">
                 {{prop.propNombre}}
               </a>
             </li>

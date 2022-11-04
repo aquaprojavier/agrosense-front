@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { RouterModule } from '@angular/router';
 import { AgmCoreModule } from '@agm/core';
 
 import { UIModule } from '../../shared/ui/ui.module';
@@ -12,6 +12,7 @@ import { LeafletComponent } from './leaflet/leaflet.component';
   declarations: [LeafletComponent],
   imports: [
     CommonModule,
+    RouterModule,
     MapsRoutingModule,
     UIModule,
     AgmCoreModule.forRoot({

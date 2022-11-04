@@ -19,4 +19,7 @@ export class PropertyService {
     return this.http.get(`${baserUrl}/property/listDev/${id}`)
   }
 
+  public getPropertyById ( id : any ){
+    return this.http.get(`${baserUrl}/property/${id}`)
+  }
 }
