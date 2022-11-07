@@ -1,13 +1,8 @@
 import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { geoJSON, LatLng, LatLngExpression, map, Map, marker, tileLayer } from 'leaflet';
-// import { UserProfileService } from 'src/app/core/services/user.service';
-// import { LoginService } from 'src/app/core/services/login.service';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
-// import { Data } from '../../../core/models/data.models';
-
-
 
 @Component({
   selector: 'app-leaflet',

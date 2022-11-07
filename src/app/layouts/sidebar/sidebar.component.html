@@ -7,8 +7,8 @@
     <!-- Left Menu Start -->
     <ul class="metismenu list-unstyled" id="side-menu" #sideMenu>
       <!-- {{menuItems}} -->
-      <ng-container>
-        <li class="menu-title">{{user.username}}</li>
+        <!-- <li class="menu-title">{{user.username}}</li> -->
+        <!-- <ng-container> -->
         <li class="mm-active">
           <a class="is-parent" class="has-arrow" aria-expanded="true">
             <i class="bx bx-home-circle"></i>
@@ -16,14 +16,26 @@
           </a>
           <ul class="sub-menu" >
             <li  *ngFor="let prop of props">
-              <!-- <a [routerLink] = "['/maps/leaflet/', prop.propId]" class="side-nav-link-ref" routerLinkActive="active"> -->
-              <a routerLink = "/maps/leaflet/{{prop.propId}}" class="side-nav-link-ref" routerLinkActive="active">
+              <a routerLink = "/maps/leaflet/{{prop.propId}}" class="side-nav-link-ref" routerLinkActive="active" (click)="changeProp(prop.propId)">
                 {{prop.propNombre}}
               </a>
             </li>
           </ul>
         </li>
-      </ng-container>
+        <li>
+          <a class="is-parent" class="has-arrow" aria-expanded="true">
+            <i class="bx bx-home-circle"></i>
+            <span>Dispositivos</span>
+          </a>
+          <ul class="sub-menu" >
+            <li  *ngFor="let dev of devices">
+              <a  class="side-nav-link-ref" routerLinkActive="active">
+                {{dev.devicesNombre}}
+              </a>
+            </li>
+          </ul>
+        </li>
+      <!-- </ng-container> -->
     </ul>
   </div>
 </ng-template>

@@ -4,6 +4,7 @@ import { EventService } from '../../core/services/event.service';
 import { LoginService } from '../../core/services/login.service';
 import { UserProfileService } from 'src/app/core/services/user.service';
 import { Router, NavigationEnd } from '@angular/router';
+import { PropertyService } from 'src/app/core/services/property.service';
 
 import { HttpClient } from '@angular/common/http';
 
@@ -28,12 +29,14 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   user: User;
   props: any;
   var: any;
+  devices: any;
 
   menuItems = [];
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
   constructor(
+      private propertyService: PropertyService,
       private userService: UserProfileService,
       private loginService: LoginService,
       private eventService: EventService, 
@@ -52,12 +55,23 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
     this.user = this.loginService.getUser()
     this.props= this.user.propiedades;
     // console.log(this.props);
-    
+    let propId
+                this.user.propiedades.forEach(element => {
+                  if (element.propDefault === 1){
+                    propId = element.propId
+                  }
+                }); 
+    this.propertyService.getDevicesByPropertyId(propId).subscribe((data)=> {
+      this.devices = data;
+      // console.log(this.devices);
+
+    });
     // this.userService.getProperties(this.user.id).subscribe((data)=> {console.log(data)})
   }
 
   ngAfterViewInit() {
     this.menu = new MetisMenu(this.sideMenu.nativeElement);
+    // console.log(this.devices)
     // this._activateMenuDropdown();
   }
 
@@ -74,6 +88,12 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
       this.menu.dispose();
     }
   }
+
+  changeProp(idProp:any){
+    this.propertyService.getDevicesByPropertyId(idProp).subscribe((data)=> {
+      this.devices = data; });
+  }
+
   _scrollElement() {
     setTimeout(() => {
       if (document.getElementsByClassName("mm-active").length > 0) {
