@@ -16,7 +16,7 @@
           </a>
           <ul class="sub-menu" >
             <li  *ngFor="let prop of props">
-              <a routerLink = "/maps/leaflet/{{prop.propId}}" class="side-nav-link-ref" routerLinkActive="active" (click)="changeProp(prop.propId)">
+              <a routerLink = "/maps/leaflet/{{prop.propId}}" class="side-nav-link-ref" routerLinkActive="active" (click)="changeDevices(prop.propId)">
                 {{prop.propNombre}}
               </a>
             </li>
@@ -24,13 +24,13 @@
         </li>
         <li>
           <a class="is-parent" class="has-arrow" aria-expanded="true">
-            <i class="bx bx-home-circle"></i>
+            <i class="bx bx-map-pin"></i>
             <span>Dispositivos</span>
           </a>
           <ul class="sub-menu" >
             <li  *ngFor="let dev of devices">
-              <a  class="side-nav-link-ref" routerLinkActive="active">
-                {{dev.devicesNombre}}
+              <a routerLink = "/linechart/{{dev.devicesId}}" class="side-nav-link-ref" routerLinkActive="active">
+                {{dev.devicesNombre}} 
               </a>
             </li>
           </ul>

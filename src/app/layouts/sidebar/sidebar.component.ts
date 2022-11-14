@@ -89,7 +89,11 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  changeProp(idProp:any){
+  // changeData(dev.devicesId){
+    
+  // }
+
+  changeDevices(idProp:any){
     this.propertyService.getDevicesByPropertyId(idProp).subscribe((data)=> {
       this.devices = data; });
   }
