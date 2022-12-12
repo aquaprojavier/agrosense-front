@@ -10,6 +10,7 @@ import { Data } from '../../../core/models/data.models';
 
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
+import * as am5stock from "@amcharts/amcharts5/stock";
 import { any } from '@amcharts/amcharts5/.internal/core/util/Array';
 
 
@@ -18,18 +19,18 @@ import { any } from '@amcharts/amcharts5/.internal/core/util/Array';
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss']
 })
-export class LineChartComponent implements OnInit{
-  
+export class LineChartComponent implements OnInit {
+
   private root!: am5.Root;
-  datas: Data [] = [];
+  datas: Data[] = [];
   deviceId: number = 1;
- 
-  constructor(@Inject(PLATFORM_ID) 
-              private platformId: Object, 
-              private activatedRoute: ActivatedRoute,
-              private zone: NgZone, 
-              private dataService: DataService) { }
-  
+
+  constructor(@Inject(PLATFORM_ID)
+  private platformId: Object,
+    private activatedRoute: ActivatedRoute,
+    private zone: NgZone,
+    private dataService: DataService) { }
+
   ngOnInit(): void {
     this.activatedRoute.snapshot.params['id'];
     this.activatedRoute.params.subscribe((params: Params) => {
@@ -52,23 +53,23 @@ export class LineChartComponent implements OnInit{
     }
   }
 
-  getData(id:number){
+  getData(id: number) {
     this.dataService.dataGraf(id).subscribe(datos => {
       this.createMap(datos, "linechartdiv")
     });
   }
 
   maybeDisposeRoot(divId) {
-    am5.array.each(am5.registry.rootElements, function(root) {
+    am5.array.each(am5.registry.rootElements, function (root) {
       if (root.dom.id == divId) {
         root.dispose();
       }
     });
   }
 
-  createMap(apiData: Data[], divId){
-     // Chart code goes in here
-     this.browserOnly(() => {
+  createMap(apiData: Data[], divId) {
+    // Chart code goes in here
+    this.browserOnly(() => {
 
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
@@ -81,37 +82,26 @@ export class LineChartComponent implements OnInit{
       root.setThemes([
         am5themes_Animated.new(root)
       ]);
+      // Create a stock chart
+      // https://www.amcharts.com/docs/v5/charts/stock-chart/#Instantiating_the_chart
+      let stockChart = root.container.children.push(am5stock.StockChart.new(root, {})
+      );
 
-      // Create chart
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/
-      let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        panX: true,
-        panY: true,
-        wheelX: "panX",
+      // Create a main stock panel (chart)
+      // https://www.amcharts.com/docs/v5/charts/stock-chart/#Adding_panels
+      let mainPanel = stockChart.panels.push(am5stock.StockPanel.new(root, {
         wheelY: "zoomX",
-        pinchZoomX: true
+        panX: true,
+        panY: true
       }));
 
-      // Add cursor
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
-      let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-        behavior: "none"
-      }));
-      cursor.lineY.set("visible", false);
-
-      function dataLoaded(result) {
-        // Set data on all series of the chart
-          series.data.processor = am5.DataProcessor.new(root, {
-            numericFields: ["dataHum1"],
-            dateFields: ["dataFecha"],
-          dateFormat: "yyyy-MM-dd HH:mm:ss"
-          });
-          series.data.setAll(result);
-      }
       // Create axes
       // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-      let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-        maxDeviation: 0.2,
+      let valueAxis = mainPanel.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+
+      let dateAxis = mainPanel.xAxes.push(am5xy.DateAxis.new(root, {
         baseInterval: {
           timeUnit: "minute",
           count: 1
@@ -120,33 +110,90 @@ export class LineChartComponent implements OnInit{
         tooltip: am5.Tooltip.new(root, {})
       }));
 
-      let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererY.new(root, {})
+      mainPanel.set("cursor", am5xy.XYCursor.new(root, {
+        yAxis: valueAxis,
+        xAxis: dateAxis,
+        behavior: "zoomX"
       }));
+
+
+      // cursor.lineY.set("visible", false);
+
+      function dataLoaded(result) {
+        // Set data on all series of the chart
+        valueSeries.data.processor = am5.DataProcessor.new(root, {
+          numericFields: ["dataHum1"],
+          dateFields: ["dataFecha"],
+          dateFormat: "yyyy-MM-dd HH:mm:ss"
+        });
+        valueSeries.data.setAll(result);
+        console.log(result);
+      }
+      // Create axes
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+      // let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+      //   maxDeviation: 0.2,
+      //   baseInterval: {
+      //     timeUnit: "minute",
+      //     count: 1
+      //   },
+      //   renderer: am5xy.AxisRendererX.new(root, {}),
+      //   tooltip: am5.Tooltip.new(root, {})
+      // }));
+
+      // let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      //   renderer: am5xy.AxisRendererY.new(root, {})
+      // }));
 
       // Add series
       // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-      let series = chart.series.push(am5xy.LineSeries.new(root, {
-        name: "Series",
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "dataHum1",
+      // let series = chart.series.push(am5xy.LineSeries.new(root, {
+      //   name: "Series",
+      //   xAxis: xAxis,
+      //   yAxis: yAxis,
+      //   valueYField: "dataHum1",
+      //   valueXField: "dataFecha",
+      //   tooltip: am5.Tooltip.new(root, {
+      //     labelText: "{valueY}"
+      //   })
+      // }));
+
+      let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
+        name: "Humedad",
         valueXField: "dataFecha",
+        valueYField: "dataHum1",
+        xAxis: dateAxis,
+        yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{valueY}"
+          labelText: "{name}: {valueY}%"
         })
       }));
 
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-      chart.set("scrollbarX", am5.Scrollbar.new(root, {
+      mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {
         orientation: "horizontal"
       }));
 
+      // Add toolbar
+      // https://www.amcharts.com/docs/v5/charts/stock/toolbar/
+      am5stock.StockToolbar.new(root, {
+        container: document.getElementById("chartcontrols"),
+        stockChart: stockChart,
+        controls: [
+          am5stock.DateRangeSelector.new(root, {
+            stockChart: stockChart
+          }),
+          am5stock.PeriodSelector.new(root, {
+            stockChart: stockChart
+          })
+        ]
+      });
+
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/
-      series.appear(1000);
-      chart.appear(1000, 100);
+      valueSeries.appear(1000);
+      mainPanel.appear(1000, 100);
 
       dataLoaded(apiData);
     });

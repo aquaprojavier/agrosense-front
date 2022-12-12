@@ -40,13 +40,14 @@ export class LeafletComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-    
+     
       this.propertyService.getDevicesByPropertyId(this.propId).subscribe(data => {
         this.devices = Object.values(data);
         this.createMap(this.property, this.devices)
       });
     });
   };
+ 
 
   createMap(property, devices){
 
@@ -68,7 +69,10 @@ export class LeafletComponent implements OnInit {
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
 
     devices.forEach(element => {
+      let operacionStyle = {color: "#2AAD27"};
       marker(element.coordenadas).addTo(this.myMap);
+      let poligonDevice = JSON.parse(element.geojson);
+      geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
     });
   }
 
