@@ -54,7 +54,7 @@ export class LineChartComponent implements OnInit {
   }
 
   getData(id: number) {
-    this.dataService.dataGraf(id).subscribe(datos => {
+    this.dataService.fullDataByDeviceId(id).subscribe(datos => {
       this.createMap(datos, "linechartdiv")
     });
   }

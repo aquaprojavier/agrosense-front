@@ -10,8 +10,12 @@ export class DataService {
 
   constructor( private http: HttpClient) { }
 
-  public dataGraf(deviceId: number){  
-    return this.http.get<Data[]>(`${baserUrl}/graf/verJson/${deviceId}`);
+  public fullDataByDeviceId(deviceId: number){  
+    return this.http.get<Data[]>(`${baserUrl}/data/verJson/${deviceId}`);
+  }
+
+  public lastDataByDeviceId(deviceId: number){  
+    return this.http.get<any>(`${baserUrl}/device/lastData/${deviceId}`);
   }
 
 }

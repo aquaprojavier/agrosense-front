@@ -1,8 +1,10 @@
 import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { geoJSON, LatLng, LatLngExpression, map, Map, marker, tileLayer } from 'leaflet';
+import { geoJSON, Icon, LatLng, LatLngExpression, map, Map, marker, tileLayer } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
+import { DataService } from 'src/app/core/services/data.service';
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
+import * as d3 from 'd3';
 
 @Component({
   selector: 'app-leaflet',
@@ -18,14 +20,39 @@ export class LeafletComponent implements OnInit {
   devices: any;
   propId: any;
   myMap = null;
+  limit: number = 24;
+  redIcon = new Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+  greenIcon = new Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+  greyIcon = new Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private propertyService: PropertyService) { }
+    private propertyService: PropertyService,
+    private dataService: DataService) { }
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Maps' }, { label: 'Leaflet Maps', active: true }];
-
     this.activatedRoute.snapshot.params['id'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['id'];
@@ -40,21 +67,19 @@ export class LeafletComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-     
       this.propertyService.getDevicesByPropertyId(this.propId).subscribe(data => {
         this.devices = Object.values(data);
         this.createMap(this.property, this.devices)
       });
     });
   };
- 
 
-  createMap(property, devices){
+  createMap(property, devices) {
 
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
     }
-    this.myMap = new Map('map').setView(property.coordenadas as [number, number], 15);
+    this.myMap = new Map('map').setView(property.coordenadas as [number, number], 14);
     tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
@@ -69,11 +94,29 @@ export class LeafletComponent implements OnInit {
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
 
     devices.forEach(element => {
-      let operacionStyle = {color: "#2AAD27"};
-      marker(element.coordenadas).addTo(this.myMap);
-      let poligonDevice = JSON.parse(element.geojson);
-      geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+      this.dataService.lastDataByDeviceId(element.devicesId).subscribe(data => {
+
+        if (data === 0.0) {
+          marker(element.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>SIN DATOS<br>`);
+          console.log(data);
+          let operacionStyle = { color: "#7B7B7B" };
+          let poligonDevice = JSON.parse(element.geojson);
+          geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        } else if (data < this.limit) {
+          marker(element.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
+          console.log(data);
+          let operacionStyle = { color: "#CB2B3E" };
+          let poligonDevice = JSON.parse(element.geojson);
+          geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        } else {
+          marker(element.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
+          console.log(data);
+          let operacionStyle = { color: "#2AAD27" };
+          let poligonDevice = JSON.parse(element.geojson);
+          geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        }
+      })
     });
-  }
+  };
 
 }

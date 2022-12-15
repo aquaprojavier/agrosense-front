@@ -20,7 +20,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ErrorInterceptor } from './core/helpers/error.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { MaterialModule } from './material/material.module';
-
+import { NgxLiquidGaugeModule } from 'ngx-liquid-gauge';
 
 
 export function createTranslateLoader(http: HttpClient): any {
@@ -44,6 +44,7 @@ export function createTranslateLoader(http: HttpClient): any {
       }
     }),
     LayoutsModule,
+    NgxLiquidGaugeModule,
     AppRoutingModule,
     ExtrapagesModule,
     CarouselModule,
