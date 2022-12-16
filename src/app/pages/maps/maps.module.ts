@@ -7,12 +7,10 @@ import { UIModule } from '../../shared/ui/ui.module';
 
 import { MapsRoutingModule } from './maps-routing.module';
 import { LeafletComponent } from './leaflet/leaflet.component';
-import { NgxLiquidGaugeModule } from 'ngx-liquid-gauge';
 
 @NgModule({
   declarations: [LeafletComponent],
   imports: [
-    NgxLiquidGaugeModule,
     CommonModule,
     RouterModule,
     MapsRoutingModule,

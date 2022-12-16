@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy }
 import { geoJSON, Icon, LatLng, LatLngExpression, map, Map, marker, tileLayer } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { DataService } from 'src/app/core/services/data.service';
+import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 import * as d3 from 'd3';
@@ -49,7 +50,10 @@ export class LeafletComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
-    private dataService: DataService) { }
+    private dataService: DataService,
+    private cargaScript: CargarService) {
+      this.cargaScript.carga(["loadFillGauge"]);
+    }
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Maps' }, { label: 'Leaflet Maps', active: true }];

@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { GrafService } from './services/data.service';
+import { DataService } from './services/data.service';
+import { CargarService } from './services/cargar.service';
 
 
 @NgModule({
   declarations: [],
   imports: [ HttpClientModule ],
-  providers: [GrafService]
+  providers: [DataService, CargarService]
 })
 export class CoreModule { }
