@@ -337,19 +337,4 @@ function liquidFillGaugeDefaultSettings() {
           animateWave(config.waveAnimateTime);
         });
     }
-  }
-  let limite = 27;
-let gauge1 = loadLiquidFillGauge("fillgauge1", 20.52, 27);
-
- // let limite = 27;
-      // let gauge1 = loadLiquidFillGauge("fillgauge1", 20.52, 27);
-      // let ultimos2 = [20.52, 0.0,0.0,0.0];
-
-      // for (let i = 1; i <=ultimos2.length; i++){
-      //    if (ultimos2[i]===0.0){
-      //      ultimos2.splice(i,1);
-      //    }
-      // }
-      // for (let i = 1; i <=ultimos2.length; i++){
-      //     let gauge1 = loadLiquidFillGauge(`fillgauge${i}`, ultimos2[i-1], limite);
-      //  }
+  };     

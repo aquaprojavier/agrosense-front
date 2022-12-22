@@ -5,7 +5,8 @@ import { DataService } from 'src/app/core/services/data.service';
 import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
-import * as d3 from 'd3';
+declare function loadLiquidFillGauge(elementId: string, value: number, limit: number, config?: any): void;
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-leaflet',
@@ -15,13 +16,14 @@ import * as d3 from 'd3';
 export class LeafletComponent implements OnInit {
   // bread crumb items
   breadCrumbItems: Array<{}>;
-
   user: User;
   property: any;
   devices: any;
   propId: any;
   myMap = null;
-  limit: number = 24;
+  limit: number = 23;
+  lastData: number[] = [];
+  
   redIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -51,9 +53,10 @@ export class LeafletComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private dataService: DataService,
-    private cargaScript: CargarService) {
+    private cargaScript: CargarService) { 
       this.cargaScript.carga(["loadFillGauge"]);
-    }
+      // console.log(loadLiquidFillGauge);
+     }
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Maps' }, { label: 'Leaflet Maps', active: true }];
@@ -96,31 +99,37 @@ export class LeafletComponent implements OnInit {
     this.myMap.scrollWheelZoom.disable();
     this.myMap.on('focus', () => { this.myMap.scrollWheelZoom.enable(); });
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
-
+    console.log(devices);
     devices.forEach(element => {
+      
       this.dataService.lastDataByDeviceId(element.devicesId).subscribe(data => {
-
-        if (data === 0.0) {
+        
+        if (data === 0.0 || null) {
           marker(element.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>SIN DATOS<br>`);
-          console.log(data);
+          console.log(element.devicesId);
           let operacionStyle = { color: "#7B7B7B" };
           let poligonDevice = JSON.parse(element.geojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else if (data < this.limit) {
           marker(element.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
-          console.log(data);
+          console.log(element.devicesId);
+          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.limit);
+          this.lastData.push(data);
           let operacionStyle = { color: "#CB2B3E" };
           let poligonDevice = JSON.parse(element.geojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else {
           marker(element.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
-          console.log(data);
+          console.log(element.devicesId);
+          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.limit);
+          this.lastData.push(data);
           let operacionStyle = { color: "#2AAD27" };
           let poligonDevice = JSON.parse(element.geojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         }
       })
     });
+    
   };
 
 }

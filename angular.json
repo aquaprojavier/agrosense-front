@@ -36,7 +36,9 @@
               "src/assets/scss/app.scss",
               "src/assets/scss/icons.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "src/assets/js/loadFillGauge.js"
+            ],
             "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": false,

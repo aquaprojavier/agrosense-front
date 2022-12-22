@@ -16,9 +16,12 @@
     <div id="gauge" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
       <div class="card">
         <div class="flex-container">
-          <div>
-            <svg id="fillgauge1" height="140"
-            style="margin: 10px"></svg>
+          <div *ngFor="let device of devices">
+            <div class="flex-gauge">
+              <svg id="fillgauge{{device.devicesId}}" height="140"
+              style="margin: 5px"></svg>
+              <div>{{device.devicesNombre}}</div>
+            </div>
           </div>
         </div>
       </div>

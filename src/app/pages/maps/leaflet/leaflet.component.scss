@@ -2,6 +2,13 @@
 .flex-container {
 	display: flex;
 	flex-flow: row wrap;
-	justify-content: center;
+	justify-content: space-around;
 	align-items: center;
+}
+.flex-gauge {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	margin: 5px;
 }
