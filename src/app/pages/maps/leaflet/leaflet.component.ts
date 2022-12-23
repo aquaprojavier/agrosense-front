@@ -5,7 +5,7 @@ import { DataService } from 'src/app/core/services/data.service';
 import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
-declare function loadLiquidFillGauge(elementId: string, value: number, limit: number, config?: any): void;
+declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 import { from } from 'rxjs';
 
 @Component({
@@ -21,7 +21,8 @@ export class LeafletComponent implements OnInit {
   devices: any;
   propId: any;
   myMap = null;
-  limit: number = 23;
+  ur: number = 17;
+  wc: number = 27
   lastData: number[] = [];
   
   redIcon = new Icon({
@@ -34,6 +35,14 @@ export class LeafletComponent implements OnInit {
   });
   greenIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+  blueIcon = new Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -110,18 +119,26 @@ export class LeafletComponent implements OnInit {
           let operacionStyle = { color: "#7B7B7B" };
           let poligonDevice = JSON.parse(element.geojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-        } else if (data < this.limit) {
+        } else if (data <= this.ur) {
           marker(element.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
           console.log(element.devicesId);
-          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.limit);
+          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#CB2B3E" };
+          let poligonDevice = JSON.parse(element.geojson);
+          geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        } else if (data > this.wc) {
+          marker(element.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
+          console.log(element.devicesId);
+          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
+          this.lastData.push(data);
+          let operacionStyle = { color: "#0481bf" };
           let poligonDevice = JSON.parse(element.geojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else {
           marker(element.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
           console.log(element.devicesId);
-          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.limit);
+          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#2AAD27" };
           let poligonDevice = JSON.parse(element.geojson);

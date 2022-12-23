@@ -47,16 +47,20 @@ function liquidFillGaugeDefaultSettings() {
     };
   }
 
-  function loadLiquidFillGauge(elementId, value, limit, config) {
+  function loadLiquidFillGauge(elementId, value, wc, ur, config) {
     if (config == null) config = liquidFillGaugeDefaultSettings();
 
-    if (value <= limit) {
+    if (value <= ur) {
       config.waveColor = "#CB2B3E";
       config.textColor = "#fc9da8";
       config.circleColor = "#982E40";
+    } else if (value > wc) {
+      config.waveColor = "#0481bf";
+      config.textColor = "#048dd1";
+      config.circleColor = "#02689c";
     } else {
       config.waveColor = "#2AAD27";
-      config.textColor = "#71eb6e";
+      config.textColor = "#50bd4d";
       config.circleColor = "#137811";
     }
 
