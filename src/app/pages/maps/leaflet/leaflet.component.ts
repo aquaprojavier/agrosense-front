@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { geoJSON, Icon, LatLng, LatLngExpression, map, Map, marker, tileLayer } from 'leaflet';
+import { geoJSON, Icon, LatLng, Map, marker, tileLayer } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
+import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
 import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from '../../../core/models/auth.models';
@@ -18,6 +19,7 @@ export class LeafletComponent implements OnInit {
   breadCrumbItems: Array<{}>;
   user: User;
   property: any;
+  operations: any;
   devices: any;
   propId: any;
   myMap = null;
@@ -61,6 +63,7 @@ export class LeafletComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
+    private operationService: OperationService,
     private dataService: DataService,
     private cargaScript: CargarService) { 
       this.cargaScript.carga(["loadFillGauge"]);
@@ -83,14 +86,14 @@ export class LeafletComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-      this.propertyService.getDevicesByPropertyId(this.propId).subscribe(data => {
-        this.devices = Object.values(data);
-        this.createMap(this.property, this.devices)
-      });
+      this.operationService.getOperationsByPropertyId(id).subscribe(data=> {
+        this.operations = data;
+        this.createMap(this.property, this.operations)
+      })
     });
   };
 
-  createMap(property, devices) {
+  createMap(property, operations) {
 
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
@@ -108,40 +111,38 @@ export class LeafletComponent implements OnInit {
     this.myMap.scrollWheelZoom.disable();
     this.myMap.on('focus', () => { this.myMap.scrollWheelZoom.enable(); });
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
-    console.log(devices);
-    devices.forEach(element => {
-      
-      this.dataService.lastDataByDeviceId(element.devicesId).subscribe(data => {
+    // console.log(devices);
+    
+    operations.forEach(element => {
+   
+      this.dataService.lastDataByDeviceId(element.devices[0].devicesId).subscribe(data => {
         
         if (data === 0.0 || null) {
-          marker(element.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>SIN DATOS<br>`);
-          console.log(element.devicesId);
+          marker(element.devices[0].coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>SIN DATOS<br>`);
+          // console.log(element.devices.devicesId);
           let operacionStyle = { color: "#7B7B7B" };
-          let poligonDevice = JSON.parse(element.geojson);
+          let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else if (data <= this.ur) {
-          marker(element.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
-          console.log(element.devicesId);
-          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
+          marker(element.devices[0].coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#CB2B3E" };
-          let poligonDevice = JSON.parse(element.geojson);
+          let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else if (data > this.wc) {
-          marker(element.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
-          console.log(element.devicesId);
-          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
+          marker(element.devices[0].coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#0481bf" };
-          let poligonDevice = JSON.parse(element.geojson);
+          let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else {
-          marker(element.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devicesNombre}</b><br>${element.devicesCultivo}<br>Humedad: ${data}%<br>`);
-          console.log(element.devicesId);
-          loadLiquidFillGauge(`fillgauge${element.devicesId}`, data, this.wc, this.ur);
+          marker(element.devices[0].coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#2AAD27" };
-          let poligonDevice = JSON.parse(element.geojson);
+          let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         }
       })
