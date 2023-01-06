@@ -32,6 +32,9 @@ export class LoginComponent implements OnInit {
               private snack: MatSnackBar) { }
 
   ngOnInit() {
+    // window.onload = function () {
+    //   var element = document.getElementById('myVideo');
+    //   element.muted= "muted";}
     this.loginForm = this.formBuilder.group({
       username: ['tomi', [Validators.required]],
       password: ['123', [Validators.required]],
@@ -43,8 +46,18 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
+  
+
   // convenience getter for easy access to form fields
   get f() { return this.loginForm.controls; }
+
+  // myFunction(video) {
+  //   if (video.paused) {
+  //     video.play();
+  //   } else {
+  //     video.pause();
+  //   }
+  // }
 
   /**
    * Form submit

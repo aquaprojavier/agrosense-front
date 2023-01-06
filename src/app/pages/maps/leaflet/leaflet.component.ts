@@ -118,27 +118,27 @@ export class LeafletComponent implements OnInit {
       this.dataService.lastDataByDeviceId(element.devices[0].devicesId).subscribe(data => {
         
         if (data === 0.0 || null) {
-          marker(element.devices[0].coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>SIN DATOS<br>`);
+          marker(element.devices[0].coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="text-align: center;"><i class="bx bx-map"></i> <b>${element.devices[0].devicesNombre}</b></div><i class="fas fa-leaf"></i> ${element.devices[0].devicesCultivo}<br><b>SIN DATOS</b><br>`);
           // console.log(element.devices.devicesId);
           let operacionStyle = { color: "#7B7B7B" };
           let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else if (data <= this.ur) {
-          marker(element.devices[0].coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          marker(element.devices[0].coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="text-align: center;"><i class="bx bx-map"></i> <b>${element.devices[0].devicesNombre}<br><div style="color: red;">PELIGRO</div></b></div><i class="fas fa-leaf"></i> ${element.devices[0].devicesCultivo}<br><i class="fas fa-tint"></i> Humedad: <b style="color: red;">${data}%</b><br>`);
           loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#CB2B3E" };
           let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else if (data > this.wc) {
-          marker(element.devices[0].coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          marker(element.devices[0].coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="text-align: center;"><i class="bx bx-map"></i> <b>${element.devices[0].devicesNombre}<br><div style="color: blue;">SATURADO</div></b></div><i class="fas fa-leaf"></i> ${element.devices[0].devicesCultivo}<br><i class="fas fa-tint"></i> Humedad: <b>${data}%</b><br>`);
           loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#0481bf" };
           let poligonDevice = JSON.parse(element.operationGeojson);
           geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
         } else {
-          marker(element.devices[0].coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<b>${element.devices[0].devicesNombre}</b><br>${element.devices[0].devicesCultivo}<br>Humedad: ${data}%<br>`);
+          marker(element.devices[0].coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="text-align: center;"><i class="bx bx-map"></i> <b>${element.devices[0].devicesNombre}<br><div style="color: green;">ÓPTIMO</div></b></div><i class="fas fa-leaf"></i> ${element.devices[0].devicesCultivo}<br><i class="fas fa-tint"></i> Humedad: <b>${data}%</b><br>`);
           loadLiquidFillGauge(`fillgauge${element.devices[0].devicesId}`, data, this.wc, this.ur);
           this.lastData.push(data);
           let operacionStyle = { color: "#2AAD27" };
