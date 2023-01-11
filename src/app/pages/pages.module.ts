@@ -15,11 +15,11 @@ import { UIModule } from '../shared/ui/ui.module';
 
 import { PagesRoutingModule } from './pages-routing.module';
 
-import { DashboardsModule } from './dashboards/dashboards.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { MapsModule } from './maps/maps.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { FormModule } from './form/form.module';
 import { LineChartComponent } from './charts/line-chart/line-chart.component';
+import { EditComponent } from './edit/edit.component';
 
 FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   dayGridPlugin,
@@ -29,7 +29,7 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
 
 @NgModule({
   declarations: [ 
-    LineChartComponent
+    LineChartComponent, EditComponent,
   ],
   imports: [
     CommonModule,
@@ -38,7 +38,6 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
     NgbModalModule,
     PagesRoutingModule,
     ReactiveFormsModule,
-    DashboardsModule,
     HttpClientModule,
     UIModule,
     WidgetModule,
@@ -48,7 +47,7 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
     NgbCollapseModule,
     SimplebarAngularModule,
     LightboxModule,
-    MapsModule,
+    DashboardModule,
     FormModule
   ],
 })

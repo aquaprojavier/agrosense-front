@@ -87,7 +87,7 @@ export class LoginComponent implements OnInit {
                     propId = element.propId
                   }
                 });  
-                this.router.navigate([`maps/leaflet/${propId}`]);
+                this.router.navigate([`dashboard/leaflet/${propId}`]);
                 this.loginService.loginStatusSubjec.next(true);
               }
               else{

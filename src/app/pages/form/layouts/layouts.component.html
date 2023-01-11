@@ -6,10 +6,10 @@
   ></app-page-title>
   <!-- end page title -->
   <div class="row">
-    <div class="col-12">
-      <div class="card">
+    <div class="col-4">
+      <div class="card" style="background-color: rgb(213, 232, 243);">
         <div class="card-body">
-          <div class="col-4">
+          <!-- <div class="col-4"> -->
             <form [formGroup]="form" (ngSubmit)="save($event)">
               <div formGroupName="fullname">            
 
@@ -108,7 +108,7 @@
               <br />
               <button type="submit">enviar</button>
             </form>
-          </div>
+          <!-- </div> -->
         </div>
       </div>
     </div>

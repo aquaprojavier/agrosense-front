@@ -1,11 +1,9 @@
-import { Component, Inject, NgZone, PLATFORM_ID, OnInit } from '@angular/core';
+import { Component, Inject, NgZone, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
-// import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
+import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
 import { DataService } from 'src/app/core/services/data.service';
 import { ActivatedRoute, Params } from '@angular/router';
-
-
 import { Data } from '../../../core/models/data.models';
 
 import * as am5 from '@amcharts/amcharts5';
@@ -19,13 +17,13 @@ import * as am5stock from "@amcharts/amcharts5/stock";
   styleUrls: ['./line-chart.component.scss']
 })
 export class LineChartComponent implements OnInit {
-
+  // private toolbar : any;
   private root!: am5.Root;
   datas: Data[] = [];
   deviceId: number = 1;
 
   constructor(@Inject(PLATFORM_ID)
-  private platformId: Object,
+    private platformId: Object,
     private activatedRoute: ActivatedRoute,
     private zone: NgZone,
     private dataService: DataService) { }
@@ -54,10 +52,10 @@ export class LineChartComponent implements OnInit {
 
   getData(id: number) {
     this.dataService.fullDataByDeviceId(id).subscribe(datos => {
-      this.createMap(datos, "linechartdiv")
+      this.createMap(datos, "linechartdiv", "chartcontrols")
     });
   }
-
+  
   maybeDisposeRoot(divId) {
     am5.array.each(am5.registry.rootElements, function (root) {
       if (root.dom.id == divId) {
@@ -66,12 +64,13 @@ export class LineChartComponent implements OnInit {
     });
   }
 
-  createMap(apiData: Data[], divId) {
+  createMap(apiData: Data[], divId, chartcontrols) {
     // Chart code goes in here
     this.browserOnly(() => {
 
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
+      this.maybeDisposeRoot(chartcontrols);
       /* Chart code */
       // Create root element
       // https://www.amcharts.com/docs/v5/getting-started/#Root_element
@@ -80,7 +79,7 @@ export class LineChartComponent implements OnInit {
       // https://www.amcharts.com/docs/v5/concepts/themes/
       root.setThemes([
         am5themes_Animated.new(root),
-        // am5themes_Dark.new(root)
+        am5themes_Dark.new(root)//modo dark
       ]);
       // Create a stock chart
       // https://www.amcharts.com/docs/v5/charts/stock-chart/#Instantiating_the_chart
@@ -92,7 +91,8 @@ export class LineChartComponent implements OnInit {
       let mainPanel = stockChart.panels.push(am5stock.StockPanel.new(root, {
         wheelY: "zoomX",
         panX: true,
-        panY: false
+        panY: true,
+        pinchZoomX: true
       }));
 
       // Create axes
@@ -131,6 +131,7 @@ export class LineChartComponent implements OnInit {
         name: "Humedad",
         valueXField: "dataFecha",
         valueYField: "dataHum1",
+        stroke: am5.color("#03549c"),
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
@@ -138,9 +139,37 @@ export class LineChartComponent implements OnInit {
         })
       }));
 
-      // add series range
+      // ========================= RANGOS ====================================
+       // add saturation range
+       let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 27 });
+       let saturationRange = valueSeries.createAxisRange(saturationRangeDataItem);
+ 
+       saturationRangeDataItem.get("axisFill").setAll({
+         fill: am5.color("#86dbf0"),
+         fillOpacity: 1,
+         visible: true
+       });
+ 
+       saturationRangeDataItem.get("label").setAll({
+         location: 0,
+         visible: true,
+         text: "WC",
+         inside: true,
+         centerX: 0,
+         centerY: am5.p100,
+         fontWeight: "bold",
+         fill: am5.color(0xffffff),
+         background: am5.RoundedRectangle.new(root, {
+           fill: am5.color("#668f64")
+         }),        
+       })
+ 
+
+      // add optimo range
       let optimoRangeDataItem = valueAxis.makeDataItem({ value: 27, endValue: 23.5 });
       let optimoRange = valueSeries.createAxisRange(optimoRangeDataItem);
+      
+
       // optimoRange.fills.template.setAll({
       //   visible: true,
       //   opacity: 0.5
@@ -157,86 +186,77 @@ export class LineChartComponent implements OnInit {
       // })
 
       optimoRangeDataItem.get("axisFill").setAll({
-        fill: am5.color("#4eed90"),
-        fillOpacity: 0.2,
+        fill: am5.color("#98f086"),
+        fillOpacity: 1,
         visible: true
       });
 
       optimoRangeDataItem.get("label").setAll({
-        inside: true,
-        fill: am5.color(0xffffff),
-        text: "WC",
-        background: am5.RoundedRectangle.new(root, {
-          fill: am5.color("#668f64")
-        }),
         location: 0,
         visible: true,
-        // text: "CC",
-        
+        text: "WC",
+        inside: true,
         centerX: 0,
         centerY: am5.p100,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        fill: am5.color(0xffffff),
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#3ead4f")
+        }),        
       })
 
       // add caution range
       let cautionRangeDataItem = valueAxis.makeDataItem({ value: 23.5, endValue: 21 });
       let cautionRange = valueSeries.createAxisRange(cautionRangeDataItem);
-      //  cautionRange.fills.template.setAll({
-      //    visible: true,
-      //    opacity: 0.5
-      //  });
-
-      //  cautionRangeDataItem.get("grid").setAll({
-      //    strokeOpacity: 1,
-      //    visible: true,
-      //    stroke: am5.color("#d9db42"),
-      //    strokeDasharray: [2, 2]
-      //  })
 
       cautionRangeDataItem.get("axisFill").setAll({
-        fill: am5.color("#edf059"),
-        fillOpacity: 0.2,
+        fill: am5.color("#faf8a2"),
+        fillOpacity: 1,
         visible: true
       });
 
       cautionRangeDataItem.get("label").setAll({
-        location: 0,
-        visible: true,
-        text: "AFD",
         inside: true,
+        fill: am5.color("#11120b"),
+        text: "UR",
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#cfdb27")
+        }),
+        location: 0,
+        visible: true,        
         centerX: 0,
         centerY: am5.p100,
         fontWeight: "bold"
       })
 
-      // add ur series range
-      let urRangeDataItem = valueAxis.makeDataItem({ value: 21, endValue: 0 });
-      let urRange = valueSeries.createAxisRange(urRangeDataItem);
-      // urRange.fills.template.setAll({
-      //   visible: true,
-      //   opacity: 0.5
-      // });
+      // add pmp series range
+      let pmpRangeDataItem = valueAxis.makeDataItem({ value: 21, endValue: 0 });
+      let urRange = valueSeries.createAxisRange(pmpRangeDataItem);
 
       urRange.strokes.template.set("stroke", am5.color("#f50a45"));
 
-      // urRangeDataItem.get("grid").setAll({
-      //   strokeOpacity: 1,
-      //   visible: true,
-      //   stroke: am5.color("#f50a45"),
-      //   strokeDasharray: [2, 2]
-      // })
+      pmpRangeDataItem.get("grid").setAll({
+        strokeOpacity: 1,
+        visible: true,
+        stroke: am5.color("#fa1e38"),
+        strokeDasharray: [5, 5]
+      })
 
-      urRangeDataItem.get("axisFill").setAll({
-        fill: am5.color("#fa64af"),
-        fillOpacity: 0.1,
+      pmpRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#f59ab8"),
+        fillOpacity: 1,
         visible: true
       });
 
-      urRangeDataItem.get("label").setAll({
-        location: 0,
-        visible: true,
-        text: "UR",
+      pmpRangeDataItem.get("label").setAll({
         inside: true,
+        fill: am5.color(0xffffff),
+        text: "PMP",
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#f50a45")
+        }),
+        location: 0,
+        visible: true,        
         centerX: 0,
         centerY: am5.p100,
         fontWeight: "bold"
@@ -250,7 +270,7 @@ export class LineChartComponent implements OnInit {
 
       // Add toolbar
       // https://www.amcharts.com/docs/v5/charts/stock/toolbar/
-      am5stock.StockToolbar.new(root, {
+      let toolbar = am5stock.StockToolbar.new(root, {
         container: document.getElementById("chartcontrols"),
         stockChart: stockChart,
         controls: [
@@ -273,10 +293,12 @@ export class LineChartComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    // this.root.container.children.clear();
     // Clean up chart when the component is removed
     this.browserOnly(() => {
       if (this.root) {
         this.root.dispose();
+        // this.toolbar.OnDestroy();
       }
     });
   }

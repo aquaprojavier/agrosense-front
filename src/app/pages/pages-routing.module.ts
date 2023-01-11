@@ -1,17 +1,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { DefaultComponent } from './dashboards/default/default.component';
 import { ChartsComponent } from './charts/charts.component';
 import { LineChartComponent } from './charts/line-chart/line-chart.component';
+import { EditComponent } from './edit/edit.component';
 
 const routes: Routes = [
-  { path: 'dashboard', component: DefaultComponent },
-  { path: 'barchart', component: ChartsComponent },
+  { path: 'edit', component: EditComponent },
+  { path: 'barchart', component: ChartsComponent },//prueba
   { path: 'linechart/:id', component: LineChartComponent },
   { path: 'form', loadChildren: () => import('./form/form.module').then(m => m.FormModule) },
-  { path: 'dashboards', loadChildren: () => import('./dashboards/dashboards.module').then(m => m.DashboardsModule) },
-  { path: 'maps', loadChildren: () => import('./maps/maps.module').then(m => m.MapsModule) }
+  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }
 ];
 
 @NgModule({

@@ -5,7 +5,7 @@ import { AgmCoreModule } from '@agm/core';
 
 import { UIModule } from '../../shared/ui/ui.module';
 
-import { MapsRoutingModule } from './maps-routing.module';
+import { DashboardRoutingModule } from './dashboard-routing.module';
 import { LeafletComponent } from './leaflet/leaflet.component';
 
 @NgModule({
@@ -13,11 +13,11 @@ import { LeafletComponent } from './leaflet/leaflet.component';
   imports: [
     CommonModule,
     RouterModule,
-    MapsRoutingModule,
+    DashboardRoutingModule,
     UIModule,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE'
     }),
   ]
 })
-export class MapsModule { }
+export class DashboardModule { }
