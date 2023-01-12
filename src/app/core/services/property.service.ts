@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../models/auth.models';
 import baserUrl from '../helpers/helper';
+import { Device } from '../models/device.models';
 
 
 @Injectable({
@@ -16,7 +17,7 @@ export class PropertyService {
   }
 
   public getDevicesByPropertyId ( id : number ){
-    return this.http.get(`${baserUrl}/property/listDev/${id}`)
+    return this.http.get<Device[]>(`${baserUrl}/property/listDev/${id}`)
   }
 
   public getPropertyById ( id : any ){

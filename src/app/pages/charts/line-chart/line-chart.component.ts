@@ -17,7 +17,7 @@ import * as am5stock from "@amcharts/amcharts5/stock";
   styleUrls: ['./line-chart.component.scss']
 })
 export class LineChartComponent implements OnInit {
-  // private toolbar : any;
+  
   private root!: am5.Root;
   datas: Data[] = [];
   deviceId: number = 1;
