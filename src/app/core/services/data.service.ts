@@ -14,6 +14,10 @@ export class DataService {
     return this.http.get<Data[]>(`${baserUrl}/data/verJson/${deviceId}`);
   }
 
+  public lastDataHumByDeviceId(deviceId: number){  
+    return this.http.get<any>(`${baserUrl}/device/lastDataHum/${deviceId}`);
+  }
+
   public lastDataByDeviceId(deviceId: number){  
     return this.http.get<any>(`${baserUrl}/device/lastData/${deviceId}`);
   }

@@ -22,6 +22,7 @@ export class LineChartComponent implements OnInit {
   datas: Data[] = [];
   deviceId: number = 1;
 
+  
   constructor(@Inject(PLATFORM_ID)
     private platformId: Object,
     private activatedRoute: ActivatedRoute,
@@ -141,8 +142,8 @@ export class LineChartComponent implements OnInit {
 
       // ========================= RANGOS ====================================
        // add saturation range
-       let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 27 });
-       let saturationRange = valueSeries.createAxisRange(saturationRangeDataItem);
+       let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 16 });
+       valueSeries.createAxisRange(saturationRangeDataItem);
  
        saturationRangeDataItem.get("axisFill").setAll({
          fill: am5.color("#86dbf0"),
@@ -164,26 +165,9 @@ export class LineChartComponent implements OnInit {
          }),        
        })
  
-
       // add optimo range
-      let optimoRangeDataItem = valueAxis.makeDataItem({ value: 27, endValue: 23.5 });
+      let optimoRangeDataItem = valueAxis.makeDataItem({ value: 16, endValue: 14.5 });
       let optimoRange = valueSeries.createAxisRange(optimoRangeDataItem);
-      
-
-      // optimoRange.fills.template.setAll({
-      //   visible: true,
-      //   opacity: 0.5
-      // });
-
-      // optimoRange.fills.template.set("fill", am5.color("#b5f5d0"));
-      // optimoRange.strokes.template.set("stroke", am5.color("#14b349"));
-
-      // optimoRangeDataItem.get("grid").setAll({
-      //   strokeOpacity: 1,
-      //   visible: true,
-      //   stroke: am5.color("#04b530"),
-      //   strokeDasharray: [2, 2]
-      // })
 
       optimoRangeDataItem.get("axisFill").setAll({
         fill: am5.color("#98f086"),
@@ -206,7 +190,7 @@ export class LineChartComponent implements OnInit {
       })
 
       // add caution range
-      let cautionRangeDataItem = valueAxis.makeDataItem({ value: 23.5, endValue: 21 });
+      let cautionRangeDataItem = valueAxis.makeDataItem({ value: 14.5, endValue: 14 });
       let cautionRange = valueSeries.createAxisRange(cautionRangeDataItem);
 
       cautionRangeDataItem.get("axisFill").setAll({
@@ -230,7 +214,7 @@ export class LineChartComponent implements OnInit {
       })
 
       // add pmp series range
-      let pmpRangeDataItem = valueAxis.makeDataItem({ value: 21, endValue: 0 });
+      let pmpRangeDataItem = valueAxis.makeDataItem({ value: 14, endValue: 0 });
       let urRange = valueSeries.createAxisRange(pmpRangeDataItem);
 
       urRange.strokes.template.set("stroke", am5.color("#f50a45"));

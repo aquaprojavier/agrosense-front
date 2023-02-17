@@ -5,7 +5,7 @@
   ></app-page-title>
 
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-12">
       <div class="card">
         <div id="map"></div>
       </div>
@@ -13,18 +13,20 @@
   </div>
   <!-- end row -->
   <div class="row">
-    <div id="gauge" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+    <div id="gauge" class="col-12">
       <div class="card">
         <div class="flex-container">
-          <div *ngFor="let device of operations">
+          <div *ngFor="let device of devices">
+            <!-- <div *ngIf=""> -->
             <div class="flex-gauge">
               <svg
-                id="fillgauge{{ device.devices[0].devicesId }}"
+                id="fillgauge{{ device.devicesId }}"
                 height="140"
                 style="margin: 5px"
               ></svg>
-              <div>{{ device.devices[0].devicesNombre }}</div>
+              <div>{{ device.devicesNombre }}</div>
             </div>
+          <!-- </div> -->
           </div>
         </div>
       </div>
