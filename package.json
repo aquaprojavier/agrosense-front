@@ -27,7 +27,7 @@
     "@angular/platform-browser-dynamic": "~13.0.2",
     "@angular/router": "~13.0.2",
     "@ckeditor/ckeditor5-angular": "^2.0.1",
-    "@ckeditor/ckeditor5-build-classic": "^26.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^37.0.1",
     "@fullcalendar/angular": "^5.8.0",
     "@fullcalendar/bootstrap": "^5.8.0",
     "@fullcalendar/core": "^5.8.0",
@@ -101,7 +101,7 @@
     "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
-    "codelyzer": "^6.0.0",
+    "codelyzer": "^0.0.28",
     "eslint": "^8.17.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
@@ -110,7 +110,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
-    "protractor": "~7.0.0",
+    "protractor": "^3.3.0",
     "ts-node": "~7.0.0",
     "typescript": "~4.4.4"
   }
