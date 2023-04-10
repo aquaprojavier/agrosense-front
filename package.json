@@ -12,7 +12,7 @@
   },
   "private": true,
   "dependencies": {
-    "@agm/core": "^1.1.0",
+    "@agm/core": "^3.0.0-beta.0",
     "@amcharts/amcharts5": "^5.2.26",
     "@angular/animations": "^13.0.2",
     "@angular/cdk": "^13.3.9",
