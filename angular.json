@@ -71,6 +71,12 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb",
                   "maximumError": "10kb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "name": "edit.component.scss",
+                  "maximumWarning": "150kb",
+                  "maximumError": "200kb"
                 }
               ]
             }
