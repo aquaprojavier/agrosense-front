@@ -17,14 +17,15 @@ import * as am5stock from "@amcharts/amcharts5/stock";
   styleUrls: ['./line-chart.component.scss']
 })
 export class LineChartComponent implements OnInit {
-  
+
   private root!: am5.Root;
   datas: Data[] = [];
   deviceId: number = 1;
+  toolbar: any;
 
-  
+
   constructor(@Inject(PLATFORM_ID)
-    private platformId: Object,
+  private platformId: Object,
     private activatedRoute: ActivatedRoute,
     private zone: NgZone,
     private dataService: DataService) { }
@@ -56,9 +57,10 @@ export class LineChartComponent implements OnInit {
       this.createMap(datos, "linechartdiv", "chartcontrols")
     });
   }
-  
+
   maybeDisposeRoot(divId) {
     am5.array.each(am5.registry.rootElements, function (root) {
+      console.log("acaaaaa  " + root.dom.id);
       if (root.dom.id == divId) {
         root.dispose();
       }
@@ -72,6 +74,17 @@ export class LineChartComponent implements OnInit {
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
       this.maybeDisposeRoot(chartcontrols);
+
+       // Remove content from chart divs
+       let chartcontrolsDiv = document.getElementById(chartcontrols);
+       while (chartcontrolsDiv.firstChild) {
+           chartcontrolsDiv.removeChild(chartcontrolsDiv.firstChild);
+       }
+ 
+       let chartDiv = document.getElementById(divId);
+       while (chartDiv.firstChild) {
+           chartDiv.removeChild(chartDiv.firstChild);
+       }
       /* Chart code */
       // Create root element
       // https://www.amcharts.com/docs/v5/getting-started/#Root_element
@@ -141,30 +154,30 @@ export class LineChartComponent implements OnInit {
       }));
 
       // ========================= RANGOS ====================================
-       // add saturation range
-       let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 16 });
-       valueSeries.createAxisRange(saturationRangeDataItem);
- 
-       saturationRangeDataItem.get("axisFill").setAll({
-         fill: am5.color("#86dbf0"),
-         fillOpacity: 1,
-         visible: true
-       });
- 
-       saturationRangeDataItem.get("label").setAll({
-         location: 0,
-         visible: true,
-         text: "WC",
-         inside: true,
-         centerX: 0,
-         centerY: am5.p100,
-         fontWeight: "bold",
-         fill: am5.color(0xffffff),
-         background: am5.RoundedRectangle.new(root, {
-           fill: am5.color("#668f64")
-         }),        
-       })
- 
+      // add saturation range
+      let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 16 });
+      valueSeries.createAxisRange(saturationRangeDataItem);
+
+      saturationRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#86dbf0"),
+        fillOpacity: 1,
+        visible: true
+      });
+
+      saturationRangeDataItem.get("label").setAll({
+        location: 0,
+        visible: true,
+        text: "WC",
+        inside: true,
+        centerX: 0,
+        centerY: am5.p100,
+        fontWeight: "bold",
+        fill: am5.color(0xffffff),
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#668f64")
+        }),
+      })
+
       // add optimo range
       let optimoRangeDataItem = valueAxis.makeDataItem({ value: 16, endValue: 14.5 });
       let optimoRange = valueSeries.createAxisRange(optimoRangeDataItem);
@@ -186,7 +199,7 @@ export class LineChartComponent implements OnInit {
         fill: am5.color(0xffffff),
         background: am5.RoundedRectangle.new(root, {
           fill: am5.color("#3ead4f")
-        }),        
+        }),
       })
 
       // add caution range
@@ -207,7 +220,7 @@ export class LineChartComponent implements OnInit {
           fill: am5.color("#cfdb27")
         }),
         location: 0,
-        visible: true,        
+        visible: true,
         centerX: 0,
         centerY: am5.p100,
         fontWeight: "bold"
@@ -240,7 +253,7 @@ export class LineChartComponent implements OnInit {
           fill: am5.color("#f50a45")
         }),
         location: 0,
-        visible: true,        
+        visible: true,
         centerX: 0,
         centerY: am5.p100,
         fontWeight: "bold"
@@ -252,9 +265,14 @@ export class LineChartComponent implements OnInit {
         orientation: "horizontal"
       }));
 
+      // Eliminar el toolbar anterior si existe
+      if (this.toolbar) {
+        this.toolbar.dispose();
+      }
+
       // Add toolbar
       // https://www.amcharts.com/docs/v5/charts/stock/toolbar/
-      let toolbar = am5stock.StockToolbar.new(root, {
+      this.toolbar = am5stock.StockToolbar.new(root, {
         container: document.getElementById("chartcontrols"),
         stockChart: stockChart,
         controls: [
