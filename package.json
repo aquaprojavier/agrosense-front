@@ -101,6 +101,7 @@
     "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
+    "angular-cli-ghpages": "^1.0.5",
     "codelyzer": "^0.0.28",
     "eslint": "^8.17.0",
     "jasmine-core": "~3.6.0",
