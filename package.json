@@ -81,7 +81,7 @@
     "simplebar-angular": "^2.3.4",
     "sweetalert2": "^11.0.18",
     "tslib": "^2.3.0",
-    "typescript": "^4.4.2",
+    "typescript": "^4.4.3",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
