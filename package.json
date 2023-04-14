@@ -82,6 +82,7 @@
     "simplebar-angular": "^2.3.4",
     "sweetalert2": "^11.0.18",
     "tslib": "^2.3.0",
+    "typescript": "^4.4.2",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
@@ -95,6 +96,7 @@
     "@angular/language-service": "~13.0.2",
     "@juggle/resize-observer": "^3.3.1",
     "@types/echarts": "^4.9.8",
+    "@types/googlemaps": "^3.43.3",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/leaflet": "^1.7.11",
@@ -111,8 +113,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
-    "protractor": "^3.3.0",
-    "ts-node": "~7.0.0",
-    "typescript": "~4.4.4"
+    "protractor": "^7.0.0",
+    "ts-node": "~7.0.0"
   }
 }
