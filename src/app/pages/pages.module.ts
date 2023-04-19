@@ -46,7 +46,6 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
     NgbCollapseModule,
     SimplebarAngularModule,
     LightboxModule,
-    MapsModule
   ],
 })
 export class PagesModule { }
