@@ -1,0 +1,160 @@
+<div class="container-fluid">
+  <app-page-title
+    title="{{ property.propNombre }}"
+    [breadcrumbItems]="breadCrumbItems"
+  ></app-page-title>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+  <!-- end row -->
+  <div class="row">
+    <div id="gauge" class="col-12">
+      <div class="card">
+        <div class="flex-container">
+          <div *ngFor="let device of devices">
+            <!-- <div *ngIf=""> -->
+            <div class="flex-gauge">
+              <svg
+                id="fillgauge{{ device.devicesId }}"
+                height="140"
+                style="margin: 5px"
+              ></svg>
+              <div>{{ device.devicesNombre }}</div>
+            </div>
+          <!-- </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div id="meteo2" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+      <div class="card" style="text-align: center">
+        <iframe
+          src="https://www.meteoblue.com/en/weather/widget/daily/godoy-cruz_argentina_3854964?geoloc=fixed&days=7&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&precipunit=MILLIMETER&coloured=coloured&pictoicon=0&pictoicon=1&maxtemperature=0&maxtemperature=1&mintemperature=0&mintemperature=1&windspeed=0&windspeed=1&windgust=0&winddirection=0&winddirection=1&uv=0&humidity=0&precipitation=0&precipitation=1&precipitationprobability=0&precipitationprobability=1&spot=0&spot=1&pressure=0&layout=dark"
+          frameborder="0"
+          scrolling="NO"
+          allowtransparency="true"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
+          style="width: 100%; height: 420px"
+        ></iframe>
+        <div>
+          <!-- DO NOT REMOVE THIS LINK --><a
+            href="https://www.meteoblue.com/en/weather/week/godoy-cruz_argentina_3854964?utm_source=weather_widget&utm_medium=linkus&utm_content=daily&utm_campaign=Weather%2BWidget"
+            target="_blank"
+            rel="noopener"
+            >meteoblue</a
+          >
+        </div>
+        <!-- <div id="openweathermap-widget-11"></div> -->
+        <!-- <script src='//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/d3.min.js'></script><script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  window.myWidgetParam.push({id: 11,cityid: '3844421',appid: '5f3a09c9c40ca76809a1cc96f5d1dff2',units: 'metric',containerid: 'openweathermap-widget-11',  });  (function() {var script = document.createElement('script');script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script> -->
+      </div>
+    </div>
+    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-5">Recomendaciones</h4>
+          <ul class="verti-timeline list-unstyled">
+            <li class="event-list active">
+              <div class="event-timeline-dot">
+                <i
+                  class="bx bxs-right-arrow-circle font-size-18 bx-fade-right"
+                ></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    22 Nov
+                    <i
+                      class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"
+                    ></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>
+                    Regar 8 horas 45 minutos el cuadro C10, equivalente a 18 mm
+                    de lámina de agua.
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="event-list">
+              <div class="event-timeline-dot">
+                <i class="bx bx-right-arrow-circle font-size-18"></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    17 Nov
+                    <i
+                      class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"
+                    ></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>
+                    Regar 13 horas 24 minutos el cuadro C17, equivalente a 121
+                    mm de lámina de agua, para lograr llegar a capacidad de
+                    campo. <a href="javascript: void(0);">Read more</a>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="event-list">
+              <div class="event-timeline-dot">
+                <i class="bx bx-right-arrow-circle font-size-18"></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    15 Nov
+                    <i
+                      class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"
+                    ></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>
+                    Regar 7 horas 34 minutos el cuadro C6, equivalente a 15 mm
+                    de lámina de agua.
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="event-list">
+              <div class="event-timeline-dot">
+                <i class="bx bx-right-arrow-circle font-size-18"></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    12 Nov
+                    <i
+                      class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"
+                    ></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>
+                    Regar 8 horas 12 minutos el cuadro C10, equivalente a 16 mm
+                    de lámina de agua.
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div class="text-center mt-4">
+            <a href="javascript: void(0);" class="btn btn-primary btn-sm"
+              >View More <i class="mdi mdi-arrow-right ms-1"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

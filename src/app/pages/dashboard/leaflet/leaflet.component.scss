@@ -1,0 +1,15 @@
+#map { height: 550px; }
+.flex-container {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	align-items: center;
+}
+.flex-gauge {
+	width: 170px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	margin: 5px;
+}

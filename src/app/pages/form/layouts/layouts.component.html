@@ -1,0 +1,117 @@
+<div class="container-fluid">
+  <!-- start page title -->
+  <app-page-title
+    title="Form Layouts"
+    [breadcrumbItems]="breadCrumbItems"
+  ></app-page-title>
+  <!-- end page title -->
+  <div class="row">
+    <div class="col-4">
+      <div class="card" style="background-color: rgb(213, 232, 243);">
+        <div class="card-body">
+          <!-- <div class="col-4"> -->
+            <form [formGroup]="form" (ngSubmit)="save($event)">
+              <div formGroupName="fullname">            
+
+                <mat-form-field appearance="fill">
+                  <mat-label>Nombre</mat-label>
+                  <input  matInput
+                          type="text"                    
+                          formControlName="name" />
+                  <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isNameFieldInvalid">close</mat-icon>
+                  <div *ngIf="nameField.touched">
+                    <mat-error  *ngIf="nameField.hasError('required')">
+                    este campo es requerido
+                    </mat-error>
+                    <mat-error  *ngIf="nameField.hasError('maxlength')">
+                    maximo 10 caracteres
+                    </mat-error>
+                  </div>                 
+                </mat-form-field>
+              
+                <mat-form-field appearance="fill">
+                  <mat-label>Apellido</mat-label>
+                  <input matInput type="text" formControlName="lastname" />
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" />
+                <div *ngIf="passwordField.touched && passwordField.invalid">
+                  <mat-error  *ngIf="passwordField.hasError('required')">
+                  este campo es requerido
+                  </mat-error>
+                  <mat-error  *ngIf="passwordField.hasError('minlength')">
+                  Debe tener al menos 5 caracteres
+                  </mat-error>
+                  <mat-error  *ngIf="passwordField.hasError('invalid_password')">
+                    Debe contener al menos un numero
+                  </mat-error>
+                </div> 
+              </mat-form-field>
+              
+              <mat-form-field appearance="fill">
+                <mat-label>Enter your email</mat-label>
+                <input
+                  matInput
+                  type="email"
+                  placeholder="pat@example.com"
+                  formControlName="email"
+                  required
+                />
+              </mat-form-field>
+              <div
+                class="messagesName"
+                [class.active]="emailField.touched && emailField.invalid"
+              >
+                <p>
+                  <strong *ngIf="emailField.hasError('required')"
+                    >este campo es requerido</strong
+                  >
+                </p>
+                <p>
+                  <strong *ngIf="emailField.hasError('email')"
+                    >Debe tener formato valido</strong
+                  >
+                </p>
+              </div>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Phone number</mat-label>
+                <input matInput type="tel" formControlName="phone" />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Color</mat-label>
+                <input matInput type="color" formControlName="color" />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Edad</mat-label>
+                <input matInput type="number" formControlName="age" />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Fecha</mat-label>
+                <input matInput type="date" formControlName="date" />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Categoria</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option value="one">First option</mat-option>
+                  <mat-option value="two">Second option</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <br />
+              <button type="submit">enviar</button>
+            </form>
+          <!-- </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end row -->
+</div>

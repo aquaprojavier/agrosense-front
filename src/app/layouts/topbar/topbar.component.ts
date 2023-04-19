@@ -1,12 +1,11 @@
 import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
-import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
-import { environment } from '../../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
+import { LoginService } from '../../core/services/login.service';
+import { User } from '../../core/models/auth.models'
 
 @Component({
   selector: 'app-topbar',
@@ -19,14 +18,18 @@ import { TranslateService } from '@ngx-translate/core';
  */
 export class TopbarComponent implements OnInit {
 
+  isLoggedIn = false;
+  user: User = null;
+
   element;
   cookieValue;
   flagvalue;
   countryName;
   valueset;
 
-  constructor(@Inject(DOCUMENT) private document: any, private router: Router, private authService: AuthenticationService,
-              private authFackservice: AuthfakeauthenticationService,
+  constructor(@Inject(DOCUMENT) private document: any, 
+              private router: Router, 
+              private loginService: LoginService,
               public languageService: LanguageService,
               public translate: TranslateService,
               public _cookiesService: CookieService) {
@@ -34,10 +37,7 @@ export class TopbarComponent implements OnInit {
 
   listLang = [
     { text: 'English', flag: 'assets/images/flags/us.jpg', lang: 'en' },
-    { text: 'Spanish', flag: 'assets/images/flags/spain.jpg', lang: 'es' },
-    { text: 'German', flag: 'assets/images/flags/germany.jpg', lang: 'de' },
-    { text: 'Italian', flag: 'assets/images/flags/italy.jpg', lang: 'it' },
-    { text: 'Russian', flag: 'assets/images/flags/russia.jpg', lang: 'ru' },
+    { text: 'Spanish', flag: 'assets/images/flags/spain.jpg', lang: 'es' }
   ];
 
   openMobileMenu: boolean;
@@ -46,6 +46,15 @@ export class TopbarComponent implements OnInit {
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
   ngOnInit() {
+    this.isLoggedIn = this.loginService.isLoggedIn();
+    this.user = this.loginService.getUser();
+    this.loginService.loginStatusSubjec.asObservable().subscribe(
+      data => {
+        this.isLoggedIn = this.loginService.isLoggedIn();
+        this.user = this.loginService.getUser();
+      }
+    )
+
     this.openMobileMenu = false;
     this.element = document.documentElement;
 
@@ -85,11 +94,9 @@ export class TopbarComponent implements OnInit {
    * Logout the user
    */
   logout() {
-    if (environment.defaultauth === 'firebase') {
-      this.authService.logout();
-    } else {
-      this.authFackservice.logout();
-    }
+   
+    this.loginService.logout();
+   
     this.router.navigate(['/account/login']);
   }
 

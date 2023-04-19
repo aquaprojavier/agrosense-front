@@ -70,8 +70,8 @@
       "TEXT": "Menú"
     },
     "DASHBOARDS": {
-      "TEXT": "Tableros",
-      "BADGE": "04",
+      "TEXT": "Propiedades",
+      "BADGE": "03",
       "LIST": {
         "DEFAULT": "Defecto",
         "SAAS": "Saas",
@@ -279,7 +279,8 @@
         "APEX": "Gráfico de Apex",
         "CHARTJS": "Chartjs Chart",
         "CHARTIST": "Chartist Chart",
-        "ECHART": "Gráfico E"
+        "ECHART": "Gráfico E",
+        "AMCHART": "Gráfico linea"
       }
     },
     "ICONS": {
@@ -294,7 +295,8 @@
     "MAPS": {
       "TEXT": "Mapas",
       "LIST": {
-        "GOOGLEMAP": "mapas de Google"
+        "GOOGLEMAP": "mapas de Google",
+        "LEAFLETMAP": "Mapas de Leaflet"
       }
     },
     "MULTILEVEL": {
