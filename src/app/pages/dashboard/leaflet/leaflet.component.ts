@@ -124,37 +124,37 @@ export class LeafletComponent implements OnInit {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
 
           if (data.dataHum1 <= this.ur) {
-            marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div><img src="../../../../assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="../../../../assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="../../../../assets/images/root.png" alt=""> Humedad de suelo: <b style="color: red;">${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b style="color: red;">${data.dataHum1}%</b><br></div>`);
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#CB2B3E" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="../../../../assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="../../../../assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           } else if (data.dataHum1 >= this.wc) {
-            marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div><img src="../../../../assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="../../../../assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="../../../../assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#0481bf" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="../../../../assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="../../../../assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           } else {
-            marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div><img src="../../../../assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="../../../../assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="../../../../assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#2AAD27" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="../../../../assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="../../../../assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           }
         },
         (error) => {
           console.log(error);
-          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="../../../../assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="../../../../assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
+          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
             let idnull = dev.devicesId;
             let operacionStyle = { color: "#7B7B7B" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
