@@ -1,37 +1,32 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AuthenticationService } from '../services/auth.service';
-import { AuthfakeauthenticationService } from '../services/authfake.service';
-
-import { environment } from '../../../environments/environment';
+import { LoginService } from '../services/login.service';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-    constructor(private authenticationService: AuthenticationService, private authfackservice: AuthfakeauthenticationService) { }
+    constructor(private authenticationService: AuthenticationService, private loginService: LoginService) { }
 
-    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        if (environment.defaultauth === 'firebase') {
-            const currentUser = this.authenticationService.currentUser();
-            if (currentUser && currentUser.token) {
-                request = request.clone({
-                    setHeaders: {
-                        Authorization: `Bearer ${currentUser.token}`
-                    }
-                });
-            }
-        } else {
-            // add authorization header with jwt token if available
-            const currentUser = this.authfackservice.currentUserValue;
-            if (currentUser && currentUser.token) {
-                request = request.clone({
-                    setHeaders: {
-                        Authorization: `Bearer ${currentUser.token}`
-                    }
-                });
-            }
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        let authReq = req;
+        const token = this.loginService.getToken();
+        console.log("entro al interceptor");
+        
+        if(token != null){
+          console.log("paso por interceptor y coloco bearer + token: " + token);
+          authReq = authReq.clone({
+            setHeaders : {Authorization: `Bearer ${token}` }
+          })
         }
-        return next.handle(request);
-    }
+        return next.handle(authReq);
+      } 
 }
+export const authInterceptorProviders = [
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass : JwtInterceptor,
+      multi : true
+    }
+  ]

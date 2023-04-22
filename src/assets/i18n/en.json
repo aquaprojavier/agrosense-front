@@ -70,7 +70,7 @@
       "TEXT": "Menu"
     },
     "DASHBOARDS": {
-      "TEXT": "Dashboards",
+      "TEXT": "Properties",
       "BADGE": "04",
       "LIST": {
         "DEFAULT": "Default",
@@ -256,14 +256,7 @@
       "TEXT": "Forms",
       "BADGE": "09",
       "LIST": {
-        "ELEMENTS": "Form Elements",
-        "VALIDATION": "Form Validation",
-        "ADVANCED": "Form Advanced",
-        "EDITOR": "Form Editor",
-        "FILEUPLOAD": "Form File Upload",
-        "REPEATER": "Form Repeater",
-        "WIZARD": "Form Wizard",
-        "MASK": "Form Mask",
+        "FORMARRAY": "Form Array",
         "LAYOUTS": "Form Layouts"
       }
     },
@@ -277,10 +270,8 @@
     "CHARTS": {
       "TEXT": "Charts",
       "LIST": {
-        "APEX": "Apex Chart",
-        "CHARTJS": "Chartjs Chart",
-        "CHARTIST": "Chartist Chart",
-        "ECHART": "E Chart"
+        "AMCHART": "Line Chart",
+        "CHARTJS": "Chartjs Chart"
       }
     },
     "ICONS": {
@@ -295,7 +286,8 @@
     "MAPS": {
       "TEXT": "Maps",
       "LIST": {
-        "GOOGLEMAP": "Google Maps"
+        "GOOGLEMAP": "Google Maps",
+        "LEAFLETMAP": "Leaflet Maps"
       }
     },
     "MULTILEVEL": {
