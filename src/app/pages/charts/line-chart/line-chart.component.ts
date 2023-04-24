@@ -54,7 +54,7 @@ export class LineChartComponent implements OnInit {
 
   getData(id: number) {
     this.dataService.fullDataByDeviceId(id).subscribe(datos => {
-      this.createMap(datos, "linechartdiv", "chartcontrols")
+      this.createGraph(datos, "linechartdiv", "chartcontrols")
     });
   }
 
@@ -67,7 +67,7 @@ export class LineChartComponent implements OnInit {
     });
   }
 
-  createMap(apiData: Data[], divId, chartcontrols) {
+  createGraph(apiData: Data[], divId, chartcontrols) {
     // Chart code goes in here
     this.browserOnly(() => {
 

@@ -7,7 +7,7 @@ import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from '../../../core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
-import { from } from 'rxjs';
+// import { from } from 'rxjs';
 
 @Component({
   selector: 'app-leaflet',
