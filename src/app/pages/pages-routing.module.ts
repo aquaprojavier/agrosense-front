@@ -7,8 +7,8 @@ import { EditComponent } from './edit/edit.component';
 
 const routes: Routes = [
   { path: 'edit', component: EditComponent },
-  { path: 'barchart', component: ChartsComponent },//prueba
-  { path: 'linechart/:id', component: LineChartComponent },
+  { path: 'chart/:id', component: ChartsComponent },//prueba
+  // { path: 'linechart/:id', component: LineChartComponent },
   { path: 'form', loadChildren: () => import('./form/form.module').then(m => m.FormModule) },
   { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }
 ];

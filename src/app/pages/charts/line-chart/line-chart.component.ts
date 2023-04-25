@@ -1,10 +1,8 @@
-import { Component, Inject, NgZone, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
-import { DataService } from 'src/app/core/services/data.service';
-import { ActivatedRoute, Params } from '@angular/router';
-import { Data } from '../../../core/models/data.models';
+import { Data } from 'src/app/core/models/data.models';
 
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -16,32 +14,28 @@ import * as am5stock from "@amcharts/amcharts5/stock";
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss']
 })
-export class LineChartComponent implements OnInit {
+export class LineChartComponent implements OnInit, OnChanges{
 
   private root!: am5.Root;
-  datas: Data[] = [];
-  deviceId: number = 1;
   toolbar: any;
-
+  @Input() datoschart: Data[];
 
   constructor(@Inject(PLATFORM_ID)
-  private platformId: Object,
-    private activatedRoute: ActivatedRoute,
+    private platformId: Object,
     private zone: NgZone,
-    private dataService: DataService) { }
+    ) { }
 
-  ngOnInit(): void {
-    this.activatedRoute.snapshot.params['id'];
-    this.activatedRoute.params.subscribe((params: Params) => {
-      this.deviceId = params['id'];
-      //request data from service
-      this.getData(this.deviceId);
-    },
-      (error) => {
-        console.log(error);
+  
+    ngOnInit(): void {
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+      // Check if the datoschart input has changed
+      if (changes.datoschart && !changes.datoschart.firstChange) {
+        // If it has changed and it's not the first change, create the graph
+        this.createGraph(this.datoschart, "linechartdiv", "chartcontrols");
       }
-    );
-  }
+    }
 
   // Run the function only in the browser
   browserOnly(f: () => void) {
@@ -52,15 +46,8 @@ export class LineChartComponent implements OnInit {
     }
   }
 
-  getData(id: number) {
-    this.dataService.fullDataByDeviceId(id).subscribe(datos => {
-      this.createGraph(datos, "linechartdiv", "chartcontrols")
-    });
-  }
-
   maybeDisposeRoot(divId) {
     am5.array.each(am5.registry.rootElements, function (root) {
-      console.log("acaaaaa  " + root.dom.id);
       if (root.dom.id == divId) {
         root.dispose();
       }

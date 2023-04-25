@@ -21,6 +21,7 @@ import { FormModule } from './form/form.module';
 import { LineChartComponent } from './charts/line-chart/line-chart.component';
 import { EditComponent } from './edit/edit.component';
 import { TempHumChartComponent } from './charts/temp-hum-chart/temp-hum-chart.component';
+import { ChartsComponent } from './charts/charts.component';
 
 FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   dayGridPlugin,
@@ -30,7 +31,10 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
 
 @NgModule({
   declarations: [ 
-    LineChartComponent, EditComponent, TempHumChartComponent,
+    LineChartComponent,
+    EditComponent, 
+    TempHumChartComponent, 
+    ChartsComponent
   ],
   imports: [
     // TableModule,
