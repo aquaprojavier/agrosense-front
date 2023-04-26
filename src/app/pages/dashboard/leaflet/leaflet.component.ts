@@ -4,7 +4,7 @@ import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
 import { CargarService } from 'src/app/core/services/cargar.service'
-import { User } from '../../../core/models/auth.models';
+import { User } from 'src/app/core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
@@ -104,21 +104,21 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
-    let poli = JSON.parse(property.geojson);
+    let poligonObj = JSON.parse(property.geojson);
     let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
-
-    let poligon = geoJSON(poli, { style: poligonoStyle }).addTo(this.myMap);
-    this.myMap.fitBounds(poligon.getBounds());
+    let poligonToGjson = geoJSON(poligonObj, { style: poligonoStyle }).addTo(this.myMap);
+    this.myMap.fitBounds(poligonToGjson.getBounds());
 
     this.myMap.scrollWheelZoom.disable();
     this.myMap.on('focus', () => { this.myMap.scrollWheelZoom.enable(); });
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
 
     this.devices = [];
+    
     operations.forEach(ope => {
 
       ope.devices.forEach(dev => {
-
+        console.log(dev)
         this.devices.push(dev);
         
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
