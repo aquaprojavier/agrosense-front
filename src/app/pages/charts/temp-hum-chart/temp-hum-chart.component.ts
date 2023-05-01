@@ -163,8 +163,8 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-      mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {orientation: "horizontal"
-      }));
+      // mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {orientation: "horizontal"
+      // }));
 
       // Eliminar el toolbar anterior si existe
       if (this.toolbar) {
