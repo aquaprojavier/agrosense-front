@@ -96,6 +96,16 @@ export class LineChartComponent implements OnInit, OnChanges {
         pinchZoomX: true
       }));
 
+      // Add cursor
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+      let cursor = mainPanel.set("cursor", am5xy.XYCursor.new(root, {
+        // yAxis: valueAxis,
+        // xAxis: dateAxis,
+        behavior: "zoomX"
+      }));
+
+      cursor.lineY.set("visible", false);
+
       // Create axes
       // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
       let valueAxis = mainPanel.yAxes.push(am5xy.ValueAxis.new(root, {
@@ -105,16 +115,10 @@ export class LineChartComponent implements OnInit, OnChanges {
       let dateAxis = mainPanel.xAxes.push(am5xy.DateAxis.new(root, {
         baseInterval: {
           timeUnit: "minute",
-          count: 1
+          count: 10
         },
         renderer: am5xy.AxisRendererX.new(root, {}),
         tooltip: am5.Tooltip.new(root, {})
-      }));
-
-      mainPanel.set("cursor", am5xy.XYCursor.new(root, {
-        yAxis: valueAxis,
-        xAxis: dateAxis,
-        behavior: "zoomX"
       }));
 
       function dataLoaded(result) {
@@ -122,32 +126,33 @@ export class LineChartComponent implements OnInit, OnChanges {
         valueSeries.data.processor = am5.DataProcessor.new(root, {
           numericFields: ["dataHum1", "cc", "ur"],
           dateFields: ["dataFecha"],
-          dateFormat: "yyyy-MM-dd HH:mm:ss"
+          dateFormat: "yyyy-MM-dd HH:mm"
         });
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
           numericFields: ["dataHum2"],
           dateFields: ["dataFecha"],
-          dateFormat: "yyyy-MM-dd HH:mm:ss"
+          dateFormat: "yyyy-MM-dd HH:mm"
         });
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
-      }
+      };
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
-        name: "Humedad 1",
+        name: "Humedad 30cm",
         valueXField: "dataFecha",
         valueYField: "dataHum1",
         stroke: am5.color("#03549c"),
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY}%"
+          labelText: "{name}: {valueY}%",
+          keepTargetHover: true
         })
       }));
 
       let valueSeries2 = mainPanel.series.push(am5xy.LineSeries.new(root, {
-        name: "Humedad 2",
+        name: "Humedad 60cm",
         valueXField: "dataFecha",
         valueYField: "dataHum2",
         stroke: am5.color("#ff0000"),
@@ -158,7 +163,7 @@ export class LineChartComponent implements OnInit, OnChanges {
         })
       }));
 
-      
+
       let legend = mainPanel.children.push(am5.Legend.new(root, {}));
       legend.data.setAll(mainPanel.series.values);
 

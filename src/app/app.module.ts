@@ -3,6 +3,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
 import { environment } from '../environments/environment';
 
 import { NgbNavModule, NgbAccordionModule, NgbTooltipModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -21,7 +24,7 @@ import { ErrorInterceptor } from './core/helpers/error.interceptor';
 import { JwtInterceptor } from './core/helpers/jwt.interceptor';
 import { MaterialModule } from './material/material.module';
 
-
+registerLocaleData(localeEs);
 export function createTranslateLoader(http: HttpClient): any {
   return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
 }
@@ -31,6 +34,7 @@ export function createTranslateLoader(http: HttpClient): any {
     AppComponent
   ],
   imports: [
+    CommonModule,
     MaterialModule,
     BrowserModule,
     BrowserAnimationsModule,

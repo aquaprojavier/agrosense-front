@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { geoJSON, Icon, LatLng, Map, marker, tileLayer } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -6,6 +7,8 @@ import { DataService } from 'src/app/core/services/data.service';
 import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from 'src/app/core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
 
@@ -16,6 +19,10 @@ declare function loadLiquidFillGauge(elementId: string, value: number, wc: numbe
 })
 export class LeafletComponent implements OnInit {
   // bread crumb items
+  fechaActual: string;
+  fechaAyer: string;
+  fechaAntier: string;
+  fechaAntiantier: string;
   breadCrumbItems: Array<{}>;
   user: User;
   property: any;
@@ -23,9 +30,10 @@ export class LeafletComponent implements OnInit {
   devices: any[] = [];
   propId: any;
   myMap = null;
-  ur: number = 17;
-  wc: number = 27
+  ur: number = 11;
+  wc: number = 17;
   lastData: number[] = [];
+  sanitizedUrl: SafeResourceUrl | null = null;
 
   redIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -65,9 +73,23 @@ export class LeafletComponent implements OnInit {
     private propertyService: PropertyService,
     private operationService: OperationService,
     private dataService: DataService,
-    private cargaScript: CargarService) {
+    private cargaScript: CargarService,
+    private sanitizer: DomSanitizer) {
+
     this.cargaScript.carga(["loadFillGauge"]);
-    // console.log(loadLiquidFillGauge);
+    const hoy = new Date();
+    const ayer = new Date(hoy);
+    ayer.setDate(hoy.getDate() - 1);
+    const antier = new Date(hoy);
+    antier.setDate(hoy.getDate() - 2);
+    const antiantier = new Date(hoy);
+    antiantier.setDate(hoy.getDate() - 3);
+
+    this.fechaActual = formatDate(hoy, 'dd \'de\' MMMM', 'es');
+    this.fechaAyer = formatDate(ayer, 'dd \'de\' MMMM', 'es');
+    this.fechaAntier = formatDate(antier, 'dd \'de\' MMMM', 'es');
+    this.fechaAntiantier = formatDate(antiantier, 'dd \'de\' MMMM', 'es');
+
   }
 
   ngOnInit(): void {
@@ -86,6 +108,7 @@ export class LeafletComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
+      this.sanitizedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.meteoblue.com/en/weather/widget/daily/${this.property?.propUbic}?geoloc=fixed&days=7&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&precipunit=MILLIMETER&coloured=coloured&pictoicon=0&pictoicon=1&maxtemperature=0&maxtemperature=1&mintemperature=0&mintemperature=1&windspeed=0&windspeed=1&windgust=0&winddirection=0&winddirection=1&uv=0&humidity=0&precipitation=0&precipitation=1&precipitationprobability=0&precipitationprobability=1&spot=0&spot=1&pressure=0&layout=dark`);
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         this.createMap(this.property, this.operations)
@@ -93,8 +116,8 @@ export class LeafletComponent implements OnInit {
     });
   };
 
-  createMap(property, operations) {
 
+  createMap(property, operations) {
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
     }
@@ -114,17 +137,30 @@ export class LeafletComponent implements OnInit {
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
 
     this.devices = [];
-    
+
     operations.forEach(ope => {
 
       ope.devices.forEach(dev => {
         console.log(dev)
         this.devices.push(dev);
-        
+
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
 
           if (data.dataHum1 <= this.ur) {
-            marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b style="color: red;">${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
+            <div style="display: flex; align-items: center;">
+              <img src="assets/images/root32px.png" alt=""> 
+            <div>
+              Humedad a 30cm: <b style="color: red;">${data.dataHum1}%</b><br><br><br>
+              Humedad a 60cm: <b style="color: red;">${data.dataHum2}%</b><br>
+            </div>            
+            </div>
+            <br>
+            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+            </div>`);
+
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#CB2B3E" };
@@ -133,7 +169,21 @@ export class LeafletComponent implements OnInit {
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           } else if (data.dataHum1 >= this.wc) {
-            marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div>
+
+            <div style="display: flex; align-items: center;">
+            <img src="assets/images/root32px.png" alt="">
+            <div>
+             Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+             Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+            </div>            
+            </div>
+            <br>
+            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+            </div>`);
+
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#0481bf" };
@@ -142,7 +192,21 @@ export class LeafletComponent implements OnInit {
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           } else {
-            marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div><img src="assets/images/water.png" alt=""> Humedad relativa: <b>${data.dataHr}%</b><br><br><img src="assets/images/termometro.png" alt=""> Temperatura: <b>${data.dataTemp}</b><br><br><img src="assets/images/root.png" alt=""> Humedad de suelo: <b>${data.dataHum1}%</b><br></div>`);
+            marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
+
+            <div style="display: flex; align-items: center;">
+            <img src="assets/images/root32px.png" alt="">
+            <div>
+             Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+             Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+            </div>            
+            </div>
+            <br>
+            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+            </div>`);
+
             loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
             this.lastData.push(data);
             let operacionStyle = { color: "#2AAD27" };
@@ -152,9 +216,9 @@ export class LeafletComponent implements OnInit {
 
           }
         },
-        (error) => {
-          console.log(error);
-          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
+          (error) => {
+            console.log(error);
+            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
             let idnull = dev.devicesId;
             let operacionStyle = { color: "#7B7B7B" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
@@ -166,7 +230,7 @@ export class LeafletComponent implements OnInit {
                 this.devices.splice(i, 1);
               }
             }
-        });
+          });
       });
     });
   };

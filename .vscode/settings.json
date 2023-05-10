@@ -1,3 +1,4 @@
 {
-    "sftp.debug": false
+    "sftp.debug": false,
+    "editor.fontSize": 14
 }

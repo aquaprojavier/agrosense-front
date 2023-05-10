@@ -1,20 +1,54 @@
-<!-- <p-table [value]="devices" [tableStyle]="{'min-width': '50rem'}">
-    <ng-template pTemplate="header">
-        <tr>
-            <th>devicesId</th>
-            <th>devicesNombre</th>
-            <th>devicesCultivo</th>
-            <th>latitud</th>
-            <th>longitud</th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-device>
-        <tr>
-            <td>{{device.devicesId}}</td>
-            <td>{{device.devicesNombre}</td>
-            <td>{{device.devicesCultivo}</td>
-            <td>{{device.latitud}}</td>
-            <td>{{device.longitud}}</td>
-        </tr>
-    </ng-template>
-</p-table> -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Lista de dispositivos</h4>
+
+          <div class="table-responsive mb-0">
+            <table *ngIf="devices && devices.length > 0" class="table table-centered table-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th class="align-middle">Dispositivo</th>
+                  <th class="align-middle">Cultivo</th>
+                  <th class="align-middle">N° Serie</th>
+                  <th class="align-middle">Latitud</th>
+                  <th class="align-middle">Longitud</th>
+                  <th class="align-middle">Status</th>
+                  <th class="align-middle">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let dev of devices">
+                  <td>{{ dev.devicesNombre }}</td>
+                  <td>{{ dev.devicesCultivo }}</td>
+                  <td>{{ dev.devicesSerie }}</td>
+                  <td>{{ dev.latitud }}</td>
+                  <td>{{ dev.longitud }}</td>
+                  <td>
+                    <span class="badge badge-pill font-size-11"
+                      [ngClass]="{
+                        'badge-soft-success': dev.conected,
+                        'badge-soft-warning': !dev.conected
+                      }">
+                      {{ dev.conected ? 'Conectado' : 'Desconectado' }}
+                    </span>
+                  </td>
+                  <td>
+                    <!-- Button trigger modal -->
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm btn-rounded">
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- end table -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

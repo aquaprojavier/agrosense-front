@@ -108,7 +108,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       let dateAxis = mainPanel.xAxes.push(am5xy.DateAxis.new(root, {
         baseInterval: {
           timeUnit: "minute",
-          count: 1
+          count: 10
         },
         renderer: am5xy.AxisRendererX.new(root, {}),
         tooltip: am5.Tooltip.new(root, {})
@@ -145,7 +145,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY}%"
+          labelText: "{name}: {valueY} C"
         })
       }));
 
@@ -157,9 +157,12 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         xAxis: dateAxis,
         yAxis: valueAxis2,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY}%"
+          labelText: "{name}: {valueY} %"
         })
       }));
+
+      let legend = mainPanel.children.push(am5.Legend.new(root, {}));
+      legend.data.setAll(mainPanel.series.values);
       
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/

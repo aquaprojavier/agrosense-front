@@ -30,40 +30,42 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   props: any;
   var: any;
   devices: any;
+  propertyId: number;
 
   menuItems = [];
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
   constructor(
-      private propertyService: PropertyService,
-      private userService: UserProfileService,
-      private loginService: LoginService,
-      private eventService: EventService, 
-      private router: Router, 
-      public translate: TranslateService, 
-      private http: HttpClient) {router.events.forEach((event) => {
+    private propertyService: PropertyService,
+    private loginService: LoginService,
+    private router: Router,
+    public translate: TranslateService) {
+      router.events.forEach((event) => {
         if (event instanceof NavigationEnd) {
           // this._activateMenuDropdown();
           this._scrollElement();
-          }
-        });
-      }
+        }
+      });
+  }
 
   ngOnInit() {
     this._scrollElement();
     this.user = this.loginService.getUser()
-    this.props= this.user.propiedades;
+    this.props = this.user.propiedades;
     // console.log(this.props);
-    let propId
-                this.user.propiedades.forEach(element => {
-                  if (element.propDefault === 1){
-                    propId = element.propId
-                  }
-                }); 
-    this.propertyService.getDevicesByPropertyId(propId).subscribe((data)=> {
+    let propId: number;
+    this.user.propiedades.forEach(element => {
+      if (element.propDefault === 1) {
+        propId = element.propId
+      }
+    });
+    this.propertyService.getDevicesByPropertyId(propId).subscribe((data) => {
       this.devices = data;
-      // console.log(this.devices);
+      console.log("propid: " + propId);
+      this.propertyId = propId;
+      console.log("propertyId: " + this.propertyId);
+
     });
     // this.userService.getProperties(this.user.id).subscribe((data)=> {console.log(data)})
   }
@@ -89,12 +91,14 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   // changeData(dev.devicesId){
-    
+
   // }
 
-  changeDevices(idProp:any){
-    this.propertyService.getDevicesByPropertyId(idProp).subscribe((data)=> {
-      this.devices = data; });
+  changeDevices(idProp: any) {
+    this.propertyService.getDevicesByPropertyId(idProp).subscribe((data) => {
+      this.devices = data;
+      this.propertyId = idProp;
+    });
   }
 
   _scrollElement() {
@@ -102,9 +106,9 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
       if (document.getElementsByClassName("mm-active").length > 0) {
         const currentPosition = document.getElementsByClassName("mm-active")[0]['offsetTop'];
         if (currentPosition > 500)
-        if(this.scrollRef.SimpleBar !== null)
-          this.scrollRef.SimpleBar.getScrollElement().scrollTop =
-            currentPosition + 300;
+          if (this.scrollRef.SimpleBar !== null)
+            this.scrollRef.SimpleBar.getScrollElement().scrollTop =
+              currentPosition + 300;
       }
     }, 300);
   }
@@ -133,7 +137,7 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   //     paths.push(links[i]['pathname']);
   //   }
   //   var itemIndex = paths.indexOf(window.location.pathname);
-    
+
   //   if (itemIndex === -1) {
   //     const strIndex = window.location.pathname.lastIndexOf('/');
   //     const item = window.location.pathname.substr(0, strIndex).toString();

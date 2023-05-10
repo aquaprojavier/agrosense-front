@@ -6,7 +6,7 @@ import { LineChartComponent } from './charts/line-chart/line-chart.component';
 import { EditComponent } from './edit/edit.component';
 
 const routes: Routes = [
-  { path: 'edit', component: EditComponent },
+  { path: 'edit/:id', component: EditComponent },
   { path: 'chart/:id', component: ChartsComponent },//prueba
   // { path: 'linechart/:id', component: LineChartComponent },
   { path: 'form', loadChildren: () => import('./form/form.module').then(m => m.FormModule) },

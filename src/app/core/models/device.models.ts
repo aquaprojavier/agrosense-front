@@ -6,4 +6,5 @@ export interface Device {
     latitud?: number;
     longitud?: number;
     coordenadas?: number[];
+    conected?: boolean;
 }
