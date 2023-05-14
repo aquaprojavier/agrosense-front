@@ -73,7 +73,6 @@ export class EditComponent implements OnInit {
         }
       }),
       catchError(error => {
-        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         console.log(error);
         return of(false);
       })
