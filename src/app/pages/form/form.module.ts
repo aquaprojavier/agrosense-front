@@ -7,10 +7,11 @@ import { FormRoutingModule } from './form-routing.module';
 
 import { LayoutsComponent } from './layouts/layouts.component';
 import { MaterialModule } from '../../material/material.module';
+import { FormEditComponent } from './form-edit/form-edit.component';
 
 @NgModule({
   // tslint:disable-next-line: max-line-length
-  declarations: [LayoutsComponent],
+  declarations: [LayoutsComponent, FormEditComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

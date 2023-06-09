@@ -32,13 +32,14 @@ export class LoginService {
   public isLoggedIn(){
     let tokenStr = localStorage.getItem('token');
     if(tokenStr == undefined || tokenStr == '' || tokenStr == null){
+      console.log("no paso el isLoggedIn");
       return false;
     }else{
       return true;
     }
   }
 
-  //cerranis sesion y eliminamos el token del localStorage
+  //cerrar sesion y eliminamos el token del localStorage
   public logout(){
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -50,10 +51,11 @@ export class LoginService {
     return localStorage.getItem('token');
   }
 
+  //setteamos el user en el localstorage
   public setUser(user:any){
     localStorage.setItem('user', JSON.stringify(user));
   }
-
+ 
   public getUser(){
     let userStr = localStorage.getItem('user');
     if(userStr != null){
@@ -66,6 +68,7 @@ export class LoginService {
 
   public getUserRole(){
     let user = this.getUser();
+    console.log('authority= ' + user.authorities[0].authority);
     return user.authorities[0].authority;
   }
 

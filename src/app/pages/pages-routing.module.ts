@@ -1,16 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
 import { ChartsComponent } from './charts/charts.component';
-import { LineChartComponent } from './charts/line-chart/line-chart.component';
 import { EditComponent } from './edit/edit.component';
 
 const routes: Routes = [
   { path: 'edit/:id', component: EditComponent },
   { path: 'chart/:id', component: ChartsComponent },//prueba
-  // { path: 'linechart/:id', component: LineChartComponent },
   { path: 'form', loadChildren: () => import('./form/form.module').then(m => m.FormModule) },
-  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }
+  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule) }//luego sacar el lazyload para optimizar la carga, ya que carga primero, no hace falta lazyload.
 ];
 
 @NgModule({
