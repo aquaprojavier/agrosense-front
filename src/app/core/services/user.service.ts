@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import baserUrl from '../helpers/helper';
+import baseUrl from '../helpers/helper';
 import { User } from '../models/auth.models';
 
 @Injectable({ providedIn: 'root' })
@@ -15,11 +15,11 @@ export class UserProfileService {
     }
 
     register(user: User) {
-        return this.http.post(`${baserUrl}/usuarios`, user);
+        return this.http.post(`${baseUrl}/usuarios`, user);
     }
 
     getProperties (userId: any){
-        return this.http.get(`${baserUrl}/property/list/${userId}`)
+        return this.http.get(`${baseUrl}/property/list/${userId}`)
     }
     
 }

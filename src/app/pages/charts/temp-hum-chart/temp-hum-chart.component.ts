@@ -150,14 +150,14 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       }));
 
       let valueSeries2 = mainPanel.series.push(am5xy.LineSeries.new(root, {
-        name: "Humedad Relativa",
+        name: "DPV",
         valueXField: "dataFecha",
-        valueYField: "dataHr",
+        valueYField: "dpv",
         stroke: am5.color("#3eedd3"),
         xAxis: dateAxis,
         yAxis: valueAxis2,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY} %"
+          labelText: "{name}: {valueY} KPa"
         })
       }));
 

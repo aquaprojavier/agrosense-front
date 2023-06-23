@@ -1,6 +1,8 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 @import url("https://unpkg.com/leaflet@1.8.0/dist/leaflet.css");
+@import '~leaflet-draw/dist/leaflet.draw.css';
+
 
 /* You can add global styles to this file, and also import other style files */
 .modal-holder {
