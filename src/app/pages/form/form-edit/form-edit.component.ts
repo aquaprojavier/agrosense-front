@@ -11,7 +11,6 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Device } from '../../../core/models/device.models';
 
-
 @Component({
   selector: 'app-form-edit',
   templateUrl: './form-edit.component.html',
