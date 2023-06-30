@@ -14,12 +14,13 @@ export class DataService {
     return this.http.get<Data[]>(`${baseUrl}/data/verJson/${deviceId}`);
   }
 
-  public lastDataHumByDeviceId(deviceId: number){  
-    return this.http.get<any>(`${baseUrl}/device/lastDataHum/${deviceId}`);
-  }
+  // public lastDataHumByDeviceId(deviceId: number){  
+  //   return this.http.get<any>(`${baseUrl}/device/lastDataHum/${deviceId}`);
+  // }
 
+  //este metodo da error
   public lastDataByDeviceId(deviceId: number){  
-    return this.http.get<any>(`${baseUrl}/device/lastData/${deviceId}`);
+    return this.http.get<Data>(`${baseUrl}/device/lastData/${deviceId}`);
   }
 
 }

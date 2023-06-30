@@ -1,12 +1,15 @@
 export class Data {
     dataId: number;
     dataFecha: Date;
+    dataHum?: number;
     dataHum1?: number;
+    dataHum2?: number;
     dataTemp?: number;
     dataHr?: number;
     volt?: number;
     estado?: boolean;
+    dpv?: number
     serie?: string;
     cc?: number;
-    ur?: number;
+    pmp?: number;
 }

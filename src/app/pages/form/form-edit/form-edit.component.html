@@ -9,7 +9,7 @@
     <div class="col-4">
       <div class="card" style="background-color: rgb(42, 48, 66)">
         <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="save()">
+          <form [formGroup]="form" (ngSubmit)="upDateDevAndPol()">
             <mat-form-field appearance="fill">
               <mat-label>Cuadro</mat-label>
               <input matInput type="text" formControlName="devicesNombre" />
@@ -95,11 +95,14 @@
                 </mat-error>
               </div>
             </mat-form-field>
-
-            <mat-form-field appearance="fill">
+            <!-- <mat-form-field appearance="fill">
               <mat-label>GeoJson</mat-label>
               <textarea matInput formControlName="geojson" rows="5" #opeGeojsonTextarea></textarea>
-            </mat-form-field>
+            </mat-form-field> -->
+
+            <!-- ---------------------se oculta el GeoJson------------------------- -->
+            <!-- <input type="hidden" formControlName="geojson" #opeGeojsonTextarea /> -->
+
             
             <!-- <mat-form-field appearance="fill">
               <mat-label>Categoria</mat-label>

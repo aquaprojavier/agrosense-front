@@ -8,10 +8,11 @@ import { FormRoutingModule } from './form-routing.module';
 import { LayoutsComponent } from './layouts/layouts.component';
 import { MaterialModule } from '../../material/material.module';
 import { FormEditComponent } from './form-edit/form-edit.component';
+import { CreateDeviceComponent } from './create-device/create-device.component';
 
 @NgModule({
   // tslint:disable-next-line: max-line-length
-  declarations: [LayoutsComponent, FormEditComponent],
+  declarations: [LayoutsComponent, FormEditComponent, CreateDeviceComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

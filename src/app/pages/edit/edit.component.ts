@@ -1,11 +1,8 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { map, catchError } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
-
-// import { DeviceService } from 'src/app/core/services/device.service';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { DataService } from 'src/app/core/services/data.service';
-
 import { ActivatedRoute, Params } from '@angular/router';
 import { Device } from 'src/app/core/models/device.models';
 
@@ -17,12 +14,12 @@ import { Device } from 'src/app/core/models/device.models';
 })
 export class EditComponent implements OnInit {
 
-  timeWithoutConexion: number = 4 * 60 * 60 * 1000;
+  timeWithoutConexion: number = 2 * 60 * 60 * 1000;
   actualDate: Date = new Date();
   argentinaTimezoneOffset = -3; // GMT-3
   actualDateInArgentina: Date = new Date(this.actualDate.getTime() + this.argentinaTimezoneOffset * 60 * 60 * 1000);
 
-  propId: number = 1;
+  propId: number;
   devices: Device[];
 
   constructor(

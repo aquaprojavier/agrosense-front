@@ -64,6 +64,12 @@ function liquidFillGaugeDefaultSettings() {
       config.circleColor = "#137811";
     }
 
+    var ad = wc - ur;
+    value = ((value-ur) * 100) / ad;
+    if (value < 0){
+      value = 0
+    }
+
     var gauge = d3.select("#" + elementId);
     var radius =
       Math.min(

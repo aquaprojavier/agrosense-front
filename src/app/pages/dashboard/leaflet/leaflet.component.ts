@@ -8,6 +8,7 @@ import { CargarService } from 'src/app/core/services/cargar.service'
 import { User } from 'src/app/core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Data } from 'src/app/core/models/data.models';
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
@@ -30,9 +31,9 @@ export class LeafletComponent implements OnInit {
   devices: any[] = [];
   propId: any;
   myMap = null;
-  ur: number = 11;
-  wc: number = 17;
-  lastData: number[] = [];
+  ur: number;
+  wc: number;
+  lastData: Data[] = [];
   sanitizedUrl: SafeResourceUrl | null = null;
 
   redIcon = new Icon({
@@ -141,19 +142,24 @@ export class LeafletComponent implements OnInit {
     operations.forEach(ope => {
 
       ope.devices.forEach(dev => {
-        console.log(dev)
+        // console.log(dev)
         this.devices.push(dev);
 
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
+          console.log("------------------------lastDataByDeviceId----------------------")
+          console.log(data);
 
-          if (data.dataHum1 <= this.ur) {
+          if (data.dataHum <= data.pmp) {
+            
             marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
             <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
             <div style="display: flex; align-items: center;">
               <img src="assets/images/root32px.png" alt=""> 
             <div>
               Humedad a 30cm: <b style="color: red;">${data.dataHum1}%</b><br><br><br>
+              
               Humedad a 60cm: <b style="color: red;">${data.dataHum2}%</b><br>
+              
             </div>            
             </div>
             <br>
@@ -161,14 +167,15 @@ export class LeafletComponent implements OnInit {
             <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
             </div>`);
 
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
+            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
             this.lastData.push(data);
             let operacionStyle = { color: "#CB2B3E" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
-          } else if (data.dataHum1 >= this.wc) {
+          } else if (data.dataHum >= data.cc) {
+
             marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
             <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div>
 
@@ -184,14 +191,15 @@ export class LeafletComponent implements OnInit {
             <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
             </div>`);
 
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
+            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
             this.lastData.push(data);
             let operacionStyle = { color: "#0481bf" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
-          } else {
+          } else if(data.dataHum > data.pmp && data.dataHum < data.cc ) {
+
             marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
             <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
 
@@ -207,17 +215,15 @@ export class LeafletComponent implements OnInit {
             <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
             </div>`);
 
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, this.wc, this.ur);
+            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
             this.lastData.push(data);
             let operacionStyle = { color: "#2AAD27" };
             let poligonDevice = JSON.parse(ope.operationGeojson);
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
-          }
-        },
-          (error) => {
-            console.log(error);
+          } else if (data.dataHum == 0.0) {
+            
             marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
             let idnull = dev.devicesId;
             let operacionStyle = { color: "#7B7B7B" };
@@ -230,6 +236,10 @@ export class LeafletComponent implements OnInit {
                 this.devices.splice(i, 1);
               }
             }
+          }
+        },
+          (error) => {
+            console.log(error);
           });
       });
     });

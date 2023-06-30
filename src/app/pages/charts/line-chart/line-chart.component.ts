@@ -1,40 +1,67 @@
 import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
 import { Data } from 'src/app/core/models/data.models';
-
+import { Soil } from 'src/app/core/models/soil.model';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5stock from "@amcharts/amcharts5/stock";
-
+import { DataService } from 'src/app/core/services/data.service';
+import { DeviceService } from 'src/app/core/services/device.service';
 
 @Component({
   selector: 'app-line-chart',
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss']
 })
-export class LineChartComponent implements OnInit, OnChanges {
+export class LineChartComponent implements OnInit {
 
   private root!: am5.Root;
   toolbar: any;
-  @Input() datoschart: Data[];
+  cc: number;
+  pmp: number;
+  ur: number;
+  datos: Data[] = [];
+  deviceId: number = 1;
+  soil: Soil;
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
     private zone: NgZone,
+    private activatedRoute: ActivatedRoute,
+    private dataService: DataService,
+    private deviceService: DeviceService
   ) { }
 
-
   ngOnInit(): void {
+    this.activatedRoute.snapshot.params['id'];
+    this.activatedRoute.params.subscribe((params: Params) => {
+      this.deviceId = params['id'];
+      this.getData(this.deviceId);
+      this.getSoil(this.deviceId);
+    },
+      (error) => {
+        console.log(error);
+      }
+    );
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    // Check if the datoschart input has changed
-    if (changes.datoschart && !changes.datoschart.firstChange) {
-      // If it has changed and it's not the first change, create the graph
-      this.createGraph(this.datoschart, "linechartdiv", "chartcontrols");
-    }
+  getData(id: number) {
+    this.dataService.fullDataByDeviceId(id).subscribe(data => {
+      this.datos = data
+      this.createGraph(this.datos, "linechartdiv", "chartcontrols");
+    });
+  }
+
+  getSoil(id: number) {
+    this.deviceService.GetSoilByDevicesId(id).subscribe(data => {
+      this.soil = data
+      this.cc = this.soil.cc;
+      this.pmp = this.soil.pmp;
+      this.ur = (this.cc + this.pmp) *0.5;
+    });
   }
 
   // Run the function only in the browser
@@ -130,12 +157,19 @@ export class LineChartComponent implements OnInit, OnChanges {
         });
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum2"],
+          numericFields: ["dataHum2", "cc", "ur"],
+          dateFields: ["dataFecha"],
+          dateFormat: "yyyy-MM-dd HH:mm"
+        });
+        // Set the data processor and data for valueSeries2
+        valueSeries3.data.processor = am5.DataProcessor.new(root, {
+          numericFields: ["dataHum", "cc", "ur"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
+        valueSeries3.data.setAll(result);
       };
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
@@ -163,121 +197,131 @@ export class LineChartComponent implements OnInit, OnChanges {
         })
       }));
 
-
-      let legend = mainPanel.children.push(am5.Legend.new(root, {}));
-      legend.data.setAll(mainPanel.series.values);
+      let valueSeries3 = mainPanel.series.push(am5xy.LineSeries.new(root, {
+        name: "Humedad media",
+        valueXField: "dataFecha",
+        valueYField: "dataHum",
+        stroke: am5.color("#02691c"),
+        xAxis: dateAxis,
+        yAxis: valueAxis,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{name}: {valueY}%"
+        })
+      }));
 
       // ========================= RANGOS ====================================
       // add saturation range
-      // let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: 16 });
-      // valueSeries.createAxisRange(saturationRangeDataItem);
+      let saturationRangeDataItem = valueAxis.makeDataItem({ value: 50, endValue: this.cc });
+      valueSeries.createAxisRange(saturationRangeDataItem);
 
-      // saturationRangeDataItem.get("axisFill").setAll({
-      //   fill: am5.color("#86dbf0"),
-      //   fillOpacity: 1,
-      //   visible: true
-      // });
+      saturationRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#86dbf0"),
+        fillOpacity: 1,
+        visible: true
+      });
 
-      // saturationRangeDataItem.get("label").setAll({
-      //   location: 0,
-      //   visible: true,
-      //   text: "WC",
-      //   inside: true,
-      //   centerX: 0,
-      //   centerY: am5.p100,
-      //   fontWeight: "bold",
-      //   fill: am5.color(0xffffff),
-      //   background: am5.RoundedRectangle.new(root, {
-      //     fill: am5.color("#668f64")
-      //   }),
-      // })
+      saturationRangeDataItem.get("label").setAll({
+        location: 0,
+        visible: true,
+        text: "WC",
+        inside: true,
+        centerX: 0,
+        centerY: am5.p100,
+        fontWeight: "bold",
+        fill: am5.color(0xffffff),
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#668f64")
+        }),
+      })
 
-      // // add optimo range
-      // let optimoRangeDataItem = valueAxis.makeDataItem({ value: 16, endValue: 14.5 });
-      // let optimoRange = valueSeries.createAxisRange(optimoRangeDataItem);
+      // add optimo range
+      let optimoRangeDataItem = valueAxis.makeDataItem({ value: this.cc, endValue: this.ur });
+      let optimoRange = valueSeries.createAxisRange(optimoRangeDataItem);
 
-      // optimoRangeDataItem.get("axisFill").setAll({
-      //   fill: am5.color("#98f086"),
-      //   fillOpacity: 1,
-      //   visible: true
-      // });
+      optimoRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#98f086"),
+        fillOpacity: 1,
+        visible: true
+      });
 
-      // optimoRangeDataItem.get("label").setAll({
-      //   location: 0,
-      //   visible: true,
-      //   text: "WC",
-      //   inside: true,
-      //   centerX: 0,
-      //   centerY: am5.p100,
-      //   fontWeight: "bold",
-      //   fill: am5.color(0xffffff),
-      //   background: am5.RoundedRectangle.new(root, {
-      //     fill: am5.color("#3ead4f")
-      //   }),
-      // })
+      optimoRangeDataItem.get("label").setAll({
+        location: 0,
+        visible: true,
+        text: "WC",
+        inside: true,
+        centerX: 0,
+        centerY: am5.p100,
+        fontWeight: "bold",
+        fill: am5.color(0xffffff),
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#3ead4f")
+        }),
+      })
 
-      // // add caution range
-      // let cautionRangeDataItem = valueAxis.makeDataItem({ value: 14.5, endValue: 14 });
-      // let cautionRange = valueSeries.createAxisRange(cautionRangeDataItem);
+      // add caution range
+      let cautionRangeDataItem = valueAxis.makeDataItem({ value: this.ur, endValue: this.pmp });
+      let cautionRange = valueSeries.createAxisRange(cautionRangeDataItem);
 
-      // cautionRangeDataItem.get("axisFill").setAll({
-      //   fill: am5.color("#faf8a2"),
-      //   fillOpacity: 1,
-      //   visible: true
-      // });
+      cautionRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#faf8a2"),
+        fillOpacity: 1,
+        visible: true
+      });
 
-      // cautionRangeDataItem.get("label").setAll({
-      //   inside: true,
-      //   fill: am5.color("#11120b"),
-      //   text: "UR",
-      //   background: am5.RoundedRectangle.new(root, {
-      //     fill: am5.color("#cfdb27")
-      //   }),
-      //   location: 0,
-      //   visible: true,
-      //   centerX: 0,
-      //   centerY: am5.p100,
-      //   fontWeight: "bold"
-      // })
+      cautionRangeDataItem.get("label").setAll({
+        inside: true,
+        fill: am5.color("#11120b"),
+        text: "UR",
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#cfdb27")
+        }),
+        location: 0,
+        visible: true,
+        centerX: 0,
+        centerY: am5.p100,
+        fontWeight: "bold"
+      })
 
-      // // add pmp series range
-      // let pmpRangeDataItem = valueAxis.makeDataItem({ value: 14, endValue: 0 });
-      // let urRange = valueSeries.createAxisRange(pmpRangeDataItem);
+      // add pmp series range
+      let pmpRangeDataItem = valueAxis.makeDataItem({ value: this.pmp, endValue: 0 });
+      let urRange = valueSeries.createAxisRange(pmpRangeDataItem);
 
-      // urRange.strokes.template.set("stroke", am5.color("#f50a45"));
+      urRange.strokes.template.set("stroke", am5.color("#f50a45"));
 
-      // pmpRangeDataItem.get("grid").setAll({
-      //   strokeOpacity: 1,
-      //   visible: true,
-      //   stroke: am5.color("#fa1e38"),
-      //   strokeDasharray: [5, 5]
-      // })
+      pmpRangeDataItem.get("grid").setAll({
+        strokeOpacity: 1,
+        visible: true,
+        stroke: am5.color("#fa1e38"),
+        strokeDasharray: [5, 5]
+      })
 
-      // pmpRangeDataItem.get("axisFill").setAll({
-      //   fill: am5.color("#f59ab8"),
-      //   fillOpacity: 1,
-      //   visible: true
-      // });
+      pmpRangeDataItem.get("axisFill").setAll({
+        fill: am5.color("#f59ab8"),
+        fillOpacity: 1,
+        visible: true
+      });
 
-      // pmpRangeDataItem.get("label").setAll({
-      //   inside: true,
-      //   fill: am5.color(0xffffff),
-      //   text: "PMP",
-      //   background: am5.RoundedRectangle.new(root, {
-      //     fill: am5.color("#f50a45")
-      //   }),
-      //   location: 0,
-      //   visible: true,
-      //   centerX: 0,
-      //   centerY: am5.p100,
-      //   fontWeight: "bold"
-      // })
+      pmpRangeDataItem.get("label").setAll({
+        inside: true,
+        fill: am5.color(0xffffff),
+        text: "PMP",
+        background: am5.RoundedRectangle.new(root, {
+          fill: am5.color("#f50a45")
+        }),
+        location: 0,
+        visible: true,
+        centerX: 0,
+        centerY: am5.p100,
+        fontWeight: "bold"
+      })
 
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-      // mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {
-      //   orientation: "horizontal"
-      // }));
+      mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {
+        orientation: "horizontal"
+      }));
+
+      // =========================FIN RANGOS ====================================
 
       // Eliminar el toolbar anterior si existe
       if (this.toolbar) {
@@ -298,12 +342,16 @@ export class LineChartComponent implements OnInit, OnChanges {
           })
         ]
       });
-
+      
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/
+      valueSeries3.appear(1500);
       valueSeries2.appear(1000);
       valueSeries.appear(1000);
       mainPanel.appear(1000, 100);
+
+      let legend = mainPanel.children.push(am5.Legend.new(root, {}));
+      legend.data.setAll(mainPanel.series.values);
 
       dataLoaded(apiData);
     });

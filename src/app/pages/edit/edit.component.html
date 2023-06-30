@@ -1,19 +1,31 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-10 col-md-12 col-sm-12">
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title">Lista de dispositivos</h4>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Dispositivos</h4>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm btn-rounded"
+              routerLink="/form/create-device/{{ propId }}"
+            >
+              Crear
+            </button>
+          </div>
 
           <div class="table-responsive mb-0">
-            <table *ngIf="devices && devices.length > 0" class="table table-centered table-nowrap">
+            <table
+              *ngIf="devices && devices.length > 0"
+              class="table table-centered table-nowrap"
+            >
               <thead class="table-light">
                 <tr>
                   <th class="align-middle">Dispositivo</th>
                   <th class="align-middle">Cultivo</th>
-                  <th class="align-middle">N° Serie</th>
-                  <th class="align-middle">Latitud</th>
-                  <th class="align-middle">Longitud</th>
+                  <!-- <th class="align-middle">N° Serie</th> -->
+                  <!-- <th class="align-middle">Latitud</th> -->
+                  <!-- <th class="align-middle">Longitud</th> -->
                   <th class="align-middle">Status</th>
                   <th class="align-middle">Acción</th>
                 </tr>
@@ -22,16 +34,18 @@
                 <tr *ngFor="let dev of devices">
                   <td>{{ dev.devicesNombre }}</td>
                   <td>{{ dev.devicesCultivo }}</td>
-                  <td>{{ dev.devicesSerie }}</td>
-                  <td>{{ dev.latitud | number: '2.2-2' }}</td>
-                  <td>{{ dev.longitud | number: '2.2-2'}}</td>
+                  <!-- <td>{{ dev.devicesSerie }}</td> -->
+                  <!-- <td>{{ dev.latitud | number: '2.2-2' }}</td> -->
+                  <!-- <td>{{ dev.longitud | number: '2.2-2'}}</td> -->
                   <td>
-                    <span class="badge badge-pill font-size-11"
+                    <span
+                      class="badge badge-pill font-size-11"
                       [ngClass]="{
                         'badge-soft-success': dev.conected,
                         'badge-soft-warning': !dev.conected
-                      }">
-                      {{ dev.conected ? 'Conectado' : 'Desconectado' }}
+                      }"
+                    >
+                      {{ dev.conected ? "Conectado" : "Desconectado" }}
                     </span>
                   </td>
                   <td>
@@ -39,7 +53,10 @@
                     <button
                       type="button"
                       class="btn btn-primary btn-sm btn-rounded"
-                      routerLink="/form/form-edit/{{propId}}/{{dev.devicesId}}" >
+                      routerLink="/form/form-edit/{{ propId }}/{{
+                        dev.devicesId
+                      }}"
+                    >
                       Editar
                     </button>
                   </td>

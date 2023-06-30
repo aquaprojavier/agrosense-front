@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control } from 'leaflet';
+import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Popup } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -13,13 +13,11 @@ import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-form-edit',
-  templateUrl: './form-edit.component.html',
-  styleUrls: ['./form-edit.component.scss']
+  selector: 'app-create-device',
+  templateUrl: './create-device.component.html',
+  styleUrls: ['./create-device.component.scss']
 })
-export class FormEditComponent implements OnInit {
-
-  // @ViewChild('opeGeojsonTextarea', { static: false }) opeGeojsonTextarea!: ElementRef;
+export class CreateDeviceComponent implements OnInit {
 
   breadCrumbItems: Array<{}>;
   user: User;
@@ -44,23 +42,19 @@ export class FormEditComponent implements OnInit {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   });
-
-  constructor(
-    private formBuilder: FormBuilder,
+  
+  constructor(private formBuilder: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private operationService: OperationService,
     private deviceService: DeviceService,
-    private router: Router,
-  ) { }
+    private router: Router,) { }
 
   ngOnInit(): void {
-    this.breadCrumbItems = [{ label: 'Forms' }, { label: 'Edit', active: true }];
+    this.breadCrumbItems = [{ label: 'Forms' }, { label: 'Create', active: true }];
     this.activatedRoute.snapshot.params['idProp'];
-    this.activatedRoute.snapshot.params['idDev'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
-      this.devId = params['idDev'];
       this.getData(this.propId);
       this.buildForm();
     },
@@ -76,7 +70,7 @@ export class FormEditComponent implements OnInit {
       // console.log(this.property)
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
-        // console.log(this.operations)
+        console.log(this.operations)
         this.createMap(this.property, this.operations)
       },
         (error) => {
@@ -85,15 +79,15 @@ export class FormEditComponent implements OnInit {
     });
   };
   // =========================================FORM============================================================
-  private initForm() {
-    this.form.patchValue({
-      devicesNombre: this.device.devicesNombre,
-      devicesCultivo: this.device.devicesCultivo,
-      devicesSerie: this.device.devicesSerie,
-      latitud: this.device.latitud,
-      longitud: this.device.longitud,
-    });
-  }
+  // private initForm() {
+  //   this.form.patchValue({
+  //     devicesNombre: this.device.devicesNombre,
+  //     devicesCultivo: this.device.devicesCultivo,
+  //     devicesSerie: this.device.devicesSerie,
+  //     latitud: this.device.latitud,
+  //     longitud: this.device.longitud,
+  //   });
+  // }
 
   private buildForm() {
     this.form = this.formBuilder.group({
@@ -102,13 +96,13 @@ export class FormEditComponent implements OnInit {
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
+      opeId: [''],
     });
   }
 
-  upDateDevAndPol() {
+  createDevAndPol() {
     if (this.form.valid) {
       const deviceEdit: DeviceEdit = {
-        devicesId: +this.devId,
         devicesNombre: this.form.value.devicesNombre,
         devicesCultivo: this.form.value.devicesCultivo,
         devicesSerie: this.form.value.devicesSerie,
@@ -117,15 +111,14 @@ export class FormEditComponent implements OnInit {
         operationId: this.opeId,
         operationGeojson: this.opeGeojson
       };
-
-      // console.log(deviceEdit);
-      this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
+      console.log(deviceEdit);
+      this.deviceService.CreateDeviceAndPol( this.opeId, deviceEdit ).subscribe(
         // this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
         (response: DeviceEdit) => {
 
-          console.log('Se ha guardado el formulario exitosamente:', response);
+          console.log('Se ha creado el dispositivo exitosamente:', response);
 
-          Swal.fire('Edición exitosa!', `El dispositivo ${deviceEdit.devicesNombre} se actualizó correctamente`, 'success')
+          Swal.fire('Creación exitosa!', `El dispositivo ${deviceEdit.devicesNombre} fue creado correctamente`, 'success')
             .then(() => {
               this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
             });
@@ -148,6 +141,15 @@ export class FormEditComponent implements OnInit {
     tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
+
+    // let popup = new Popup().setLatLng().setContent('<p>Hello world!<br />This is a nice popup.</p>').openOn(this.myMap);
+
+    this.myMap.on('click', (event) => {
+      const latLng = event.latlng;
+      marker(latLng).addTo(this.myMap)
+        .bindPopup(`<b>Latitud:</b> ${latLng.lat}<br><b>Longitud:</b> ${latLng.lng}`)
+        .openPopup();
+    });
 
     //Dibuja el poligono de la propiedad y centra el foco en esta.
     let propertyObj = JSON.parse(property.geojson);
@@ -201,29 +203,29 @@ export class FormEditComponent implements OnInit {
 
       ope.devices.forEach(dev => {
 
-        if (dev.devicesId == this.devId) {
-          this.device = dev;
-          this.opeGeojson = ope.operationGeojson;
-          this.opeId = ope.operationId;
-          // Agregar capas al featureGroup desde un objeto GeoJSON
-          geoJSON(JSON.parse(this.opeGeojson), {
-            onEachFeature: (feature, layer) => {
-              this.drawItems.addLayer(layer);
-            }
-          }).addTo(this.myMap);
+        // if (dev.devicesId == this.devId) {
+        //   this.device = dev;
+        //   this.opeGeojson = ope.operationGeojson;
+        //   this.opeId = ope.operationId;
+        //   // Agregar capas al featureGroup desde un objeto GeoJSON
+        //   geoJSON(JSON.parse(this.opeGeojson), {
+        //     onEachFeature: (feature, layer) => {
+        //       this.drawItems.addLayer(layer);
+        //     }
+        //   }).addTo(this.myMap);
 
-          this.initForm();
+        //   // this.initForm();
 
-          marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap);
+        //   marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap);
 
-        } else {
+        // } else {
 
           let operationObj = JSON.parse(ope.operationGeojson);
           let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
           let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
           operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
-        }
+        // }
       });
     });
   };
@@ -231,39 +233,30 @@ export class FormEditComponent implements OnInit {
   get nameField() {
     return this.form.get('devicesNombre');
   }
-
   get isNameFieldValid() {
     return this.nameField.touched && this.nameField.valid;
   }
-
   get isNameFieldInvalid() {
     return this.nameField.touched && this.nameField.invalid;
   }
-
   get isVarietyFieldValid() {
     return this.varietyField.touched && this.varietyField.valid;
   }
-
   get isVarietyFieldInvalid() {
     return this.varietyField.touched && this.varietyField.invalid;
   }
-
   get varietyField() {
     return this.form.get('devicesCultivo')
   }
-
   get serieField() {
     return this.form.get('devicesSerie');
   }
-
   get isSerieFieldValid() {
     return this.serieField.touched && this.serieField.valid;
   }
-
   get isSerieFieldInvalid() {
     return this.serieField.touched && this.serieField.invalid;
   }
-
   get latitudField() {
     return this.form.get('latitud')
   }
@@ -282,5 +275,7 @@ export class FormEditComponent implements OnInit {
   get isLongitudFieldInvalid() {
     return this.longitudField.touched && this.longitudField.invalid;
   }
+  get operationField(){
+    return this.form.get('operation')
+  }
 }
-
