@@ -5,6 +5,7 @@ import { PropertyService } from 'src/app/core/services/property.service';
 import { DataService } from 'src/app/core/services/data.service';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Device } from 'src/app/core/models/device.models';
+import { Operation } from '../../core/models/operation.models';
 
 @Component({
   selector: 'app-edit',
@@ -18,7 +19,8 @@ export class EditComponent implements OnInit {
   actualDate: Date = new Date();
   argentinaTimezoneOffset = -3; // GMT-3
   actualDateInArgentina: Date = new Date(this.actualDate.getTime() + this.argentinaTimezoneOffset * 60 * 60 * 1000);
-
+  operations: Operation[];
+  // operation: Operation;
   propId: number;
   devices: Device[];
 
@@ -42,12 +44,16 @@ export class EditComponent implements OnInit {
   }
 
   getData(id: number){
-    this.propertyService.getDevicesByPropertyId(this.propId).subscribe(data =>{
-      this.devices = data;
-      this.devices.forEach(dev => {
-        this.isConected(dev.devicesId).subscribe(conected => {
-          dev.conected = conected;
-        });
+    this.propertyService.getOperationAndDevicesByPropertyId(this.propId).subscribe(data =>{
+      this.operations = data;
+      this.devices = [];
+      this.operations.forEach(ope => {
+        ope.devices.forEach(dev => {
+          this.devices.push(dev);
+          this.isConected(dev.devicesId).subscribe(conected => {
+            dev.conected = conected;
+          });
+        })        
       });
     })
   }
@@ -75,5 +81,11 @@ export class EditComponent implements OnInit {
       })
     );
   }
+
+  getDevicesNames(devices: Device[]): string {
+    const deviceNames = devices.map(dev => dev.devicesNombre);
+    return deviceNames.length > 0 ? deviceNames.join(', ') : 'No tiene';
+  }
+  
 
 }

@@ -7,12 +7,14 @@ import { FormRoutingModule } from './form-routing.module';
 
 import { LayoutsComponent } from './layouts/layouts.component';
 import { MaterialModule } from '../../material/material.module';
-import { FormEditComponent } from './form-edit/form-edit.component';
+import { EditDeviceComponent } from './edit-device/edit-device.component';
 import { CreateDeviceComponent } from './create-device/create-device.component';
+import { CreateOperationComponent } from './create-operation/create-operation.component';
+import { EditOperationComponent } from './edit-operation/edit-operation.component';
 
 @NgModule({
   // tslint:disable-next-line: max-line-length
-  declarations: [LayoutsComponent, FormEditComponent, CreateDeviceComponent],
+  declarations: [LayoutsComponent, EditDeviceComponent, CreateDeviceComponent, CreateOperationComponent, EditOperationComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

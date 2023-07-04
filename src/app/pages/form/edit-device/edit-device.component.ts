@@ -13,11 +13,11 @@ import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-form-edit',
-  templateUrl: './form-edit.component.html',
-  styleUrls: ['./form-edit.component.scss']
+  selector: 'app-edit-device',
+  templateUrl: './edit-device.component.html',
+  styleUrls: ['./edit-device.component.scss']
 })
-export class FormEditComponent implements OnInit {
+export class EditDeviceComponent implements OnInit {
 
   // @ViewChild('opeGeojsonTextarea', { static: false }) opeGeojsonTextarea!: ElementRef;
 

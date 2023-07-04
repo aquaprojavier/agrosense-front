@@ -21,7 +21,7 @@
             >
               <thead class="table-light">
                 <tr>
-                  <th class="align-middle">Dispositivo</th>
+                  <th class="align-middle">Nombre</th>
                   <th class="align-middle">Cultivo</th>
                   <!-- <th class="align-middle">N° Serie</th> -->
                   <!-- <th class="align-middle">Latitud</th> -->
@@ -53,9 +53,66 @@
                     <button
                       type="button"
                       class="btn btn-primary btn-sm btn-rounded"
-                      routerLink="/form/form-edit/{{ propId }}/{{
+                      routerLink="/form/edit-device/{{ propId }}/{{
                         dev.devicesId
                       }}"
+                    >
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- end table -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-10 col-md-12 col-sm-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Operaciones</h4>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm btn-rounded"
+              routerLink="/form/create-operation/{{ propId }}"
+            >
+              Crear
+            </button>
+          </div>
+
+          <div class="table-responsive mb-0">
+            <table
+              *ngIf="devices && devices.length > 0"
+              class="table table-centered table-nowrap"
+            >
+              <thead class="table-light">
+                <tr>
+                  <th class="align-middle">Nombre</th>
+                  <th class="align-middle">Area</th>
+                  <th class="align-middle">Dispositivos</th>
+                  <th class="align-middle">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ope of operations">
+                  <td>{{ ope.operationName }}</td>
+                  <td>{{ ope.operationArea }}</td>
+                  <td>
+                    {{ getDevicesNames(ope.devices) }}
+                  </td>
+                  <td>
+                    <!-- Button trigger modal -->
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm btn-rounded"
+                      [routerLink]="
+                        '/form/edit-operation/' + propId + '/' + ope.operationId
+                      "
                     >
                       Editar
                     </button>

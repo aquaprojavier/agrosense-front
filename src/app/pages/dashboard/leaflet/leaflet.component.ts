@@ -141,6 +141,13 @@ export class LeafletComponent implements OnInit {
 
     operations.forEach(ope => {
 
+      if (ope.devices && ope.devices.length === 0) {
+        let operacionStyle = { color: "#7B7B7B" };
+        let poligonDevice = JSON.parse(ope.operationGeojson);
+        let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+      }
+
       ope.devices.forEach(dev => {
         // console.log(dev)
         this.devices.push(dev);
@@ -150,7 +157,7 @@ export class LeafletComponent implements OnInit {
           console.log(data);
 
           if (data.dataHum <= data.pmp) {
-            
+
             marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
             <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
             <div style="display: flex; align-items: center;">
@@ -198,7 +205,7 @@ export class LeafletComponent implements OnInit {
             let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
-          } else if(data.dataHum > data.pmp && data.dataHum < data.cc ) {
+          } else if (data.dataHum > data.pmp && data.dataHum < data.cc) {
 
             marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
             <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
@@ -223,7 +230,7 @@ export class LeafletComponent implements OnInit {
             poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
 
           } else if (data.dataHum == 0.0) {
-            
+
             marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
             let idnull = dev.devicesId;
             let operacionStyle = { color: "#7B7B7B" };
@@ -240,6 +247,18 @@ export class LeafletComponent implements OnInit {
         },
           (error) => {
             console.log(error);
+            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
+            let idnull = dev.devicesId;
+            let operacionStyle = { color: "#7B7B7B" };
+            let poligonDevice = JSON.parse(ope.operationGeojson);
+            if (ope.devices.length >= 1) { 
+              geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+            }
+            for (let i = 0; i < this.devices.length; i++) {
+              if (this.devices[i].devicesId === idnull) {
+                this.devices.splice(i, 1);
+              }
+            }
           });
       });
     });

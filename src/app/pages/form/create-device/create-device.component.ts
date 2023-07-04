@@ -96,25 +96,30 @@ export class CreateDeviceComponent implements OnInit {
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
-      opeId: [''],
+      opeId: ['', Validators.required],
     });
   }
 
   createDevAndPol() {
     if (this.form.valid) {
+      this.operations.forEach(ope => {
+        if (this.form.value.opeId == ope.operationId){
+          this.opeGeojson = ope.operationGeojson
+        }
+      })
       const deviceEdit: DeviceEdit = {
         devicesNombre: this.form.value.devicesNombre,
         devicesCultivo: this.form.value.devicesCultivo,
         devicesSerie: this.form.value.devicesSerie,
         latitud: this.form.value.latitud,
         longitud: this.form.value.longitud,
-        operationId: this.opeId,
+        operationId: this.form.value.opeId,
         operationGeojson: this.opeGeojson
       };
       console.log(deviceEdit);
-      this.deviceService.CreateDeviceAndPol( this.opeId, deviceEdit ).subscribe(
+      this.deviceService.CreateDeviceAndPol( deviceEdit.operationId, deviceEdit ).subscribe(
         // this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
-        (response: DeviceEdit) => {
+        (response: Device) => {
 
           console.log('Se ha creado el dispositivo exitosamente:', response);
 
@@ -200,7 +205,12 @@ export class CreateDeviceComponent implements OnInit {
     });
 
     operations.forEach(ope => {
-
+      if (ope.devices && ope.devices.length === 0) {
+        let operacionStyle = { color: "#7B7B7B" };
+        let poligonDevice = JSON.parse(ope.operationGeojson);
+       let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+      }
       ope.devices.forEach(dev => {
 
         // if (dev.devicesId == this.devId) {
@@ -275,7 +285,13 @@ export class CreateDeviceComponent implements OnInit {
   get isLongitudFieldInvalid() {
     return this.longitudField.touched && this.longitudField.invalid;
   }
-  get operationField(){
-    return this.form.get('operation')
+  get opeIdField(){
+    return this.form.get('opeId')
+  }
+  get isOpeIdFieldValid() {
+    return this.opeIdField.touched && this.opeIdField.valid;
+  }
+  get isOpeIdFieldInvalid() {
+    return this.opeIdField.touched && this.opeIdField.invalid;
   }
 }
