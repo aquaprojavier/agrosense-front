@@ -119,7 +119,7 @@ export class EditDeviceComponent implements OnInit {
       };
 
       // console.log(deviceEdit);
-      this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
+      this.deviceService.putDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
         // this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
         (response: DeviceEdit) => {
 

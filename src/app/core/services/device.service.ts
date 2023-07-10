@@ -13,35 +13,36 @@ export class DeviceService {
 
   constructor(private http: HttpClient) { }
 
-  public GetDevices () {
+  public getDevices () {
     return this.http.get(`${baseUrl}/device`)
   }
+
+  deleteDevice(id: number): Observable<string> {
+    return this.http.delete(`${baseUrl}/device/${id}`, { responseType: 'text' });
+  }
   
-  public PutDevicesById(id: number, data: Device): Observable<Device> {
+  
+  public putDevicesById(id: number, data: Device): Observable<Device> {
     return this.http.put<Device>(`${baseUrl}/device/${id}`, data);
   }
 
-  public GetDevicesById (id : number ) {
+  public getDevicesById (id : number ) {
     return this.http.get(`${baseUrl}/device/${id}`)
   }
 
-  public CreateDeviceAndPol(idPol: number, data: DeviceEdit) {
-    return this.http.post<Device>(`${baseUrl}/device/createDevAndPol/${idPol}`, data);
-  }
-
-  public CreateDevice (data: Device) {
+  public createDevice ({ data }: { data: Device; }) {
     return this.http.post<Device>(`${baseUrl}/device`, data)
   }
 
-  public GetSoilByDevicesId (id : number ) {
+  public getSoilByDevicesId (id : number ) {
     return this.http.get<Soil>(`${baseUrl}/device/soil/${id}`)
   }
 
-  public PutDevicesEditById(idDev: number, idPol: number, data: DeviceEdit): Observable<DeviceEdit> {
+  public putDevicesEditById(idDev: number, idPol: number, data: DeviceEdit): Observable<DeviceEdit> {
     return this.http.put<DeviceEdit>(`${baseUrl}/device/editDevAndPol/${idDev}/${idPol}`, data);
   }
   
-  public GetPoligonByDeviceId(id: number){
+  public getPoligonByDeviceId(id: number){
     return this.http.get(`${baseUrl}/device/poligon/${id}`)
   }
 }

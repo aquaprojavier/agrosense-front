@@ -1,2 +1,13 @@
 // @import "../../../../node_modules/primeng/resources/primeng.min.css";
 // @import "../../../../node_modules/primeng/resources/themes/bootstrap4-dark-blue/theme.css";
+.dark-background {
+    background-color: #1a1a1a; /* Color de fondo oscuro */
+    color: #ffffff; /* Color de texto blanco */
+  }
+  
+  .dark-background .swal2-title,
+  .dark-background .swal2-popup .swal2-content {
+    color: #ffffff; /* Color de texto blanco */
+  }
+  
+  

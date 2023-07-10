@@ -14,9 +14,9 @@ export class DataService {
     return this.http.get<Data[]>(`${baseUrl}/data/verJson/${deviceId}`);
   }
 
-  // public lastDataHumByDeviceId(deviceId: number){  
-  //   return this.http.get<any>(`${baseUrl}/device/lastDataHum/${deviceId}`);
-  // }
+  public getSerialNumber(serialId: string){  
+    return this.http.get<string[]>(`${baseUrl}/data/serialNumber/${serialId}`);
+  }
 
   //este metodo da error
   public lastDataByDeviceId(deviceId: number){  

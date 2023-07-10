@@ -103,7 +103,7 @@ export class CreateOperationComponent implements OnInit {
 
       console.log(operationEdit);
 
-      this.operationService.CreateOperationWithPropId(this.propId, operationEdit).subscribe(
+      this.operationService.createOperationWithPropId(this.propId, operationEdit).subscribe(
         (response: Operation) => {
 
           console.log('Se ha creado la operacion exitosamente:', response);

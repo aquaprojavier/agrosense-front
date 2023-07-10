@@ -56,7 +56,7 @@ export class LineChartComponent implements OnInit {
   }
 
   getSoil(id: number) {
-    this.deviceService.GetSoilByDevicesId(id).subscribe(data => {
+    this.deviceService.getSoilByDevicesId(id).subscribe(data => {
       this.soil = data
       this.cc = this.soil.cc;
       this.pmp = this.soil.pmp;

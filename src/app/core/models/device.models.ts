@@ -1,3 +1,5 @@
+import { Soil } from "./soil.model";
+
 export class Device {
     devicesId?: number;
     devicesNombre: string;
@@ -5,7 +7,7 @@ export class Device {
     devicesSerie: string;
     latitud: number;
     longitud: number;
-    // coordenadas?: number[];
+    operationId: number;
     conected?: boolean;
-    operation?: number
+    soil?: Soil;
 }

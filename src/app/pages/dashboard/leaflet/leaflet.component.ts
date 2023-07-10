@@ -142,125 +142,282 @@ export class LeafletComponent implements OnInit {
     operations.forEach(ope => {
 
       if (ope.devices && ope.devices.length === 0) {
+
         let operacionStyle = { color: "#7B7B7B" };
         let poligonDevice = JSON.parse(ope.operationGeojson);
         let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
+      } else if (ope.devices && ope.devices.length >= 2) {
+        let average: number = 0;
+        let counter: number = 0;
+
+        ope.devices.forEach(dev => {
+          counter += 1;
+          console.log(counter);
+          this.devices.push(dev);
+
+          this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
+            console.log("------------------------lastDataByDeviceId----------------------")
+            console.log(data);
+            average += data.dataHum
+            console.log(average);
+
+            if (data.dataHum <= data.pmp) {
+
+              marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
+              <div style="display: flex; align-items: center;">
+                <img src="assets/images/root32px.png" alt=""> 
+              <div>
+                Humedad a 30cm: <b style="color: red;">${data.dataHum1}%</b><br><br><br>
+                Humedad a 60cm: <b style="color: red;">${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
+              this.lastData.push(data);
+             
+            } else if (data.dataHum >= data.cc) {
+
+              marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div>
+  
+              <div style="display: flex; align-items: center;">
+              <img src="assets/images/root32px.png" alt="">
+              <div>
+               Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+               Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
+              this.lastData.push(data);
+              
+            } else if (data.dataHum > data.pmp && data.dataHum < data.cc) {
+
+              marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
+  
+              <div style="display: flex; align-items: center;">
+              <img src="assets/images/root32px.png" alt="">
+              <div>
+               Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+               Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
+              this.lastData.push(data);
+             
+            }
+            // else if (data.dataHum == 0.0) {
+
+            //   marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`,{ closeButton: false });
+            //   let idnull = dev.devicesId;
+            //   let operacionStyle = { color: "#7B7B7B" };
+            //   let poligonDevice = JSON.parse(ope.operationGeojson);
+            //   if (ope.devices.lenght > 1) {
+            //     geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+            //   }
+            //   for (let i = 0; i < this.devices.length; i++) {
+            //     if (this.devices[i].devicesId === idnull) {
+            //       this.devices.splice(i, 1);
+            //     }
+            //   }
+            // }
+    
+            console.log('promedio: ' + average/counter);
+            const promedio = average/counter;
+            if (promedio <= data.pmp) {
+              let operacionStyle = { color: "#CB2B3E" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(
+                `<div style="line-height: 0.5;">
+                  <div style="text-align: center;">
+                    <img src="assets/images/location.png" alt=""><br><br>
+                    Operacion: <b>${ope.operationName}</b><br><br>
+                  </div>
+                  <img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br>
+                  <img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br>
+                </div>`,
+                { closeButton: false }
+              );
+            } else if (promedio >= data.cc) {
+              let operacionStyle = { color: "#0481bf" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false });
+            } else {
+              let operacionStyle = { color: "#2AAD27" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false });
+            }
+
+          },
+            (error) => {
+              console.log(error);
+              marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`, { closeButton: false });
+              let idnull = dev.devicesId;
+              let operacionStyle = { color: "#7B7B7B" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              if (ope.devices.length >= 1) {
+                let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+                poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
+              }
+              for (let i = 0; i < this.devices.length; i++) {
+                if (this.devices[i].devicesId === idnull) {
+                  this.devices.splice(i, 1);
+                }
+              }
+            });
+        
+        });
+
+      } else {
+
+        ope.devices.forEach(dev => {
+          // console.log(dev)
+          this.devices.push(dev);
+
+          this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
+            console.log("------------------------lastDataByDeviceId----------------------")
+            console.log(data);
+
+            if (data.dataHum <= data.pmp) {
+
+              marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
+              <div style="display: flex; align-items: center;">
+                <img src="assets/images/root32px.png" alt=""> 
+              <div>
+                Humedad a 30cm: <b style="color: red;">${data.dataHum1}%</b><br><br><br>
+                Humedad a 60cm: <b style="color: red;">${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
+              this.lastData.push(data);
+              let operacionStyle = { color: "#CB2B3E" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(
+                `<div style="line-height: 0.5;">
+                  <div style="text-align: center;">
+                    <img src="assets/images/location.png" alt=""><br><br>
+                    Operacion: <b>${ope.operationName}</b><br><br>
+                  </div>
+                  <img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br>
+                  <img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br>
+                </div>`,
+                { closeButton: false }
+              );
+
+
+            } else if (data.dataHum >= data.cc) {
+
+              marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div>
+  
+              <div style="display: flex; align-items: center;">
+              <img src="assets/images/root32px.png" alt="">
+              <div>
+               Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+               Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
+              this.lastData.push(data);
+              let operacionStyle = { color: "#0481bf" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
+            } else if (data.dataHum > data.pmp && data.dataHum < data.cc) {
+
+              marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
+              <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
+  
+              <div style="display: flex; align-items: center;">
+              <img src="assets/images/root32px.png" alt="">
+              <div>
+               Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
+               Humedad a 60cm: <b>${data.dataHum2}%</b><br>
+              </div>            
+              </div>
+              <br>
+              <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
+              <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
+              </div>`, { closeButton: false });
+
+              loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
+              this.lastData.push(data);
+              let operacionStyle = { color: "#2AAD27" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+              poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
+            }
+            // else if (data.dataHum == 0.0) {
+
+            //   marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`,{ closeButton: false });
+            //   let idnull = dev.devicesId;
+            //   let operacionStyle = { color: "#7B7B7B" };
+            //   let poligonDevice = JSON.parse(ope.operationGeojson);
+            //   if (ope.devices.lenght > 1) {
+            //     geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+            //   }
+            //   for (let i = 0; i < this.devices.length; i++) {
+            //     if (this.devices[i].devicesId === idnull) {
+            //       this.devices.splice(i, 1);
+            //     }
+            //   }
+            // }
+          },
+            (error) => {
+              console.log(error);
+              marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`, { closeButton: false });
+              let idnull = dev.devicesId;
+              let operacionStyle = { color: "#7B7B7B" };
+              let poligonDevice = JSON.parse(ope.operationGeojson);
+              if (ope.devices.length >= 1) {
+                let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
+                poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
+              }
+              for (let i = 0; i < this.devices.length; i++) {
+                if (this.devices[i].devicesId === idnull) {
+                  this.devices.splice(i, 1);
+                }
+              }
+            });
+        });
       }
 
-      ope.devices.forEach(dev => {
-        // console.log(dev)
-        this.devices.push(dev);
-
-        this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
-          console.log("------------------------lastDataByDeviceId----------------------")
-          console.log(data);
-
-          if (data.dataHum <= data.pmp) {
-
-            marker(dev.coordenadas, { icon: this.redIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
-            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: red;">PELIGRO</h2></div>
-            <div style="display: flex; align-items: center;">
-              <img src="assets/images/root32px.png" alt=""> 
-            <div>
-              Humedad a 30cm: <b style="color: red;">${data.dataHum1}%</b><br><br><br>
-              
-              Humedad a 60cm: <b style="color: red;">${data.dataHum2}%</b><br>
-              
-            </div>            
-            </div>
-            <br>
-            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
-            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
-            </div>`);
-
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
-            this.lastData.push(data);
-            let operacionStyle = { color: "#CB2B3E" };
-            let poligonDevice = JSON.parse(ope.operationGeojson);
-            let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
-
-          } else if (data.dataHum >= data.cc) {
-
-            marker(dev.coordenadas, { icon: this.blueIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
-            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: blue;">SATURADO</h2></div>
-
-            <div style="display: flex; align-items: center;">
-            <img src="assets/images/root32px.png" alt="">
-            <div>
-             Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
-             Humedad a 60cm: <b>${data.dataHum2}%</b><br>
-            </div>            
-            </div>
-            <br>
-            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
-            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
-            </div>`);
-
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum1, data.cc, data.pmp);
-            this.lastData.push(data);
-            let operacionStyle = { color: "#0481bf" };
-            let poligonDevice = JSON.parse(ope.operationGeojson);
-            let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
-
-          } else if (data.dataHum > data.pmp && data.dataHum < data.cc) {
-
-            marker(dev.coordenadas, { icon: this.greenIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
-            <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: green;">OPTIMO</h2></div>
-
-            <div style="display: flex; align-items: center;">
-            <img src="assets/images/root32px.png" alt="">
-            <div>
-             Humedad a 30cm: <b>${data.dataHum1}%</b><br><br><br>
-             Humedad a 60cm: <b>${data.dataHum2}%</b><br>
-            </div>            
-            </div>
-            <br>
-            <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
-            <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
-            </div>`);
-
-            loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
-            this.lastData.push(data);
-            let operacionStyle = { color: "#2AAD27" };
-            let poligonDevice = JSON.parse(ope.operationGeojson);
-            let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
-
-          } else if (data.dataHum == 0.0) {
-
-            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
-            let idnull = dev.devicesId;
-            let operacionStyle = { color: "#7B7B7B" };
-            let poligonDevice = JSON.parse(ope.operationGeojson);
-            if (ope.devices.lenght > 1) {
-              geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            }
-            for (let i = 0; i < this.devices.length; i++) {
-              if (this.devices[i].devicesId === idnull) {
-                this.devices.splice(i, 1);
-              }
-            }
-          }
-        },
-          (error) => {
-            console.log(error);
-            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: grey;">SIN DATOS</h2></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br></Div>`);
-            let idnull = dev.devicesId;
-            let operacionStyle = { color: "#7B7B7B" };
-            let poligonDevice = JSON.parse(ope.operationGeojson);
-            if (ope.devices.length >= 1) { 
-              geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-            }
-            for (let i = 0; i < this.devices.length; i++) {
-              if (this.devices[i].devicesId === idnull) {
-                this.devices.splice(i, 1);
-              }
-            }
-          });
-      });
     });
   };
 

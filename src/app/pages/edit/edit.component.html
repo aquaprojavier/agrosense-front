@@ -8,11 +8,11 @@
             <button
               type="button"
               class="btn btn-primary btn-sm btn-rounded"
-              routerLink="/form/create-device/{{ propId }}"
+              (click)="createDevice()"
             >
               Crear
             </button>
-          </div>
+          </div>          
 
           <div class="table-responsive mb-0">
             <table
@@ -59,6 +59,13 @@
                     >
                       Editar
                     </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm btn-rounded"
+                      (click)="deleteDevice(dev.devicesId)"
+                    >
+                      Eliminar
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -87,7 +94,7 @@
 
           <div class="table-responsive mb-0">
             <table
-              *ngIf="devices && devices.length > 0"
+              *ngIf="operations && operations.length > 0"
               class="table table-centered table-nowrap"
             >
               <thead class="table-light">
@@ -115,6 +122,13 @@
                       "
                     >
                       Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm btn-rounded"
+                      (click)="deleteOperation(ope.operationId)"
+                    >
+                      Eliminar
                     </button>
                   </td>
                 </tr>
