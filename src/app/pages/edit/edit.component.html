@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-10 col-md-12 col-sm-12">
+    <div class="col-12">
       <div class="card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,7 +10,7 @@
               class="btn btn-primary btn-sm btn-rounded"
               (click)="createDevice()"
             >
-              Crear
+             CREAR
             </button>
           </div>          
 
@@ -53,18 +53,16 @@
                     <button
                       type="button"
                       class="btn btn-primary btn-sm btn-rounded"
-                      routerLink="/form/edit-device/{{ propId }}/{{
-                        dev.devicesId
-                      }}"
+                      routerLink="/form/edit-device/{{ propId }}/{{ dev.devicesId }}"
                     >
-                      Editar
+                    <i class="bi bi-pencil-fill"></i>
                     </button>
                     <button
                       type="button"
                       class="btn btn-danger btn-sm btn-rounded"
                       (click)="deleteDevice(dev.devicesId)"
                     >
-                      Eliminar
+                    <i class="bi bi-trash-fill"></i>
                     </button>
                   </td>
                 </tr>
@@ -78,7 +76,7 @@
   </div>
 
   <div class="row">
-    <div class="col-lg-10 col-md-12 col-sm-12">
+    <div class="col-12">
       <div class="card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -88,7 +86,7 @@
               class="btn btn-primary btn-sm btn-rounded"
               routerLink="/form/create-operation/{{ propId }}"
             >
-              Crear
+              CREAR
             </button>
           </div>
 
@@ -108,7 +106,7 @@
               <tbody>
                 <tr *ngFor="let ope of operations">
                   <td>{{ ope.operationName }}</td>
-                  <td>{{ ope.operationArea }}</td>
+                  <td>{{ ope.operationArea }} Ha.</td>
                   <td>
                     {{ getDevicesNames(ope.devices) }}
                   </td>
@@ -117,18 +115,15 @@
                     <button
                       type="button"
                       class="btn btn-primary btn-sm btn-rounded"
-                      [routerLink]="
-                        '/form/edit-operation/' + propId + '/' + ope.operationId
-                      "
-                    >
-                      Editar
+                      routerLink="/form/edit-operation/{{ propId }}/{{ope.operationId}}"
+                    ><i class="bi bi-pencil-fill"></i>
                     </button>
                     <button
                       type="button"
                       class="btn btn-danger btn-sm btn-rounded"
                       (click)="deleteOperation(ope.operationId)"
                     >
-                      Eliminar
+                    <i class="bi bi-trash-fill"></i>
                     </button>
                   </td>
                 </tr>

@@ -4,7 +4,7 @@ import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Popup } f
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
-import { DeviceEdit } from 'src/app/core/models/deviceEdit.models';
+import { DeviceDto } from 'src/app/core/models/deviceDto.models';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { DataService } from 'src/app/core/services/data.service';
 import { SoilService } from 'src/app/core/services/soil.service';
@@ -28,7 +28,7 @@ export class CreateDeviceComponent implements OnInit {
   property: any;
   operations: Operation[];
   device: Device;
-  deviceEdit: DeviceEdit;
+  deviceDto: DeviceDto;
   opeId: number;
   propId: number;
   devId: number;
@@ -41,7 +41,7 @@ export class CreateDeviceComponent implements OnInit {
   longitud: number;
   serialNumbers: string[] = [];
   soils: Soil[] = [];
-  
+
   greenIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -93,11 +93,10 @@ export class CreateDeviceComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-      // console.log(this.property)
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         console.log(this.operations)
-        this.createMap(this.property, this.operations)
+        this.showMap(this.property, this.operations)
       },
         (error) => {
           console.log(error);
@@ -105,7 +104,7 @@ export class CreateDeviceComponent implements OnInit {
     });
   };
 
-  getFreeSerialNumber(serialId: string){
+  getFreeSerialNumber(serialId: string) {
     this.dataService.getSerialNumber(serialId).subscribe(data => {
       this.serialNumbers = data;
     })
@@ -127,22 +126,21 @@ export class CreateDeviceComponent implements OnInit {
   saveDevice() {
     if (this.form.valid) {
       this.operations.forEach(ope => {
-        if (this.form.value.opeId == ope.operationId){
-          this.opeGeojson = ope.operationGeojson
+        if (this.form.value.opeId == ope.operationId) {
+          this.opeGeojson = ope.polygons[0]
         }
       })
-      const deviceDto: Device = {
+      const deviceDto: DeviceDto = {
         devicesNombre: this.form.value.devicesNombre,
         devicesCultivo: this.form.value.devicesCultivo,
         devicesSerie: this.form.value.devicesSerie,
         latitud: this.form.value.latitud,
         longitud: this.form.value.longitud,
         operationId: this.form.value.opeId,
-        soil: this.form.value.soil
+        soilId: this.form.value.soil.id
       };
       console.log(deviceDto);
       this.deviceService.createDevice({ data: deviceDto }).subscribe(
-        // this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
         (response: Device) => {
 
           console.log('Se ha creado el dispositivo exitosamente:', response);
@@ -161,7 +159,8 @@ export class CreateDeviceComponent implements OnInit {
     }
   }
   // =========================================MAP==========================================================
-  createMap(property, operations) {
+  showMap(property, operations) {
+
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
     }
@@ -201,48 +200,42 @@ export class CreateDeviceComponent implements OnInit {
     this.myMap.addControl(drawControl);
     this.myMap.addLayer(this.drawItems);
 
-
     // Evento 'draw:created' para agregar nuevas capas al featureGroup
     this.myMap.on('draw:created', (e) => {
       let type = e.layerType;
       const layer = e.layer;
-      if (type === 'marker'){
+      if (type === 'marker') {
         console.log(type);
-      let coordenadas = layer.toGeoJSON().geometry.coordinates;
-      this.longitud = coordenadas[0];
-      this.latitud = coordenadas[1];
-      console.log(this.latitud);
-      console.log(this.longitud);
-      };      
+        let coordenadas = layer.toGeoJSON().geometry.coordinates;
+        this.longitud = coordenadas[0];
+        this.latitud = coordenadas[1];
+        console.log(this.latitud);
+        console.log(this.longitud);
+      };
       // this.opeGeojson = JSON.stringify(layer.toGeoJSON());
       this.drawItems.addLayer(layer);
     });
 
-    // // Evento 'draw:edited' para editar capas del featureGroup
-    // this.myMap.on('draw:edited', (e) => {
-    //   const layers = e.layers;
-    //   layers.eachLayer((layer) => {
-    //     this.opeGeojson = JSON.stringify(layer.toGeoJSON());
-    //   });
-    // });
-
+    let operationStyleGrey = { color: "#7B7B7B" };
+    let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+    
     operations.forEach(ope => {
       if (ope.devices && ope.devices.length === 0) {
-        let operacionStyle = { color: "#7B7B7B" };
-        let poligonDevice = JSON.parse(ope.operationGeojson);
-       let poligon = geoJSON(poligonDevice, { style: operacionStyle }).addTo(this.myMap);
-        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`,{ closeButton: false })
+        ope.polygons.forEach(poly => {
+          let poligonDevice = JSON.parse(poly.geojson);
+          let poligon = geoJSON(poligonDevice, { style: operationStyleGrey }).addTo(this.myMap);
+          poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+        })
       }
       ope.devices.forEach(dev => {
 
-          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+        marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
 
-          let operationObj = JSON.parse(ope.operationGeojson);
-          let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
-          let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
-          operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`,{ closeButton: false })
-
-        // }
+        ope.polygons.forEach(poly => {
+          let operationObj = JSON.parse(poly.geojson);
+          let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
+          operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+        });
       });
     });
   };
@@ -292,7 +285,7 @@ export class CreateDeviceComponent implements OnInit {
   get isLongitudFieldInvalid() {
     return this.longitudField.touched && this.longitudField.invalid;
   }
-  get opeIdField(){
+  get opeIdField() {
     return this.form.get('opeId')
   }
   get isOpeIdFieldValid() {

@@ -53,9 +53,9 @@ export class EditComponent implements OnInit {
     )
   }
 
-  areFreeSerialNumbers(serialId: string){
+  areFreeSerialNumbers(serialId: string) {
     this.dataService.getSerialNumber(serialId).subscribe(data => {
-      if (data.length === 0){
+      if (data.length === 0) {
         this.areSerialNumbersAvailable = false
       } else {
         this.areSerialNumbersAvailable = true
@@ -85,53 +85,78 @@ export class EditComponent implements OnInit {
   }
 
   deleteDevice(id: number) {
-    this.deviceService.deleteDevice(id).subscribe(
-      (response: string) => {
-        // La solicitud se completó con éxito
-        console.log(response);
-        Swal.fire({
-          title: 'Eliminación exitosa!',
-          text: 'El dispositivo fue eliminado correctamente',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1000
-        }).then(() => {
-          location.reload();
-        });
-      },
-      (error) => {
-        // Ocurrió un error durante la solicitud
-        console.error('Error al eliminar el dispositivo:', error);
-        // Realizar cualquier otra acción necesaria en caso de error
+    Swal.fire({
+      title: 'Confirmación',
+      text: '¿Estás seguro de que deseas eliminar este dispositivo?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si el usuario confirmó la eliminación, se realiza la solicitud DELETE
+        this.deviceService.deleteDevice(id).subscribe(
+          (response: string) => {
+            console.log(response);
+            Swal.fire({
+              title: 'Eliminación exitosa!',
+              text: 'El dispositivo fue eliminado correctamente',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 1000
+            }).then(() => {
+              location.reload();
+            });
+          },
+          (error) => {
+            console.error('Error al eliminar el dispositivo:', error);
+            // Realizar cualquier otra acción necesaria en caso de error
+          }
+        );
       }
-    );
-  }  
-  
-  deleteOperation(id: number){
-    this.operationService.deleteOperation(id).subscribe(
-      (response: string) => {
-        // La solicitud se completó con éxito
-        console.log(response);
-        Swal.fire({
-          title: 'Eliminación exitosa!',
-          text: 'La operación fue eliminada correctamente',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1000
-        }).then(() => {
-          location.reload();
-        });
-      },
-      (error) => {
-        // Ocurrió un error durante la solicitud
-        console.error('Error al eliminar la operacion:', error);
-        // Realizar cualquier otra acción necesaria en caso de error
-      }
-    );
+    });
   }
 
-  getData(id: number){
-    this.propertyService.getOperationAndDevicesByPropertyId(id).subscribe(data =>{
+  deleteOperation(id: number) {
+    Swal.fire({
+      title: 'Confirmación',
+      text: '¿Estás seguro de que deseas eliminar esta operación?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si el usuario confirmó la eliminación, se realiza la solicitud DELETE
+        this.operationService.deleteOperation(id).subscribe(
+          (response: string) => {
+            console.log(response);
+            Swal.fire({
+              title: 'Eliminación exitosa!',
+              text: 'La operación fue eliminada correctamente',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 1000
+            }).then(() => {
+              location.reload();
+            });
+          },
+          (error) => {
+            console.error('Error al eliminar la operacion:', error);
+            // Realizar cualquier otra acción necesaria en caso de error
+          }
+        );
+      }
+    });
+  }
+
+
+  getData(id: number) {
+    this.propertyService.getOperationAndDevicesByPropertyId(id).subscribe(data => {
       this.operations = data;
       this.devices = [];
       this.operations.forEach(ope => {
@@ -140,7 +165,7 @@ export class EditComponent implements OnInit {
           this.isConected(dev.devicesId).subscribe(conected => {
             dev.conected = conected;
           });
-        })        
+        })
       });
     })
   }
@@ -173,6 +198,6 @@ export class EditComponent implements OnInit {
     const deviceNames = devices.map(dev => dev.devicesNombre);
     return deviceNames.length > 0 ? deviceNames.join(', ') : 'No tiene';
   }
-  
+
 
 }

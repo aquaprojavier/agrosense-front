@@ -1,4 +1,4 @@
-export class DeviceEdit {
+export class DeviceDto {
     devicesId?: number;
     devicesNombre: string;
     devicesCultivo: string;
@@ -6,6 +6,8 @@ export class DeviceEdit {
     latitud: number;
     longitud: number;
     operationId: number;
-    operationGeojson: string;
+    soilId: number;
+    koef1?: number;
+    koef2?: number;
   }
   

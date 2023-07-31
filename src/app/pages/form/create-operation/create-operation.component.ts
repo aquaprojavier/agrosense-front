@@ -1,17 +1,18 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Popup } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
-import { DeviceEdit } from 'src/app/core/models/deviceEdit.models';
-import { DeviceService } from 'src/app/core/services/device.service';
+import { DeviceDto } from 'src/app/core/models/deviceDto.models';
 import { User } from 'src/app/core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Device } from '../../../core/models/device.models';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { Operation } from 'src/app/core/models/operation.models';
+import { OperationDto } from 'src/app/core/models/operationDto.models';
+import { Polygon } from 'src/app/core/models/polygon.models';
 
 @Component({
   selector: 'app-create-operation',
@@ -34,21 +35,23 @@ export class CreateOperationComponent implements OnInit {
   operation: Operation
   operations: Operation[];
   device: Device;
-  deviceEdit: DeviceEdit;
+  deviceDto: DeviceDto;
   opeId: number;
   propId: number;
   devId: number;
   myMap = null;
-  opeGeojson: string;
+  // opeGeojson: string;
   form: FormGroup;
   drawItems: FeatureGroup;
   geojsonLayer: any;
+  // polygon: Polygon;
+  polygons: Polygon[] = [];
+
 
   constructor(private formBuilder: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private operationService: OperationService,
-    private deviceService: DeviceService,
     private router: Router,) { }
 
   ngOnInit(): void {
@@ -68,11 +71,10 @@ export class CreateOperationComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-      // console.log(this.property)
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         console.log(this.operations)
-        this.createMap(this.property, this.operations)
+        this.showMap(this.property, this.operations)
       },
         (error) => {
           console.log(error);
@@ -88,22 +90,17 @@ export class CreateOperationComponent implements OnInit {
     });
   }
 
-  createOperation() {
+  saveOperation() {
     if (this.form.valid) {
-      // this.operations.forEach(ope => {
-      //   if (this.form.value.opeId == ope.operationId) {
-      //     this.opeGeojson = ope.operationGeojson
-      //   }
-      // })
-      const operationEdit: Operation = {
+      const operationEdit: OperationDto = {
         operationName: this.form.value.operationName,
         operationArea: this.form.value.operationArea,
-        operationGeojson: this.opeGeojson
+        propId : this.propId,
+        polygons: this.polygons
       };
-
       console.log(operationEdit);
 
-      this.operationService.createOperationWithPropId(this.propId, operationEdit).subscribe(
+      this.operationService.createOperation (operationEdit).subscribe(
         (response: Operation) => {
 
           console.log('Se ha creado la operacion exitosamente:', response);
@@ -122,7 +119,8 @@ export class CreateOperationComponent implements OnInit {
     }
   }
   // =========================================MAP==========================================================
-  createMap (property, operations) {
+  showMap(property, operations) {
+
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
     }
@@ -163,42 +161,45 @@ export class CreateOperationComponent implements OnInit {
     this.myMap.addControl(drawControl);
     this.myMap.addLayer(this.drawItems);
 
-    // Evento 'draw:created' para agregar nuevas capas al featureGroup
-    this.myMap.on('draw:created', (e) => {
-      const layer = e.layer;
-      this.opeGeojson = JSON.stringify(layer.toGeoJSON());
-      console.log(this.opeGeojson);
-      this.drawItems.addLayer(layer);
-    });
+    this.createPolygon();
 
-    // Evento 'draw:edited' para editar capas del featureGroup
-    this.myMap.on('draw:edited', (e) => {
-      const layers = e.layers;
-      layers.eachLayer((layer) => {
-        this.opeGeojson = JSON.stringify(layer.toGeoJSON());
-      });
-    });
-    //  // Agregar capas al featureGroup desde un objeto GeoJSON
-    //  geoJSON(JSON.parse(this.opeGeojson), {
-    //   onEachFeature: (feature, layer) => {
-    //     this.drawItems.addLayer(layer);
-    //   }
-    // }).addTo(this.myMap);
+    // let operacionStyleGrey = { color: "#7B7B7B" };
+    let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+
     operations.forEach(ope => {
+
+        ope.polygons.forEach(poly => {
+          let poligonDevice = JSON.parse(poly.geojson);
+          let poligon = geoJSON(poligonDevice, { style: operationStyleYellow }).addTo(this.myMap);
+          poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+        })
 
       ope.devices.forEach(dev => {
 
         marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
 
-        let operationObj = JSON.parse(ope.operationGeojson);
-        let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
-        let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
-        operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+        // ope.polygons.forEach(poly => {
+        //   let operationObj = JSON.parse(poly.geojson);
+        //   let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
+        //   operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+        // })
 
-        // }
       });
     });
   };
+
+  createPolygon() {
+    // Evento 'draw:created' para agregar nuevas capas al featureGroup
+    this.myMap.on('draw:created', (e) => {
+      const layer = e.layer;
+      let opeGeojson = JSON.stringify(layer.toGeoJSON());
+      // console.log(opeGeojson);
+      const polygon1: Polygon = new Polygon();
+      polygon1.geojson = opeGeojson;
+      this.drawItems.addLayer(layer);
+      this.polygons.push(polygon1);
+    });
+  }
 
   get operationNameField() {
     return this.form.get('operationName');
@@ -209,7 +210,6 @@ export class CreateOperationComponent implements OnInit {
   get isOperationNameFieldInvalid() {
     return this.operationNameField.touched && this.operationNameField.invalid;
   }
-
   get operationAreaField() {
     return this.form.get('operationArea')
   }
@@ -219,7 +219,6 @@ export class CreateOperationComponent implements OnInit {
   get isOperationAreaFieldInvalid() {
     return this.operationAreaField.touched && this.operationAreaField.invalid;
   }
-
   get opeIdField() {
     return this.form.get('opeId')
   }
@@ -229,5 +228,4 @@ export class CreateOperationComponent implements OnInit {
   get isOpeIdFieldInvalid() {
     return this.opeIdField.touched && this.opeIdField.invalid;
   }
-
 }

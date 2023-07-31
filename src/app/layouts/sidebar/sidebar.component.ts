@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, Input, OnChanges } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
 import MetisMenu from 'metismenujs/dist/metismenujs';
 import { EventService } from '../../core/services/event.service';
 import { LoginService } from '../../core/services/login.service';
@@ -53,21 +53,20 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
     this._scrollElement();
     this.user = this.loginService.getUser()
     this.props = this.user.propiedades;
-    // console.log(this.props);
-    let propId: number;
-    this.user.propiedades.forEach(element => {
-      if (element.propDefault === 1) {
-        propId = element.propId
-      }
-    });
-    this.propertyService.getDevicesByPropertyId(propId).subscribe((data) => {
-      this.devices = data;
-      console.log("propid: " + propId);
-      this.propertyId = propId;
-      console.log("propertyId: " + this.propertyId);
+    this.propertyId = this.findDefaultPropertyId();
+    this.changeDevices(this.propertyId);
+  }
 
-    });
-    // this.userService.getProperties(this.user.id).subscribe((data)=> {console.log(data)})
+  private findDefaultPropertyId(): number | null {
+    let propId: number = null;
+    if (this.user && this.user.propiedades) {
+      this.user.propiedades.forEach(element => {
+        if (element.propDefault === 1) {
+          propId = element.propId;
+        }
+      });
+    }
+    return propId;
   }
 
   ngAfterViewInit() {
@@ -80,13 +79,20 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
     event.currentTarget.nextElementSibling.classList.toggle('mm-show');
   }
 
-  ngOnChanges() {
-    if (!this.isCondensed && this.sideMenu || this.isCondensed) {
-      setTimeout(() => {
-        this.menu = new MetisMenu(this.sideMenu.nativeElement);
-      });
-    } else if (this.menu) {
-      this.menu.dispose();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.isCondensed && (changes.isCondensed.firstChange || changes.isCondensed.currentValue !== changes.isCondensed.previousValue)) {
+      if (!this.isCondensed && this.sideMenu || this.isCondensed) {
+        setTimeout(() => {
+          this.menu = new MetisMenu(this.sideMenu.nativeElement);
+        });
+      } else if (this.menu) {
+        this.menu.dispose();
+      }
+    }
+
+    if (changes.user && changes.user.currentValue) {
+      const propId = this.findDefaultPropertyId();
+      this.changeDevices(propId);
     }
   }
 

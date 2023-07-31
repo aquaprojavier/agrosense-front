@@ -6,11 +6,11 @@
   ></app-page-title>
   <!-- end page title -->
   <div class="row">
-    <div class="col-4">
+    <div class="col-12 col-lg-3">
       <div class="card" style="background-color: rgb(42, 48, 66)">
         <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="upDateDevAndPol()">
-            <mat-form-field appearance="fill">
+          <form [formGroup]="form" (ngSubmit)="upDateDev()">
+            <mat-form-field appearance="fill" class="w-100">
               <mat-label>Cuadro</mat-label>
               <input matInput type="text" formControlName="devicesNombre" />
               <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
@@ -25,7 +25,7 @@
               </div>
             </mat-form-field>
 
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="fill" class="w-100">
               <mat-label>Variedad</mat-label>
               <input matInput type="text" formControlName="devicesCultivo" />
               <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
@@ -40,24 +40,18 @@
               </div>
             </mat-form-field>
 
-            <mat-form-field appearance="fill">
-              <mat-label>Numero de serie</mat-label>
-              <input matInput type="text" formControlName="devicesSerie" />
-              <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isSerieFieldInvalid">close</mat-icon>
-              <div *ngIf="serieField.touched">
-                <mat-error *ngIf="serieField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-                <mat-error *ngIf="serieField.hasError('maxlength')">
-                  maximo 25 caracteres!
-                </mat-error>
-              </div>
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Tipo de suelo</mat-label>
+              <mat-select formControlName="soilId">
+                <mat-option *ngFor="let soil of soils" [value]="soil.id">
+                  {{ soil.tipo }}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
 
-            <mat-form-field>
+            <mat-form-field appearance="fill" class="w-100">
               <mat-label>Latitud</mat-label>
-              <input matInput type="number" formControlName="latitud" />
+              <input matInput type="number" [(ngModel)]="latitud" formControlName="latitud" />
               <mat-icon matSuffix *ngIf="isLatitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLatitudFieldInvalid">close</mat-icon>
               <div *ngIf="latitudField.touched">
@@ -74,9 +68,9 @@
               </div>
             </mat-form-field>
 
-            <mat-form-field>
+             <mat-form-field appearance="fill" class="w-100">
               <mat-label>Longitud</mat-label>
-              <input matInput type="number" formControlName="longitud" />
+              <input matInput type="number"  [(ngModel)]="longitud"  formControlName="longitud" />
               <mat-icon matSuffix *ngIf="isLongitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLongitudFieldInvalid"
                 >close</mat-icon
@@ -95,31 +89,32 @@
                 </mat-error>
               </div>
             </mat-form-field>
-            <!-- <mat-form-field appearance="fill">
-              <mat-label>GeoJson</mat-label>
-              <textarea matInput formControlName="geojson" rows="5" #opeGeojsonTextarea></textarea>
-            </mat-form-field> -->
 
-            <!-- ---------------------se oculta el GeoJson------------------------- -->
-            <!-- <input type="hidden" formControlName="geojson" #opeGeojsonTextarea /> -->
-
-            
-            <!-- <mat-form-field appearance="fill">
-              <mat-label>Categoria</mat-label>
-              <mat-select formControlName="category">
-                <mat-option value="one">Franco-limoso</mat-option>
-                <mat-option value="two">Arenoso</mat-option>
+           <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Operacion de riego</mat-label>
+              <mat-select formControlName="operationId">
+                <mat-option *ngFor="let operation of operations" [value]="operation.operationId">
+                  {{ operation.operationName }}
+                </mat-option>
               </mat-select>
-            </mat-form-field> -->
+              <mat-icon matSuffix *ngIf="isOperationIdFieldValid">done</mat-icon>
+              <mat-icon matSuffix *ngIf="isOperationIdFieldInvalid">close</mat-icon>
+              <div *ngIf="operationIdField.touched">
+                <mat-error *ngIf="operationIdField.hasError('required')">
+                  este campo es requerido!
+                </mat-error>
+              </div>
+            </mat-form-field>
+
             <br />
-            <button type="submit">enviar</button>
+            <button type="submit" class="btn btn-primary w-100">Editar</button>
           </form>
           <!-- </div> -->
         </div>
       </div>
     </div>
 
-    <div class="col-8">
+    <div class="col-12 col-lg-9">
       <div class="card">
         <!-- <button id="botonMapa">Obtener GeoJSON</button> -->
         <div id="mapEdit">aca va un mapa</div>

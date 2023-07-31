@@ -4,6 +4,7 @@ import { User } from '../models/auth.models';
 import baseUrl from '../helpers/helper';
 import { Device } from '../models/device.models';
 import { Operation } from '../models/operation.models';
+import { Property } from '../models/property.models';
 
 
 @Injectable({
@@ -22,7 +23,7 @@ export class PropertyService {
   }
 
   public getPropertyById ( id : any ){
-    return this.http.get(`${baseUrl}/property/${id}`)
+    return this.http.get<Property>(`${baseUrl}/property/${id}`)
   }
 
   public getOperationAndDevicesByPropertyId ( id : number ){

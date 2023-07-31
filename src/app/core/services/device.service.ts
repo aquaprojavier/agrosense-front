@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import baseUrl from '../helpers/helper';
 import { Device } from '../models/device.models';
-import { DeviceEdit } from '../models/deviceEdit.models';
+import { DeviceDto } from '../models/deviceDto.models';
 import { Observable } from 'rxjs';
 import { Soil } from '../models/soil.model';
 
@@ -21,8 +21,7 @@ export class DeviceService {
     return this.http.delete(`${baseUrl}/device/${id}`, { responseType: 'text' });
   }
   
-  
-  public putDevicesById(id: number, data: Device): Observable<Device> {
+  public editDevice(id: number, data: DeviceDto) {
     return this.http.put<Device>(`${baseUrl}/device/${id}`, data);
   }
 
@@ -30,16 +29,12 @@ export class DeviceService {
     return this.http.get(`${baseUrl}/device/${id}`)
   }
 
-  public createDevice ({ data }: { data: Device; }) {
+  public createDevice ({ data }: { data: DeviceDto; }) {
     return this.http.post<Device>(`${baseUrl}/device`, data)
   }
 
   public getSoilByDevicesId (id : number ) {
     return this.http.get<Soil>(`${baseUrl}/device/soil/${id}`)
-  }
-
-  public putDevicesEditById(idDev: number, idPol: number, data: DeviceEdit): Observable<DeviceEdit> {
-    return this.http.put<DeviceEdit>(`${baseUrl}/device/editDevAndPol/${idDev}/${idPol}`, data);
   }
   
   public getPoligonByDeviceId(id: number){

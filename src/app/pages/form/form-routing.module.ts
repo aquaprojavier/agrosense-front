@@ -11,7 +11,7 @@ const routes: Routes = [
     { path: 'layouts', component: LayoutsComponent },
     { path: 'edit-device/:idProp/:idDev', component: EditDeviceComponent },
     { path: 'create-operation/:idProp', component: CreateOperationComponent},
-    { path: 'edit-operation/:idProp', component: EditOperationComponent},
+    { path: 'edit-operation/:idProp/:idOpe', component: EditOperationComponent},
     { path: 'create-device/:idProp', component: CreateDeviceComponent},
     { path: 'edit-device/:idProp', component: EditDeviceComponent}
 

@@ -7,7 +7,7 @@ export class Device {
     devicesSerie: string;
     latitud: number;
     longitud: number;
-    operationId: number;
+    // operationId: number;
     conected?: boolean;
     soil?: Soil;
 }
