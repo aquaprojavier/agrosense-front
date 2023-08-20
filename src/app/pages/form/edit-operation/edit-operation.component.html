@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <!-- start page title -->
     <app-page-title
-      title="Edit Device"
+      title="Edit Operation"
       [breadcrumbItems]="breadCrumbItems"
     ></app-page-title>
     <!-- end page title -->
@@ -13,7 +13,7 @@
 
               <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Operación</mat-label>
-                <input matInput type="text" formControlName="operationName" />
+                <input matInput type="text" formControlName="name" />
                 <mat-icon matSuffix *ngIf="isOperationNameFieldValid">done</mat-icon>
                 <mat-icon matSuffix *ngIf="isOperationNameFieldInvalid">close</mat-icon>
                 <div *ngIf="operationNameField.touched">
@@ -28,7 +28,7 @@
   
               <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Area</mat-label>
-                <input matInput type="number" formControlName="operationArea" />
+                <input matInput type="number" formControlName="area" />
                 <mat-icon matSuffix *ngIf="isOperationAreaFieldValid">done</mat-icon>
                 <mat-icon matSuffix *ngIf="isOperationAreaFieldInvalid">close</mat-icon>
                 <div *ngIf="operationAreaField.touched">

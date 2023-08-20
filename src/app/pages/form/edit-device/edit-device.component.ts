@@ -69,6 +69,8 @@ export class EditDeviceComponent implements OnInit {
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.devId = params['idDev'];
+      console.log('+++++++++');
+      console.log(this.devId);
       this.getData(this.propId);
       this.getSoils();
       this.buildForm();

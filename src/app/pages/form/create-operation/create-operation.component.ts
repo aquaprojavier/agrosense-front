@@ -95,7 +95,7 @@ export class CreateOperationComponent implements OnInit {
       const operationEdit: OperationDto = {
         operationName: this.form.value.operationName,
         operationArea: this.form.value.operationArea,
-        propId : this.propId,
+        propertyId : this.propId,
         polygons: this.polygons
       };
       console.log(operationEdit);

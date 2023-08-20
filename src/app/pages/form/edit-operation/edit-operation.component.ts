@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control } from 'leaflet';
+import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Layer } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { Soil } from 'src/app/core/models/soil.model';
 import { Operation } from 'src/app/core/models/operation.models';
 import { Polygon } from 'src/app/core/models/polygon.models';
+import { OperationDto } from 'src/app/core/models/operationDto.models';
 
 @Component({
   selector: 'app-edit-operation',
@@ -31,13 +32,14 @@ export class EditOperationComponent implements OnInit {
   propId: number;
   operationId: number;
   myMap = null;
-  opeGeojson: any;
+  poliGeojson: string;
   form: FormGroup;
   drawItems: FeatureGroup;
   geojsonLayer: any;
   latitud: number;
   longitud: number;
-  soils: Soil[] = [];
+  polygons: Polygon[] = [];
+  polygonLayers: { [polygonId: number]: Layer } = {};
 
   greyIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
@@ -63,7 +65,7 @@ export class EditOperationComponent implements OnInit {
     // Acceder a los parámetros usando subscribe (para escuchar cambios en la URL)
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
-      this.operationId = params['operationId'];
+      this.operationId = params['idOpe'];
       // Aquí puedes realizar acciones basadas en los parámetros obtenidos
       this.getData(this.propId);
       // this.getOperation(this.operationId);
@@ -95,8 +97,8 @@ export class EditOperationComponent implements OnInit {
   // =========================================FORM============================================================
   private initForm() {
     this.form.patchValue({
-      operationName: this.operation.operationName,
-      operationArea: this.operation.operationArea,
+      name: this.operation.operationName,
+      area: this.operation.operationArea,
       // polygons: this.operation.polygons,
       // devices: this.operation.devices
     });
@@ -104,26 +106,23 @@ export class EditOperationComponent implements OnInit {
 
   private buildForm() {
     this.form = this.formBuilder.group({
-      operationName: ['', [Validators.required, Validators.maxLength(20)]],
-      operationArea: ['', [Validators.required, Validators.min(0), Validators.max(500)]]
+      name: ['', [Validators.required, Validators.maxLength(20)]],
+      area: ['', [Validators.required, Validators.min(0), Validators.max(500)]]
     });
   }
 
   upDateOperation() {
     if (this.form.valid) {
-      // const deviceEdit: Device = {
-      //   devicesId: +this.devId,
-      //   devicesNombre: this.form.value.devicesNombre,
-      //   devicesCultivo: this.form.value.devicesCultivo,
-      //   devicesSerie: this.form.value.devicesSerie,
-      //   latitud: this.form.value.latitud,
-      //   longitud: this.form.value.longitud,
-      //   operationId: this.opeId,
-      // };
+      const operationDto: OperationDto = {
+        // operationId: +this.devId,
+        operationName: this.form.value.name,
+        operationArea: this.form.value.area,
+        polygons: this.polygons
+      };
 
-      // console.log(deviceEdit);
-      this.operationService.updateOperation(this.operationId, this.form.value).subscribe(
-        // this.deviceService.PutDevicesEditById(this.devId, this.opeId, deviceEdit).subscribe(
+      console.log(this.polygons);
+      this.operationService.updateOperation(this.operationId, operationDto).subscribe(
+
         (response: Operation) => {
 
           console.log('Se ha guardado el formulario exitosamente:', response);
@@ -142,8 +141,10 @@ export class EditOperationComponent implements OnInit {
     }
   }
   // =========================================MAP==========================================================
-  showMap(property, operations) {
 
+
+  showMap(property, operations) {
+    console.log(operations);
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
     }
@@ -184,28 +185,50 @@ export class EditOperationComponent implements OnInit {
     this.myMap.addControl(drawControl);
     this.myMap.addLayer(this.drawItems);
 
-    // Evento 'draw:edited' para editar capas del featureGroup
+    // Dentro del evento draw:edited
     this.myMap.on('draw:edited', (e) => {
       const layers = e.layers;
-      layers.eachLayer((layer) => {
-        this.opeGeojson = JSON.stringify(layer.toGeoJSON());
+      layers.eachLayer((layer: any) => {
+        for (const polygonId in this.polygonLayers) {
+          if (this.polygonLayers[polygonId] === layer) {
+            this.polygons.forEach( poly => {
+              console.log("paso 1")
+              console.log(poly.polygonId);
+              if ( poly.polygonId === parseInt(polygonId)){
+                poly.geojson = JSON.stringify(layer.toGeoJSON());
+                console.log(poly.geojson);
+                // this.polygons.push(poly);
+              }
+            })
+          }
+        }
       });
     });
-
-    let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
     let operationStyleGrey = { color: "#7B7B7B" };
     operations.forEach(ope => {
 
       if (ope.operationId == this.operationId) {
         this.operation = ope;
+        ope.devices.forEach(dev => {
+          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+        });
         ope.polygons.forEach(poly => {
-          this.opeGeojson = poly.geojson;
+
+          this.poliGeojson = poly.geojson;
+          
           // Agregar capas al featureGroup desde un objeto GeoJSON
-          geoJSON(JSON.parse(this.opeGeojson), {
+          geoJSON(JSON.parse(this.poliGeojson), {
             onEachFeature: (feature, layer) => {
+              // ID del polígono
+              const poligono_id = poly.polygonId;
+             
+              this.polygonLayers[poligono_id] = layer; // Almacenar el layer en el diccionario  
+              console.log(this.polygonLayers[poligono_id]);//layer asociado al id del polygon
               this.drawItems.addLayer(layer);
             }
           }).addTo(this.myMap);
+          // poly.geojson = this.poliGeojson
+          this.polygons.push(poly);
         });
 
       } else {
@@ -218,25 +241,24 @@ export class EditOperationComponent implements OnInit {
           });
         } else {
           ope.devices.forEach(dev => {
-  
-              marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
-          
-              let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
-              ope.polygons.forEach(poly => {
-                let operationObj = JSON.parse(poly.geojson);
-                let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
-                operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
-              })
+
+            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+
+            let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+            ope.polygons.forEach(poly => {
+              let operationObj = JSON.parse(poly.geojson);
+              let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
+              operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+            })
           });
         }
       }
     });
-
     this.initForm();
   };
 
   get operationNameField() {
-    return this.form.get('operationName');
+    return this.form.get('name');
   }
   get isOperationNameFieldValid() {
     return this.operationNameField.touched && this.operationNameField.valid;
@@ -245,21 +267,12 @@ export class EditOperationComponent implements OnInit {
     return this.operationNameField.touched && this.operationNameField.invalid;
   }
   get operationAreaField() {
-    return this.form.get('operationArea')
+    return this.form.get('area')
   }
   get isOperationAreaFieldValid() {
     return this.operationAreaField.touched && this.operationAreaField.valid;
   }
   get isOperationAreaFieldInvalid() {
     return this.operationAreaField.touched && this.operationAreaField.invalid;
-  }
-  get opeIdField() {
-    return this.form.get('opeId')
-  }
-  get isOpeIdFieldValid() {
-    return this.opeIdField.touched && this.opeIdField.valid;
-  }
-  get isOpeIdFieldInvalid() {
-    return this.opeIdField.touched && this.opeIdField.invalid;
   }
 }

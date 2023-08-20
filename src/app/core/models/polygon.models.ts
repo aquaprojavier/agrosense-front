@@ -1,5 +1,4 @@
 export class Polygon {
-    poligono_id?: number;
+    polygonId?: number;
     geojson: string;
-    operation_id?: number
 }

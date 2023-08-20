@@ -181,7 +181,7 @@ export class LeafletComponent implements OnInit {
 
     operations.forEach(ope => {
       if (ope.devices.length === 0) {
-        addPolygons(ope, "#7B7B7B");
+        addPolygons(ope, "#302e2e");
       } else {
         ope.devices.forEach(dev => {
           this.devices.push(dev);

@@ -5,7 +5,7 @@ export class OperationDto {
     operationId?: number;
     operationName: string;
     operationArea: number;
-    propId: number;
+    propertyId?: number;
     polygons?: Polygon[];
     devices?: Device[]
 }
