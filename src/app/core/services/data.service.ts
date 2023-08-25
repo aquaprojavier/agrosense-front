@@ -10,8 +10,13 @@ export class DataService {
 
   constructor( private http: HttpClient) { }
 
+  public showDataByIdAndLastDays(deviceId: number, days: number){  
+    return this.http.get<Data[]>(`${baseUrl}/data/showByLastDays/${deviceId}/${days}`);
+  }
+
+
   public fullDataByDeviceId(deviceId: number){  
-    return this.http.get<Data[]>(`${baseUrl}/data/verJson/${deviceId}`);
+    return this.http.get<Data[]>(`${baseUrl}/data/show/${deviceId}`);
   }
 
   public getSerialNumber(serialId: string){  

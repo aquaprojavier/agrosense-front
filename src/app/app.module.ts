@@ -14,6 +14,8 @@ import { ScrollToModule } from '@nicky-lenaers/ngx-scroll-to';
 
 import { ExtrapagesModule } from './extrapages/extrapages.module';
 
+import { MatNativeDateModule } from '@angular/material/core'; // Importa MatNativeDateModule
+
 import { LayoutsModule } from './layouts/layouts.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -39,6 +41,7 @@ export function createTranslateLoader(http: HttpClient): any {
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    MatNativeDateModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

@@ -26,7 +26,7 @@ export class DeviceService {
   }
 
   public getDevicesById (id : number ) {
-    return this.http.get(`${baseUrl}/device/${id}`)
+    return this.http.get<Device>(`${baseUrl}/device/${id}`)
   }
 
   public createDevice ({ data }: { data: DeviceDto; }) {

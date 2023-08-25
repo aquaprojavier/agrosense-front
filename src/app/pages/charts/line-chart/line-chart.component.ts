@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
@@ -10,6 +10,7 @@ import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5stock from "@amcharts/amcharts5/stock";
 import { DataService } from 'src/app/core/services/data.service';
 import { DeviceService } from 'src/app/core/services/device.service';
+import { Device } from 'src/app/core/models/device.models';
 
 @Component({
   selector: 'app-line-chart',
@@ -26,6 +27,9 @@ export class LineChartComponent implements OnInit {
   datos: Data[] = [];
   deviceId: number = 1;
   soil: Soil;
+  selectedDays: number = 30; // Valor predeterminado, puedes ajustarlo según tu lógica
+  device: Device
+
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
@@ -39,8 +43,9 @@ export class LineChartComponent implements OnInit {
     this.activatedRoute.snapshot.params['id'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.deviceId = params['id'];
-      this.getData(this.deviceId);
+      this.getData(this.deviceId, 30);
       this.getSoil(this.deviceId);
+      this.getDevice(this.deviceId);
     },
       (error) => {
         console.log(error);
@@ -48,19 +53,31 @@ export class LineChartComponent implements OnInit {
     );
   }
 
-  getData(id: number) {
-    this.dataService.fullDataByDeviceId(id).subscribe(data => {
+  getDevice (id: number){
+    this.deviceService.getDevicesById(id).subscribe(dev => {
+      this.device = dev;
+      console.log(dev)
+    })
+  }
+
+  getData(id: number, days: number) {
+    this.dataService.showDataByIdAndLastDays(id, days).subscribe(data => {
       this.datos = data
-      this.createGraph(this.datos, "linechartdiv", "chartcontrols");
+      this.createGraph(this.datos, "linechartdiv");
     });
   }
+
+  onButtonClick(days: number) {
+    this.selectedDays = days; // Actualizar el valor de días seleccionado
+    this.getData(this.deviceId, days); // Llamar a la función getData con el nuevo número de días
+  }  
 
   getSoil(id: number) {
     this.deviceService.getSoilByDevicesId(id).subscribe(data => {
       this.soil = data
       this.cc = this.soil.cc;
       this.pmp = this.soil.pmp;
-      this.ur = (this.cc + this.pmp) *0.5;
+      this.ur = (this.cc + this.pmp) * 0.5;
     });
   }
 
@@ -81,19 +98,19 @@ export class LineChartComponent implements OnInit {
     });
   }
 
-  createGraph(apiData: Data[], divId, chartcontrols) {
+  createGraph(apiData: Data[], divId) {
     // Chart code goes in here
     this.browserOnly(() => {
 
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
-      this.maybeDisposeRoot(chartcontrols);
+      // this.maybeDisposeRoot(chartcontrols);
 
       // Remove content from chart divs
-      let chartcontrolsDiv = document.getElementById(chartcontrols);
-      while (chartcontrolsDiv.firstChild) {
-        chartcontrolsDiv.removeChild(chartcontrolsDiv.firstChild);
-      }
+      // let chartcontrolsDiv = document.getElementById(chartcontrols);
+      // while (chartcontrolsDiv.firstChild) {
+      //   chartcontrolsDiv.removeChild(chartcontrolsDiv.firstChild);
+      // }
 
       let chartDiv = document.getElementById(divId);
       while (chartDiv.firstChild) {
@@ -120,7 +137,8 @@ export class LineChartComponent implements OnInit {
         // wheelY: "zoomX",
         panX: true,
         panY: false,
-        pinchZoomX: true
+        pinchZoomX: true,
+        layout: root.verticalLayout
       }));
 
       // Add cursor
@@ -155,13 +173,14 @@ export class LineChartComponent implements OnInit {
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
+
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
           numericFields: ["dataHum2", "cc", "ur"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
-        // Set the data processor and data for valueSeries2
+        // Set the data processor and data for valueSeries3
         valueSeries3.data.processor = am5.DataProcessor.new(root, {
           numericFields: ["dataHum", "cc", "ur"],
           dateFields: ["dataFecha"],
@@ -170,6 +189,7 @@ export class LineChartComponent implements OnInit {
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
         valueSeries3.data.setAll(result);
+        sbSeries.data.setAll(apiData);
       };
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
@@ -193,11 +213,12 @@ export class LineChartComponent implements OnInit {
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY}%"
+          labelText: "{name}: {valueY}%",
+          keepTargetHover: true
         })
       }));
 
-      let valueSeries3 = mainPanel.series.push(am5xy.LineSeries.new(root, {
+      let valueSeries3 = mainPanel.series.push(am5xy.SmoothedXLineSeries.new(root, {
         name: "Humedad media",
         valueXField: "dataFecha",
         valueYField: "dataHum",
@@ -205,7 +226,8 @@ export class LineChartComponent implements OnInit {
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY}%"
+          labelText: "{name}: {valueY}%",
+          keepTargetHover: true
         })
       }));
 
@@ -314,35 +336,70 @@ export class LineChartComponent implements OnInit {
         centerY: am5.p100,
         fontWeight: "bold"
       })
-
+      // =========================FIN RANGOS ====================================
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-      mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {
-        orientation: "horizontal"
+      let scrollbar = mainPanel.set("scrollbarX", am5xy.XYChartScrollbar.new(root, {
+        orientation: "horizontal",
+        height: 30
+      }));
+      stockChart.toolsContainer.children.push(scrollbar);
+      
+      let sbDateAxis = scrollbar.chart.xAxes.push(am5xy.GaplessDateAxis.new(root, {
+        baseInterval: {
+          timeUnit: "minute",
+          count: 10
+        },
+        renderer: am5xy.AxisRendererX.new(root, {})
+      }));
+      
+      let sbValueAxis = scrollbar.chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+      
+      let sbSeries = scrollbar.chart.series.push(am5xy.LineSeries.new(root, {
+        valueYField: "dataHum",
+        valueXField: "dataFecha",
+        xAxis: sbDateAxis,
+        yAxis: sbValueAxis
       }));
 
-      // =========================FIN RANGOS ====================================
+      sbSeries.fills.template.setAll({
+        visible: true,
+        fillOpacity: 0.3
+      });
+      
+     
 
       // Eliminar el toolbar anterior si existe
-      if (this.toolbar) {
-        this.toolbar.dispose();
-      }
+      // if (this.toolbar) {
+      //   this.toolbar.dispose();
+      // }
 
       // Add toolbar
       // https://www.amcharts.com/docs/v5/charts/stock/toolbar/
-      this.toolbar = am5stock.StockToolbar.new(root, {
-        container: document.getElementById("chartcontrols"),
-        stockChart: stockChart,
-        controls: [
-          am5stock.DateRangeSelector.new(root, {
-            stockChart: stockChart
-          }),
-          am5stock.PeriodSelector.new(root, {
-            stockChart: stockChart
-          })
-        ]
-      });
-      
+      // this.toolbar = am5stock.StockToolbar.new(root, {
+      //   container: document.getElementById("chartcontrols"),
+      //   stockChart: stockChart,
+      //   controls: [
+      //     am5stock.DateRangeSelector.new(root, {
+      //       stockChart: stockChart
+      //     }),
+      //     am5stock.PeriodSelector.new(root, {
+      //       stockChart: stockChart,
+      //       periods: [
+      //         { timeUnit: "day", count: 1, name: "1D" },
+      //         { timeUnit: "day", count: 5, name: "5D" },
+      //         { timeUnit: "month", count: 1, name: "1M" },
+      //         { timeUnit: "month", count: 3, name: "3M" },
+      //         { timeUnit: "month", count: 6, name: "6M" },
+      //         { timeUnit: "ytd", name: "YTD" },
+      //         { timeUnit: "year", count: 1, name: "1Y" },
+      //         { timeUnit: "max", name: "Max" },
+      //       ]
+      //     })
+      //   ],
+      // });
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/
       valueSeries3.appear(1500);

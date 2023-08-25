@@ -32,7 +32,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
     // Check if the datoschart input has changed
     if (changes.datoschart && !changes.datoschart.firstChange) {
       // If it has changed and it's not the first change, create the graph
-      this.createGraph(this.datoschart, "chartdiv", "chartcontrols2");
+      this.createGraph(this.datoschart, "chartdiv");
     }
   }
 
@@ -53,20 +53,14 @@ export class TempHumChartComponent implements OnInit, OnChanges {
     });
   }
 
-  createGraph(apiData: Data[], divId, chartcontrols) {
+  createGraph(apiData: Data[], divId) {
     // Chart code goes in here
     this.browserOnly(() => {
 
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
-      this.maybeDisposeRoot(chartcontrols);
 
       // Remove content from chart divs
-      let chartcontrolsDiv = document.getElementById(chartcontrols);
-      while (chartcontrolsDiv.firstChild) {
-        chartcontrolsDiv.removeChild(chartcontrolsDiv.firstChild);
-      }
-
       let chartDiv = document.getElementById(divId);
       while (chartDiv.firstChild) {
         chartDiv.removeChild(chartDiv.firstChild);
@@ -92,7 +86,8 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         // wheelY: "zoomX",
         panX: true,
         panY: false,
-        pinchZoomX: true
+        pinchZoomX: true,
+        layout: root.verticalLayout
       }));
 
       // Create axes
@@ -135,6 +130,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         });
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
+        sbSeries.data.setAll(apiData);
       }
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
@@ -145,7 +141,8 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         xAxis: dateAxis,
         yAxis: valueAxis,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY} C"
+          labelText: "{name}: {valueY} C",
+          keepTargetHover: true
         })
       }));
 
@@ -157,7 +154,8 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         xAxis: dateAxis,
         yAxis: valueAxis2,
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{name}: {valueY} KPa"
+          labelText: "{name}: {valueY} KPa",
+          keepTargetHover: true
         })
       }));
 
@@ -166,28 +164,39 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-      // mainPanel.set("scrollbarX", am5.Scrollbar.new(root, {orientation: "horizontal"
-      // }));
+       // Add scrollbar
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
+      let scrollbar = mainPanel.set("scrollbarX", am5xy.XYChartScrollbar.new(root, {
+        orientation: "horizontal",
+        height: 30
+      }));
+      stockChart.toolsContainer.children.push(scrollbar);
+      
+      let sbDateAxis = scrollbar.chart.xAxes.push(am5xy.GaplessDateAxis.new(root, {
+        baseInterval: {
+          timeUnit: "minute",
+          count: 10
+        },
+        renderer: am5xy.AxisRendererX.new(root, {})
+      }));
+      
+      let sbValueAxis = scrollbar.chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+      
+      let sbSeries = scrollbar.chart.series.push(am5xy.LineSeries.new(root, {
+        valueYField: "dpv",
+        valueXField: "dataFecha",
+        xAxis: sbDateAxis,
+        yAxis: sbValueAxis
+      }));
 
-      // Eliminar el toolbar anterior si existe
-      if (this.toolbar) {
-        this.toolbar.dispose();
-      }
-
-      // Add toolbar
-      // https://www.amcharts.com/docs/v5/charts/stock/toolbar/
-      this.toolbar = am5stock.StockToolbar.new(root, {
-        container: document.getElementById("chartcontrols2"),
-        stockChart: stockChart,
-        controls: [
-          am5stock.DateRangeSelector.new(root, {
-            stockChart: stockChart
-          }),
-          am5stock.PeriodSelector.new(root, {
-            stockChart: stockChart
-          })
-        ]
+      sbSeries.fills.template.setAll({
+        visible: true,
+        fillOpacity: 0.3
       });
+
+      
 
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/

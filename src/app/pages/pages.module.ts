@@ -14,7 +14,7 @@ import { WidgetModule } from '../shared/widget/widget.module';
 import { UIModule } from '../shared/ui/ui.module';
 
 import { PagesRoutingModule } from './pages-routing.module';
-
+import { MaterialModule } from '../material/material.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { FormModule } from './form/form.module';
@@ -36,6 +36,7 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   ],
   imports: [
     // TableModule,
+    MaterialModule,
     CommonModule,
     FormsModule,
     NgbDropdownModule,
