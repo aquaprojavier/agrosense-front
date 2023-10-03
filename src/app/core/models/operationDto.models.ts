@@ -4,7 +4,7 @@ import { Polygon } from "./polygon.models";
 export class OperationDto {
     operationId?: number;
     operationName: string;
-    operationArea: number;
+    operationArea?: number;
     propertyId?: number;
     polygons?: Polygon[];
     devices?: Device[]

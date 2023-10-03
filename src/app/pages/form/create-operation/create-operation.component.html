@@ -23,27 +23,7 @@
                     Máximo 20 caracteres!
                   </mat-error>
                 </div>
-              </mat-form-field>
-  
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label>Area</mat-label>
-                <input matInput type="number" formControlName="operationArea" />
-                <mat-icon matSuffix *ngIf="isOperationAreaFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isOperationAreaFieldInvalid">close</mat-icon>
-                <div *ngIf="operationAreaField.touched">
-                  <mat-error *ngIf="operationAreaField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error
-                    *ngIf="
-                    operationAreaField.hasError('max') || operationAreaField.hasError('min')
-                    "
-                  >
-                    Este operación debe estar comprendido entre 1 y 200 hectáreas.
-                  </mat-error>
-                </div>
-              </mat-form-field>
-  
+              </mat-form-field>  
               <br />
               <button type="submit" class="btn btn-primary w-100">Crear</button>
             </form>

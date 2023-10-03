@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { formatDate } from '@angular/common';
-import { geoJSON, Icon, LatLng, Map, marker, tileLayer } from 'leaflet';
+import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
@@ -126,9 +126,36 @@ export class LeafletComponent implements OnInit {
     }
 
     this.myMap = new Map('map').setView([0, 0], 14);
-    tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    const arcgisTileLayer = tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
+
+    // Crear una capa de grupo para los polígonos
+    const polygonLayer = layerGroup();
+    // Agregar la capa de polígonos al mapa
+    polygonLayer.addTo(this.myMap);
+
+    // URL de los tiles recibida de la API (con placeholders)
+    let tileURL = 'http://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/0205e8d1400/6509191675325506540ba823?appid=8dbe5b04b083a07e2c25cd0193c562fc';
+
+    // Agregar capa de tiles con tu polígono
+    let ndviTileLayer = tileLayer(tileURL, {
+      // Opciones adicionales de la capa de tiles
+    });
+    // Agregar control de capas
+    const baseLayers = {
+      'ArcGIS': arcgisTileLayer
+    };
+
+    const overlayLayers = {
+      'NDVI': ndviTileLayer, // Capa de mosaicos NDVI
+      'Polygons': polygonLayer // Capa de grupo de polígonos
+    };
+    // Agregar control de capas
+    const layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+
+    // Agregar el control de capas al mapa
+    layerControl.addTo(this.myMap);
 
     let poligonToGjson;
     let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
@@ -169,11 +196,17 @@ export class LeafletComponent implements OnInit {
       ope.polygons.forEach(poli => {
         let poligonDevice = JSON.parse(poli.geojson);
         let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
+
+        // Formatear ope.operationArea con 2 decimales
+      const formattedOperationArea = ope.operationArea.toFixed(2);
+
         poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
       <img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div>
       ${dev ? `<img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br>` : ''}
-      <img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br>
+      <img src="assets/images/selection.png" alt=""> Superficie: <b>${formattedOperationArea} ha.</b><br>
       </div>`, { closeButton: false });
+        // Agregar el polígono a la capa de grupo
+        polygonLayer.addLayer(poligon);
       });
     };
 
@@ -205,7 +238,7 @@ export class LeafletComponent implements OnInit {
         });
       }
     });
-    
+
   };
 
 

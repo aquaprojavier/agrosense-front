@@ -120,8 +120,8 @@ export class EditDeviceComponent implements OnInit {
 
   private buildForm() {
     this.form = this.formBuilder.group({
-      devicesNombre: ['', [Validators.required, Validators.maxLength(10)]],
-      devicesCultivo: ['', [Validators.required, Validators.maxLength(10)]],
+      devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
+      devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
@@ -244,8 +244,6 @@ export class EditDeviceComponent implements OnInit {
           const coordenadas = layer.getLatLng();
           this.longitud = coordenadas.lng;
           this.latitud = coordenadas.lat;
-          console.log(this.latitud);
-          console.log(this.longitud);
         }
         // No es necesario agregar la capa al featureGroup nuevamente, ya que ya está allí debido a la edición.
       });

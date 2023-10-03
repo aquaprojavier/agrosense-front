@@ -86,7 +86,6 @@ export class CreateOperationComponent implements OnInit {
   private buildForm() {
     this.form = this.formBuilder.group({
       operationName: ['', [Validators.required, Validators.maxLength(20)]],
-      operationArea: ['', [Validators.required, Validators.min(0), Validators.max(500)]],//TODO automatizar
     });
   }
 
@@ -94,18 +93,29 @@ export class CreateOperationComponent implements OnInit {
     if (this.form.valid) {
       const operationEdit: OperationDto = {
         operationName: this.form.value.operationName,
-        operationArea: this.form.value.operationArea,
-        propertyId : this.propId,
-        polygons: this.polygons
+        propertyId: this.propId,
+        polygons: []
       };
+
+      for (let i = 0; i < this.polygons.length; i++) {
+        const polygonName = `${this.form.value.operationName}${i + 1}`;
+        console.log(polygonName);
+        const modifiedPolygon: Polygon = {
+          name: polygonName,
+          geojson: this.polygons[i].geojson
+        };
+        operationEdit.polygons.push(modifiedPolygon);
+      }
+
       console.log(operationEdit);
 
-      this.operationService.createOperation (operationEdit).subscribe(
+      this.operationService.createOperation(operationEdit).subscribe(
         (response: Operation) => {
 
           console.log('Se ha creado la operacion exitosamente:', response);
 
-          Swal.fire('Creación exitosa!', `La operation ${this.form.value.operationName} fue creado correctamente`, 'success')
+          Swal.fire('Creación exitosa!', `La operation ${this.form.value.operationName} fue creado correctamente.\n
+          Área de operación: ${response.operationArea} ha.`, 'success')
             .then(() => {
               this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
             });
@@ -168,11 +178,11 @@ export class CreateOperationComponent implements OnInit {
 
     operations.forEach(ope => {
 
-        ope.polygons.forEach(poly => {
-          let poligonDevice = JSON.parse(poly.geojson);
-          let poligon = geoJSON(poligonDevice, { style: operationStyleYellow }).addTo(this.myMap);
-          poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-        })
+      ope.polygons.forEach(poly => {
+        let poligonDevice = JSON.parse(poly.geojson);
+        let poligon = geoJSON(poligonDevice, { style: operationStyleYellow }).addTo(this.myMap);
+        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+      })
 
       ope.devices.forEach(dev => {
 
@@ -209,15 +219,6 @@ export class CreateOperationComponent implements OnInit {
   }
   get isOperationNameFieldInvalid() {
     return this.operationNameField.touched && this.operationNameField.invalid;
-  }
-  get operationAreaField() {
-    return this.form.get('operationArea')
-  }
-  get isOperationAreaFieldValid() {
-    return this.operationAreaField.touched && this.operationAreaField.valid;
-  }
-  get isOperationAreaFieldInvalid() {
-    return this.operationAreaField.touched && this.operationAreaField.invalid;
   }
   get opeIdField() {
     return this.form.get('opeId')
