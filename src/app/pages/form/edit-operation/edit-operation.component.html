@@ -12,7 +12,7 @@
             <form [formGroup]="form" (ngSubmit)="upDateOperation()">
 
               <mat-form-field appearance="fill" class="w-100">
-                <mat-label>Operación</mat-label>
+                <mat-label class="light">Operación</mat-label>
                 <input matInput type="text" formControlName="name" />
                 <mat-icon matSuffix *ngIf="isOperationNameFieldValid">done</mat-icon>
                 <mat-icon matSuffix *ngIf="isOperationNameFieldInvalid">close</mat-icon>
@@ -27,7 +27,7 @@
               </mat-form-field>
   
               <mat-form-field appearance="fill" class="w-100">
-                <mat-label>Area</mat-label>
+                <mat-label class="light">Area</mat-label>
                 <input matInput type="number" formControlName="area" />
                 <mat-icon matSuffix *ngIf="isOperationAreaFieldValid">done</mat-icon>
                 <mat-icon matSuffix *ngIf="isOperationAreaFieldInvalid">close</mat-icon>

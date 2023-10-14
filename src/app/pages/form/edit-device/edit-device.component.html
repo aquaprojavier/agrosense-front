@@ -11,7 +11,7 @@
         <div class="card-body">
           <form [formGroup]="form" (ngSubmit)="upDateDev()">
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Cuadro</mat-label>
+              <mat-label class="light">Cuadro</mat-label>
               <input matInput type="text" formControlName="devicesNombre" />
               <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isNameFieldInvalid">close</mat-icon>
@@ -26,7 +26,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Variedad</mat-label>
+              <mat-label class="light">Variedad</mat-label>
               <input matInput type="text" formControlName="devicesCultivo" />
               <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isVarietyFieldInvalid">close</mat-icon>
@@ -41,7 +41,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Tipo de suelo</mat-label>
+              <mat-label class="light">Tipo de suelo</mat-label>
               <mat-select formControlName="soilId">
                 <mat-option *ngFor="let soil of soils" [value]="soil.id">
                   {{ soil.tipo }}
@@ -50,7 +50,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Latitud</mat-label>
+              <mat-label class="light">Latitud</mat-label>
               <input matInput type="number" [(ngModel)]="latitud" formControlName="latitud" />
               <mat-icon matSuffix *ngIf="isLatitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLatitudFieldInvalid">close</mat-icon>
@@ -69,7 +69,7 @@
             </mat-form-field>
 
              <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Longitud</mat-label>
+              <mat-label class="light">Longitud</mat-label>
               <input matInput type="number"  [(ngModel)]="longitud"  formControlName="longitud" />
               <mat-icon matSuffix *ngIf="isLongitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLongitudFieldInvalid"
@@ -91,7 +91,7 @@
             </mat-form-field>
 
            <mat-form-field appearance="fill" class="w-100">
-              <mat-label>Operacion de riego</mat-label>
+              <mat-label class="light">Operacion de riego</mat-label>
               <mat-select formControlName="operationId">
                 <mat-option *ngFor="let operation of operations" [value]="operation.operationId">
                   {{ operation.operationName }}

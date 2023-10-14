@@ -1,5 +1,7 @@
 import { Device } from "./device.models";
 import { Polygon } from "./polygon.models";
+import { Irrigation } from './irrigation.models';
+import { Crop } from './crop.models';
 
 export class OperationDto {
     operationId?: number;
@@ -8,4 +10,6 @@ export class OperationDto {
     propertyId?: number;
     polygons?: Polygon[];
     devices?: Device[]
+    irrigation?: Irrigation;
+    crop?: Crop
 }

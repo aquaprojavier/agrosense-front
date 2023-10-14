@@ -13,6 +13,8 @@ import { Router } from '@angular/router';
 import { Operation } from 'src/app/core/models/operation.models';
 import { OperationDto } from 'src/app/core/models/operationDto.models';
 import { Polygon } from 'src/app/core/models/polygon.models';
+import { Crop } from '../../../core/models/crop.models';
+import { Irrigation } from 'src/app/core/models/irrigation.models'; 
 
 @Component({
   selector: 'app-create-operation',
@@ -86,16 +88,60 @@ export class CreateOperationComponent implements OnInit {
   private buildForm() {
     this.form = this.formBuilder.group({
       operationName: ['', [Validators.required, Validators.maxLength(20)]],
+      type: ['', [Validators.required, Validators.maxLength(20)]],
+      crop: ['', [Validators.required, Validators.maxLength(20)]],
+      variety: ['', [Validators.required, Validators.maxLength(20)]],
+      efficiency: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
+      betweenEmitters: ['', [Validators.required, Validators.min(0.15), Validators.max(3)]],
+      rowNumbers: ['', [Validators.required, Validators.min(1), Validators.max(8)]],
+      betweenRow: ['', [Validators.required, Validators.min(0.3), Validators.max(8)]],
+      emitterFlow: ['', [Validators.required, Validators.min(0.5), Validators.max(8)]],
+      wetSoil: ['', [Validators.required, Validators.min(5), Validators.max(100)]],
+      ks: ['', [Validators.required, Validators.min(0), Validators.max(1)]],
     });
   }
 
   saveOperation() {
     if (this.form.valid) {
-      const operationEdit: OperationDto = {
-        operationName: this.form.value.operationName,
-        propertyId: this.propId,
-        polygons: []
-      };
+      // Obtener valores del formulario
+    const operationName = this.form.value.operationName;
+    const type = this.form.value.type;
+    const cropName = this.form.value.crop;
+    const variety = this.form.value.variety;
+    const efficiency = this.form.value.efficiency;
+    const betweenEmitters = this.form.value.betweenEmitters;
+    const rowNumbers = this.form.value.rowNumbers;
+    const betweenRow = this.form.value.betweenRow;
+    const emitterFlow = this.form.value.emitterFlow;
+    const wetSoil = this.form.value.wetSoil;
+    const ks = this.form.value.ks;
+
+    // Crear objeto Irrigation
+    const irrigation: Irrigation = {
+      type: type,
+      efficiency: efficiency,
+      betweenEmitters: betweenEmitters,
+      rowNumbers: rowNumbers,
+      betweenRow: betweenRow,
+      emitterFlow: emitterFlow,
+      wetSoil: wetSoil,
+      ks: ks,
+    };
+
+    // Crear objeto Crop
+    const crop: Crop = {
+      crop: cropName,
+      variety: variety,
+    };
+      
+      // Crear objeto OperationDto
+    const operationEdit: OperationDto = {
+      operationName: operationName,
+      propertyId: this.propId,
+      polygons: [],
+      irrigation: irrigation,
+      crop: crop,
+    };
 
       for (let i = 0; i < this.polygons.length; i++) {
         const polygonName = `${this.form.value.operationName}${i + 1}`;
@@ -124,6 +170,7 @@ export class CreateOperationComponent implements OnInit {
           console.error('Error en la respuesta del backend:', error);
         }
       );
+      
     } else {
       this.form.markAllAsTouched();
     }
@@ -228,5 +275,95 @@ export class CreateOperationComponent implements OnInit {
   }
   get isOpeIdFieldInvalid() {
     return this.opeIdField.touched && this.opeIdField.invalid;
+  }
+  get typeField() {
+    return this.form.get('type');
+  }
+  get isTypeFieldValid() {
+    return this.typeField.touched && this.typeField.valid;
+  }
+  get isTypeFieldInvalid() {
+    return this.typeField.touched && this.typeField.invalid;
+  }
+  get cropField() {
+    return this.form.get('crop');
+  }
+  get isCropFieldValid() {
+    return this.cropField.touched && this.cropField.valid;
+  }
+  get isCropFieldInvalid() {
+    return this.cropField.touched && this.cropField.invalid;
+  }
+  get varietyField() {
+    return this.form.get('variety');
+  }
+  get isVarietyFieldValid() {
+    return this.varietyField.touched && this.varietyField.valid;
+  }
+  get isVarietyFieldInvalid() {
+    return this.varietyField.touched && this.varietyField.invalid;
+  }
+  get efficiencyField() {
+    return this.form.get('efficiency');
+  }
+  get isEfficiencyFieldValid() {
+    return this.efficiencyField.touched && this.efficiencyField.valid;
+  }
+  get isEfficiencyFieldInvalid() {
+    return this.efficiencyField.touched && this.efficiencyField.invalid;
+  }
+  get betweenEmittersField() {
+    return this.form.get('betweenEmitters');
+  }
+  get isBetweenEmittersFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
+  }
+  get isBetweenEmittersFieldInvalid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.invalid;
+  }
+  get rowNumbersField() {
+    return this.form.get('rowNumbers');
+  }
+  get isRowNumbersFieldValid() {
+    return this.rowNumbersField.touched && this.rowNumbersField.valid;
+  }
+  get isRowNumbersFieldInvalid() {
+    return this.rowNumbersField.touched && this.rowNumbersField.invalid;
+  }
+  get betweenRowField() {
+    return this.form.get('betweenRow');
+  }
+  get isBetweenRowFieldValid() {
+    return this.betweenRowField.touched && this.betweenRowField.valid;
+  }
+  get isBetweenRowFieldInvalid() {
+    return this.betweenRowField.touched && this.betweenRowField.invalid;
+  }
+  get emitterFlowField() {
+    return this.form.get('emitterFlow');
+  }
+  get isEmitterFlowFieldValid() {
+    return this.emitterFlowField.touched && this.emitterFlowField.valid;
+  }
+  get isEmitterFlowFieldInvalid() {
+    return this.emitterFlowField.touched && this.emitterFlowField.invalid;
+  }
+  get wetSoilField() {
+    return this.form.get('wetSoil');
+  }
+  get isWetSoilFieldValid() {
+    return this.wetSoilField.touched && this.wetSoilField.valid;
+  }
+  get isWetSoilFieldInvalid() {
+    return this.wetSoilField.touched && this.wetSoilField.invalid;
+  }
+  get ksField() {
+    return this.form.get('ks');
+  }
+  get isKsFieldValid() {
+    return this.ksField.touched && this.ksField.valid;
+  }
+  get isKsFieldInvalid() {
+    return this.ksField.touched && this.ksField.invalid;
   }
 }

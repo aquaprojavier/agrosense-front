@@ -11,7 +11,7 @@ import 'sweetalert2/dist/sweetalert2.css';
 import { Router } from '@angular/router';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { OperationService } from 'src/app/core/services/operation.service';
-import { Location } from '@angular/common';
+// import { Location } from '@angular/common';
 
 
 @Component({
