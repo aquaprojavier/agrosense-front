@@ -1,4 +1,4 @@
 export class Crop {
-    crop: string;
-    variety?: string
+    cropName: string;
+    variety?: string;
 }

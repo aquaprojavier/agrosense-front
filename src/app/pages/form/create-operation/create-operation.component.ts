@@ -11,10 +11,10 @@ import { Device } from '../../../core/models/device.models';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { Operation } from 'src/app/core/models/operation.models';
-import { OperationDto } from 'src/app/core/models/operationDto.models';
 import { Polygon } from 'src/app/core/models/polygon.models';
 import { Crop } from '../../../core/models/crop.models';
 import { Irrigation } from 'src/app/core/models/irrigation.models'; 
+import { Soil } from 'src/app/core/models/soil.model';
 
 @Component({
   selector: 'app-create-operation',
@@ -42,27 +42,91 @@ export class CreateOperationComponent implements OnInit {
   propId: number;
   devId: number;
   myMap = null;
-  // opeGeojson: string;
   form: FormGroup;
   drawItems: FeatureGroup;
   geojsonLayer: any;
-  // polygon: Polygon;
   polygons: Polygon[] = [];
+  soilType: string[] = [
+    "Arenoso",
+    "Franco-arenoso",
+    "Franco",
+    "Franco-arcilloso",
+    "Arcillo-limoso",
+    "Arcilloso",
+    // Agrega más tipos de suelo según tus necesidades
+  ];
+  plantingYearOptions: number[] = [2023,2022,2021,2020,2019,2018,2017,2016,2015,2014,2013,2012,2011,2010,2009,2008,2007,2006,2005,2004,2003,2002,2001,2000];
+  cropTypeOptions: string[] = ['Almendro','Ajo','Cerezo','Ciruela','Damazco','Durazno','Nogal','Olivo','Peral','Pistacho','Uva de mesa', 'Vid vinífera','Zanahoria', 'Zapallo'];
+  riegoOptions: string[] = ['goteo', 'aspersión', 'microaspersión', 'surco'];
+  wetSoilOptions: number[] = [100,95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,5];
+  stoneOptions: number[] = [90,80,70,60,50,40,20,10,5,0];
+  rowNumbersOptions: number[] = [1,2,3,4];
+  efficiencyOptions: number[] = [95,90,85,80,70,60,50,40,30];
+  efficiencyMap: { [key: string]: number } = {
+    goteo: 90,
+    aspersión: 95,
+    microaspersión: 85,
+    surco: 30
+  };
 
 
   constructor(private formBuilder: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private operationService: OperationService,
-    private router: Router,) { }
+    private router: Router,) {}
 
   ngOnInit(): void {
+    this.buildForm();
+    this.form.get('type').valueChanges.subscribe((selectedType: string) => {
+      const efficiencyValue = this.efficiencyMap[selectedType];
+      if (efficiencyValue !== undefined) {
+        this.form.get('efficiency').setValue(efficiencyValue);
+      } else {
+        this.form.get('efficiency').reset();
+      }
+    });
+
+    this.form.get('soilType').valueChanges.subscribe((selectedSoilType: string) => {
+      switch (selectedSoilType) {
+        case 'Arenoso':
+          this.form.get('cc').setValue(9);
+          this.form.get('pmp').setValue(4);
+          break;
+        case 'Franco-arenoso':
+          this.form.get('cc').setValue(14);
+          this.form.get('pmp').setValue(6);
+          break;
+        case 'Franco':
+          this.form.get('cc').setValue(22);
+          this.form.get('pmp').setValue(10);
+          break;
+        case 'Franco-arcilloso':
+          this.form.get('cc').setValue(27);
+          this.form.get('pmp').setValue(13);
+          break;
+        case 'Arcillo-limoso':
+          this.form.get('cc').setValue(31);
+          this.form.get('pmp').setValue(15);
+          break;
+        case 'Arcilloso':
+          this.form.get('cc').setValue(35);
+          this.form.get('pmp').setValue(17);
+          break;
+        default:
+          this.form.get('cc').reset();
+          this.form.get('pmp').reset();
+          break;
+      }
+    });
+    
+    
     this.breadCrumbItems = [{ label: 'Operation' }, { label: 'Create', active: true }];
     this.activatedRoute.snapshot.params['idProp'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.getData(this.propId);
-      this.buildForm();
+      
     },
       (error) => {
         console.log(error);
@@ -88,16 +152,24 @@ export class CreateOperationComponent implements OnInit {
   private buildForm() {
     this.form = this.formBuilder.group({
       operationName: ['', [Validators.required, Validators.maxLength(20)]],
-      type: ['', [Validators.required, Validators.maxLength(20)]],
       crop: ['', [Validators.required, Validators.maxLength(20)]],
-      variety: ['', [Validators.required, Validators.maxLength(20)]],
-      efficiency: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
+      betweenPlant: ['', [Validators.required, Validators.min(0.15), Validators.max(15)]],
+      betweenRow: ['', [Validators.required, Validators.min(0.3), Validators.max(15)]],
+      plantingYear: ['', [Validators.required, Validators.min(1950), Validators.max(2023)]],
+
+      type: ['', [Validators.required]], // Agregar campo 'type' con validación requerida
+      efficiency: ['', [Validators.required, Validators.min(30), Validators.max(95)]],
       betweenEmitters: ['', [Validators.required, Validators.min(0.15), Validators.max(3)]],
-      rowNumbers: ['', [Validators.required, Validators.min(1), Validators.max(8)]],
-      betweenRow: ['', [Validators.required, Validators.min(0.3), Validators.max(8)]],
+      rowNumbers: [1, [Validators.required, Validators.min(1), Validators.max(8)]],
       emitterFlow: ['', [Validators.required, Validators.min(0.5), Validators.max(8)]],
       wetSoil: ['', [Validators.required, Validators.min(5), Validators.max(100)]],
-      ks: ['', [Validators.required, Validators.min(0), Validators.max(1)]],
+     
+      soilType: ['', [Validators.required]], // Agregar campo 'soilType' con validación requerida
+      rootDepth: ['', [Validators.required]], // Agregar campo 'root' con validación requerida
+      stone: [0, [Validators.required]], // Agregar campo 'cc' con validación requerida
+      cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
+      ur: [50, [Validators.required]], // Agregar campo 'ur' con validación requerida
+      pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
   }
 
@@ -105,57 +177,73 @@ export class CreateOperationComponent implements OnInit {
     if (this.form.valid) {
       // Obtener valores del formulario
     const operationName = this.form.value.operationName;
-    const type = this.form.value.type;
+    const betweenPlant = this.form.value.betweenPlant;
+    const betweenRow = this.form.value.betweenRow;
+    const plantingYear = this.form.value.plantingYear;
+
     const cropName = this.form.value.crop;
-    const variety = this.form.value.variety;
+    
+    const irriType = this.form.value.type;
     const efficiency = this.form.value.efficiency;
     const betweenEmitters = this.form.value.betweenEmitters;
     const rowNumbers = this.form.value.rowNumbers;
-    const betweenRow = this.form.value.betweenRow;
     const emitterFlow = this.form.value.emitterFlow;
     const wetSoil = this.form.value.wetSoil;
-    const ks = this.form.value.ks;
+    
+    const soilType = this.form.value.soilType;
+    const root = this.form.value.rootDepth;
+    const stone = this.form.value.stone;
+    const cc = this.form.value.cc;
+    const ur = this.form.value.ur;
+    const pmp = this.form.value.pmp; 
 
     // Crear objeto Irrigation
     const irrigation: Irrigation = {
-      type: type,
+      type: irriType,
       efficiency: efficiency,
       betweenEmitters: betweenEmitters,
       rowNumbers: rowNumbers,
-      betweenRow: betweenRow,
       emitterFlow: emitterFlow,
       wetSoil: wetSoil,
-      ks: ks,
     };
 
     // Crear objeto Crop
     const crop: Crop = {
-      crop: cropName,
-      variety: variety,
+      cropName: cropName,
+    };
+
+    //Crear objrto soil
+    const soil: Soil = {
+    soilType: soilType,
+    depth: root,
+    stone: stone,
+    cc: cc,
+    ur: ur,
+    pmp: pmp,
     };
       
-      // Crear objeto OperationDto
-    const operationEdit: OperationDto = {
+    // Crear objeto Operation
+    const operationCreated: Operation = {
+      propertyId: this.propId, 
       operationName: operationName,
-      propertyId: this.propId,
-      polygons: [],
-      irrigation: irrigation,
+      plantingYear: plantingYear,
+      betweenPlant: betweenPlant,
+      betweenRow: betweenRow,
       crop: crop,
+      polygons: this.polygons,     
+      irrigation: irrigation,      
+      soil: soil
     };
 
-      for (let i = 0; i < this.polygons.length; i++) {
+    //asigna un nombre a cada poligono   
+       for (let i = 0; i < this.polygons.length; i++) {
         const polygonName = `${this.form.value.operationName}${i + 1}`;
-        console.log(polygonName);
-        const modifiedPolygon: Polygon = {
-          name: polygonName,
-          geojson: this.polygons[i].geojson
-        };
-        operationEdit.polygons.push(modifiedPolygon);
+          this.polygons[i].name = polygonName;
       }
+      
+      console.log(operationCreated);
 
-      console.log(operationEdit);
-
-      this.operationService.createOperation(operationEdit).subscribe(
+      this.operationService.createOperation(operationCreated).subscribe(
         (response: Operation) => {
 
           console.log('Se ha creado la operacion exitosamente:', response);
@@ -219,6 +307,7 @@ export class CreateOperationComponent implements OnInit {
     this.myMap.addLayer(this.drawItems);
 
     this.createPolygon();
+    console.log(this.polygons)
 
     // let operacionStyleGrey = { color: "#7B7B7B" };
     let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
@@ -235,12 +324,6 @@ export class CreateOperationComponent implements OnInit {
 
         marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
 
-        // ope.polygons.forEach(poly => {
-        //   let operationObj = JSON.parse(poly.geojson);
-        //   let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
-        //   operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-        // })
-
       });
     });
   };
@@ -255,6 +338,7 @@ export class CreateOperationComponent implements OnInit {
       polygon1.geojson = opeGeojson;
       this.drawItems.addLayer(layer);
       this.polygons.push(polygon1);
+      console.log(polygon1);
     });
   }
 
@@ -294,14 +378,23 @@ export class CreateOperationComponent implements OnInit {
   get isCropFieldInvalid() {
     return this.cropField.touched && this.cropField.invalid;
   }
-  get varietyField() {
-    return this.form.get('variety');
+  get betweenPlantField() {
+    return this.form.get('betweenPlant');
   }
-  get isVarietyFieldValid() {
-    return this.varietyField.touched && this.varietyField.valid;
+  get isBetweenPlantFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
   }
-  get isVarietyFieldInvalid() {
-    return this.varietyField.touched && this.varietyField.invalid;
+  get isBetweenPlantFieldInvalid() {
+    return this.betweenEmittersField. touched && this.betweenEmittersField.invalid;
+  }
+  get plantingYearField() {
+    return this.form.get('plantingYear');
+  }
+  get isPlantingYearFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
+  }
+  get isPlantingYearFieldInvalid() {
+    return this.betweenEmittersField. touched && this.betweenEmittersField.invalid;
   }
   get efficiencyField() {
     return this.form.get('efficiency');
@@ -357,13 +450,60 @@ export class CreateOperationComponent implements OnInit {
   get isWetSoilFieldInvalid() {
     return this.wetSoilField.touched && this.wetSoilField.invalid;
   }
-  get ksField() {
-    return this.form.get('ks');
+  get stoneField() {
+    return this.form.get('stone');
   }
-  get isKsFieldValid() {
-    return this.ksField.touched && this.ksField.valid;
+  get isStoneFieldValid() {
+    return this.stoneField.touched && this.stoneField.valid;
   }
-  get isKsFieldInvalid() {
-    return this.ksField.touched && this.ksField.invalid;
+  get isStoneFieldInvalid() {
+    return this.stoneField.touched && this.stoneField.invalid;
   }
+  get soilTypeField() {
+    return this.form.get('soilType');
+  }
+  get isSoilTypeFieldValid() {
+    return this.soilTypeField.touched && this.soilTypeField.valid;
+  }
+  get isSoilTypeFieldInvalid() {
+    return this.soilTypeField.touched && this.soilTypeField.invalid;
+  }
+  
+  get rootDepthField() {
+    return this.form.get('rootDepth');
+  }
+  get isRootDepthFieldValid() {
+    return this.rootDepthField.touched && this.rootDepthField.valid;
+  }
+  get isRootDepthFieldInvalid() {
+    return this.rootDepthField.touched && this.rootDepthField.invalid;
+  }
+  get ccField() {
+    return this.form.get('cc');
+  }
+  get isCcFieldValid() {
+    return this.ccField.touched && this.ccField.valid;
+  }
+  get isCcFieldInvalid() {
+    return this.ccField.touched && this.ccField.invalid;
+  }
+  get urField() {
+    return this.form.get('ur');
+  }
+  get isUrFieldValid() {
+    return this.urField.touched && this.urField.valid;
+  }
+  get isUrFieldInvalid() {
+    return this.urField.touched && this.urField.invalid;
+  }
+  get pmpField() {
+    return this.form.get('pmp');
+  }
+  get isPmpFieldValid() {
+    return this.pmpField.touched && this.pmpField.valid;
+  }
+  get isPmpFieldInvalid() {
+    return this.pmpField.touched && this.pmpField.invalid;
+  }
+  
 }

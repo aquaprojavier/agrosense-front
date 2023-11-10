@@ -4,8 +4,7 @@ export class Irrigation {
     efficiency: number;
     betweenEmitters: number;
     rowNumbers: number;
-    betweenRow: number;
     emitterFlow: number;
     wetSoil: number;
-    ks: number
+    ks?: number
 }

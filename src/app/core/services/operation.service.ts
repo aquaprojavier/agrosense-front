@@ -16,7 +16,7 @@ export class OperationService {
     return this.http.get<Operation[]>(`${baseUrl}/property/listOp/${id}`)
   }
 
-  public createOperation (data: OperationDto) {
+  public createOperation (data: Operation) {
     return this.http.post<Operation>(`${baseUrl}/operation`, data)
   }
 

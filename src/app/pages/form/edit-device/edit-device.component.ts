@@ -207,7 +207,7 @@ export class EditDeviceComponent implements OnInit {
           poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
         });
 
-      ope.devices.forEach(dev => {
+      property.devices.forEach(dev => {
 
         if (dev.devicesId == this.devId) {
 

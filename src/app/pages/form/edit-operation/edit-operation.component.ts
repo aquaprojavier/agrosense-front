@@ -13,6 +13,8 @@ import { Soil } from 'src/app/core/models/soil.model';
 import { Operation } from 'src/app/core/models/operation.models';
 import { Polygon } from 'src/app/core/models/polygon.models';
 import { OperationDto } from 'src/app/core/models/operationDto.models';
+import { Irrigation } from 'src/app/core/models/irrigation.models';
+import { Crop } from 'src/app/core/models/crop.models';
 
 @Component({
   selector: 'app-edit-operation',
@@ -40,6 +42,29 @@ export class EditOperationComponent implements OnInit {
   longitud: number;
   polygons: Polygon[] = [];
   polygonLayers: { [polygonId: number]: Layer } = {};
+
+  soilTypeOptions: string[] = [
+    "arenoso",
+    "franco-arenoso",
+    "franco",
+    "franco-arcilloso",
+    "arcillo-limoso",
+    "arcilloso",
+    // Agrega más tipos de suelo según tus necesidades
+  ];
+  plantingYearOptions: number[] = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000];
+  cropTypeOptions: string[] = ['Almendro', 'Ajo', 'Cerezo', 'Ciruela', 'Damazco', 'Durazno', 'Nogal', 'Olivo', 'Peral', 'Pistacho', 'Uva de mesa', 'Vid vinífera', 'Zanahoria', 'Zapallo'];
+  riegoOptions: string[] = ['goteo', 'aspersión', 'microaspersión', 'surco'];
+  wetSoilOptions: number[] = [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5];
+  stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
+  rowNumbersOptions: number[] = [1, 2, 3, 4];
+  efficiencyOptions: number[] = [95, 90, 85, 80, 70, 60, 50, 40, 30];
+  efficiencyMap: { [key: string]: number } = {
+    goteo: 90,
+    aspersión: 95,
+    microaspersión: 85,
+    surco: 30
+  };
 
   greyIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
@@ -96,32 +121,118 @@ export class EditOperationComponent implements OnInit {
   };
   // =========================================FORM============================================================
   private initForm() {
+    console.log(this.operation);
     this.form.patchValue({
-      name: this.operation.operationName,
-      area: this.operation.operationArea,
-      // polygons: this.operation.polygons,
-      // devices: this.operation.devices
+      operationName: this.operation.operationName,
+      crop: this.operation.crop.cropName,
+      betweenPlant: this.operation.betweenPlant,
+      betweenRow: this.operation.betweenRow,
+      plantingYear: this.operation.plantingYear,
+
+      type: this.operation.irrigation.type,
+      efficiency: this.operation.irrigation.efficiency,
+      betweenEmitters: this.operation.irrigation.betweenEmitters,
+      rowNumbers: this.operation.irrigation.rowNumbers,
+      emitterFlow: this.operation.irrigation.emitterFlow,
+      wetSoil: this.operation.irrigation.wetSoil,
+
+      soilType: this.operation.soil.soilType,
+      depth: this.operation.soil.depth,
+      stone: this.operation.soil.stone,
+      cc: this.operation.soil.cc,
+      ur: this.operation.soil.ur,
+      pmp: this.operation.soil.pmp,
     });
   }
 
   private buildForm() {
     this.form = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.maxLength(20)]],
-      area: ['', [Validators.required, Validators.min(0), Validators.max(500)]]
+      operationName: ['', [Validators.required, Validators.maxLength(20)]],
+      crop: ['', [Validators.required, Validators.maxLength(20)]],
+      betweenPlant: ['', [Validators.required, Validators.min(0.15), Validators.max(15)]],
+      betweenRow: ['', [Validators.required, Validators.min(0.3), Validators.max(15)]],
+      plantingYear: ['', [Validators.required, Validators.min(1950), Validators.max(2023)]],
+
+      type: ['', [Validators.required]], // Agregar campo 'type' con validación requerida
+      efficiency: ['', [Validators.required, Validators.min(30), Validators.max(95)]],
+      betweenEmitters: ['', [Validators.required, Validators.min(0.15), Validators.max(3)]],
+      rowNumbers: [1, [Validators.required, Validators.min(1), Validators.max(8)]],
+      emitterFlow: ['', [Validators.required, Validators.min(0.5), Validators.max(8)]],
+      wetSoil: ['', [Validators.required, Validators.min(5), Validators.max(100)]],
+
+      soilType: ['', [Validators.required]], // Agregar campo 'soilType' con validación requerida
+      depth: ['', [Validators.required]], // Agregar campo 'root' con validación requerida
+      stone: [0, [Validators.required]], // Agregar campo 'cc' con validación requerida
+      cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
+      ur: [50, [Validators.required]], // Agregar campo 'ur' con validación requerida
+      pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
   }
 
+
   upDateOperation() {
     if (this.form.valid) {
-      const operationDto: OperationDto = {
+
+      const operationName = this.form.value.operationName;
+      const betweenPlant = this.form.value.betweenPlant;
+      const betweenRow = this.form.value.betweenRow;
+      const plantingYear = this.form.value.plantingYear;
+
+      const cropName = this.form.value.crop;
+
+      const irriType = this.form.value.type;
+      const efficiency = this.form.value.efficiency;
+      const betweenEmitters = this.form.value.betweenEmitters;
+      const rowNumbers = this.form.value.rowNumbers;
+      const emitterFlow = this.form.value.emitterFlow;
+      const wetSoil = this.form.value.wetSoil;
+
+      const soilType = this.form.value.soilType;
+      const depth = this.form.value.depth;
+      const stone = this.form.value.stone;
+      const cc = this.form.value.cc;
+      const ur = this.form.value.ur;
+      const pmp = this.form.value.pmp;
+
+      // Crear objeto Irrigation
+      const irrigation: Irrigation = {
+        type: irriType,
+        efficiency: efficiency,
+        betweenEmitters: betweenEmitters,
+        rowNumbers: rowNumbers,
+        emitterFlow: emitterFlow,
+        wetSoil: wetSoil,
+      };
+
+      // Crear objeto Crop
+      const crop: Crop = {
+        cropName: cropName,
+      };
+
+      //Crear objrto soil
+      const soil: Soil = {
+        soilType: soilType,
+        depth: depth,
+        stone: stone,
+        cc: cc,
+        ur: ur,
+        pmp: pmp,
+      };
+      const operationEdited: Operation = {
         // operationId: +this.devId,
-        operationName: this.form.value.name,
-        operationArea: this.form.value.area,
-        polygons: this.polygons
+        polygons: this.polygons,
+        propertyId: this.propId,
+        operationName: operationName,
+        plantingYear: plantingYear,
+        betweenPlant: betweenPlant,
+        betweenRow: betweenRow,
+        crop: crop,
+        irrigation: irrigation,
+        soil: soil
       };
 
       console.log(this.polygons);
-      this.operationService.updateOperation(this.operationId, operationDto).subscribe(
+      this.operationService.updateOperation(this.operationId, operationEdited).subscribe(
 
         (response: Operation) => {
 
@@ -191,10 +302,10 @@ export class EditOperationComponent implements OnInit {
       layers.eachLayer((layer: any) => {
         for (const polygonId in this.polygonLayers) {
           if (this.polygonLayers[polygonId] === layer) {
-            this.polygons.forEach( poly => {
+            this.polygons.forEach(poly => {
               console.log("paso 1")
               console.log(poly.polygonId);
-              if ( poly.polygonId === parseInt(polygonId)){
+              if (poly.polygonId === parseInt(polygonId)) {
                 poly.geojson = JSON.stringify(layer.toGeoJSON());
                 console.log(poly.geojson);
                 // this.polygons.push(poly);
@@ -215,13 +326,13 @@ export class EditOperationComponent implements OnInit {
         ope.polygons.forEach(poly => {
 
           this.poliGeojson = poly.geojson;
-          
+
           // Agregar capas al featureGroup desde un objeto GeoJSON
           geoJSON(JSON.parse(this.poliGeojson), {
             onEachFeature: (feature, layer) => {
               // ID del polígono
               const poligono_id = poly.polygonId;
-             
+
               this.polygonLayers[poligono_id] = layer; // Almacenar el layer en el diccionario  
               console.log(this.polygonLayers[poligono_id]);//layer asociado al id del polygon
               this.drawItems.addLayer(layer);
@@ -258,7 +369,7 @@ export class EditOperationComponent implements OnInit {
   };
 
   get operationNameField() {
-    return this.form.get('name');
+    return this.form.get('operationName');
   }
   get isOperationNameFieldValid() {
     return this.operationNameField.touched && this.operationNameField.valid;
@@ -266,13 +377,157 @@ export class EditOperationComponent implements OnInit {
   get isOperationNameFieldInvalid() {
     return this.operationNameField.touched && this.operationNameField.invalid;
   }
-  get operationAreaField() {
-    return this.form.get('area')
+  get opeIdField() {
+    return this.form.get('opeId')
   }
-  get isOperationAreaFieldValid() {
-    return this.operationAreaField.touched && this.operationAreaField.valid;
+  get isOpeIdFieldValid() {
+    return this.opeIdField.touched && this.opeIdField.valid;
   }
-  get isOperationAreaFieldInvalid() {
-    return this.operationAreaField.touched && this.operationAreaField.invalid;
+  get isOpeIdFieldInvalid() {
+    return this.opeIdField.touched && this.opeIdField.invalid;
+  }
+  get typeField() {
+    return this.form.get('type');
+  }
+  get isTypeFieldValid() {
+    return this.typeField.touched && this.typeField.valid;
+  }
+  get isTypeFieldInvalid() {
+    return this.typeField.touched && this.typeField.invalid;
+  }
+  get cropField() {
+    return this.form.get('crop');
+  }
+  get isCropFieldValid() {
+    return this.cropField.touched && this.cropField.valid;
+  }
+  get isCropFieldInvalid() {
+    return this.cropField.touched && this.cropField.invalid;
+  }
+  get betweenPlantField() {
+    return this.form.get('betweenPlant');
+  }
+  get isBetweenPlantFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
+  }
+  get isBetweenPlantFieldInvalid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.invalid;
+  }
+  get plantingYearField() {
+    return this.form.get('plantingYear');
+  }
+  get isPlantingYearFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
+  }
+  get isPlantingYearFieldInvalid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.invalid;
+  }
+  get efficiencyField() {
+    return this.form.get('efficiency');
+  }
+  get isEfficiencyFieldValid() {
+    return this.efficiencyField.touched && this.efficiencyField.valid;
+  }
+  get isEfficiencyFieldInvalid() {
+    return this.efficiencyField.touched && this.efficiencyField.invalid;
+  }
+  get betweenEmittersField() {
+    return this.form.get('betweenEmitters');
+  }
+  get isBetweenEmittersFieldValid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.valid;
+  }
+  get isBetweenEmittersFieldInvalid() {
+    return this.betweenEmittersField.touched && this.betweenEmittersField.invalid;
+  }
+  get rowNumbersField() {
+    return this.form.get('rowNumbers');
+  }
+  get isRowNumbersFieldValid() {
+    return this.rowNumbersField.touched && this.rowNumbersField.valid;
+  }
+  get isRowNumbersFieldInvalid() {
+    return this.rowNumbersField.touched && this.rowNumbersField.invalid;
+  }
+  get betweenRowField() {
+    return this.form.get('betweenRow');
+  }
+  get isBetweenRowFieldValid() {
+    return this.betweenRowField.touched && this.betweenRowField.valid;
+  }
+  get isBetweenRowFieldInvalid() {
+    return this.betweenRowField.touched && this.betweenRowField.invalid;
+  }
+  get emitterFlowField() {
+    return this.form.get('emitterFlow');
+  }
+  get isEmitterFlowFieldValid() {
+    return this.emitterFlowField.touched && this.emitterFlowField.valid;
+  }
+  get isEmitterFlowFieldInvalid() {
+    return this.emitterFlowField.touched && this.emitterFlowField.invalid;
+  }
+  get wetSoilField() {
+    return this.form.get('wetSoil');
+  }
+  get isWetSoilFieldValid() {
+    return this.wetSoilField.touched && this.wetSoilField.valid;
+  }
+  get isWetSoilFieldInvalid() {
+    return this.wetSoilField.touched && this.wetSoilField.invalid;
+  }
+  get stoneField() {
+    return this.form.get('stone');
+  }
+  get isStoneFieldValid() {
+    return this.stoneField.touched && this.stoneField.valid;
+  }
+  get isStoneFieldInvalid() {
+    return this.stoneField.touched && this.stoneField.invalid;
+  }
+  get soilTypeField() {
+    return this.form.get('soilType');
+  }
+  get isSoilTypeFieldValid() {
+    return this.soilTypeField.touched && this.soilTypeField.valid;
+  }
+  get isSoilTypeFieldInvalid() {
+    return this.soilTypeField.touched && this.soilTypeField.invalid;
+  }
+  get depthField() {
+    return this.form.get('depth');
+  }
+  get isDepthFieldValid() {
+    return this.depthField.touched && this.depthField.valid;
+  }
+  get isDepthFieldInvalid() {
+    return this.depthField.touched && this.depthField.invalid;
+  }
+  get ccField() {
+    return this.form.get('cc');
+  }
+  get isCcFieldValid() {
+    return this.ccField.touched && this.ccField.valid;
+  }
+  get isCcFieldInvalid() {
+    return this.ccField.touched && this.ccField.invalid;
+  }
+  get urField() {
+    return this.form.get('ur');
+  }
+  get isUrFieldValid() {
+    return this.urField.touched && this.urField.valid;
+  }
+  get isUrFieldInvalid() {
+    return this.urField.touched && this.urField.invalid;
+  }
+  get pmpField() {
+    return this.form.get('pmp');
+  }
+  get isPmpFieldValid() {
+    return this.pmpField.touched && this.pmpField.valid;
+  }
+  get isPmpFieldInvalid() {
+    return this.pmpField.touched && this.pmpField.invalid;
   }
 }

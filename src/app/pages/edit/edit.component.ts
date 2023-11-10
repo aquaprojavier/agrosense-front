@@ -11,7 +11,7 @@ import 'sweetalert2/dist/sweetalert2.css';
 import { Router } from '@angular/router';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { OperationService } from 'src/app/core/services/operation.service';
-// import { Location } from '@angular/common';
+import { Property } from 'src/app/core/models/property.models';
 
 
 @Component({
@@ -27,6 +27,7 @@ export class EditComponent implements OnInit {
   argentinaTimezoneOffset = -3; // GMT-3
   actualDateInArgentina: Date = new Date(this.actualDate.getTime() + this.argentinaTimezoneOffset * 60 * 60 * 1000);
   operations: Operation[];
+  property: Property
   propId: number;
   devices: Device[];
   areSerialNumbersAvailable: boolean
@@ -52,6 +53,7 @@ export class EditComponent implements OnInit {
       }
     )
   }
+  
 
   areFreeSerialNumbers(serialId: string) {
     this.dataService.getSerialNumber(serialId).subscribe(data => {
@@ -155,19 +157,31 @@ export class EditComponent implements OnInit {
   }
 
 
-  getData(id: number) {
-    this.propertyService.getOperationAndDevicesByPropertyId(id).subscribe(data => {
-      this.operations = data;
+  getData(propId: number) {
+    this.propertyService.getPropertyById(propId).subscribe(data => {
+      this.property = data; 
       this.devices = [];
-      this.operations.forEach(ope => {
-        ope.devices.forEach(dev => {
+      this.property.devices.forEach(dev => {
           this.devices.push(dev);
           this.isConected(dev.devicesId).subscribe(conected => {
             dev.conected = conected;
           });
         })
       });
-    })
+  
+    this.propertyService.getOperationAndDevicesByPropertyId(propId).subscribe(data => {
+      this.operations = data;})
+      
+    //   this.devices = [];
+    //   this.operations.forEach(ope => {
+    //     ope.devices.forEach(dev => {
+    //       this.devices.push(dev);
+    //       this.isConected(dev.devicesId).subscribe(conected => {
+    //         dev.conected = conected;
+    //       });
+    //     })
+    //   });
+    // })
   }
 
   isConected(id: number): Observable<boolean> {
@@ -193,10 +207,37 @@ export class EditComponent implements OnInit {
       })
     );
   }
+  getOperationNameByDevId(devId: number): string {
+    let valor: string = "Ninguna";
+    if (this.operations && this.operations.length > 0) {
+      for (const ope of this.operations) {
+        if (ope.devices) {
+          for (const dev of ope.devices) {
+            if (dev.devicesId === devId) {
+              valor = ope.operationName;
+              break; // Para salir del bucle si encontramos una coincidencia
+            }
+          }
+        }
+      }
+    }
+    return valor;
+  }
+  // getOperationNameByDevId (devId: number): string {
+  //   let valor: string = "Ninguna";
+  //   this.operations.forEach ( ope =>{
+  //     ope.devices.forEach (dev => {
+  //       if (dev.devicesId === devId) {
+  //         valor = ope.operationName
+  //       }
+  //     })
+  //   })
+  //   return valor;
+  // }
 
   getDevicesNames(devices: Device[]): string {
     const deviceNames = devices.map(dev => dev.devicesNombre);
-    return deviceNames.length > 0 ? deviceNames.join(', ') : 'No tiene';
+    return deviceNames.length > 0 ? deviceNames.join(', ') : 'Ninguno';
   }
 
 

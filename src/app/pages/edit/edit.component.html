@@ -22,8 +22,8 @@
               <thead class="table-light">
                 <tr>
                   <th class="align-middle">Nombre</th>
-                  <th class="align-middle">Cultivo</th>
-                  <!-- <th class="align-middle">N° Serie</th> -->
+                  <th class="align-middle">Variedad</th>
+                  <th class="align-middle">Operacion</th>
                   <!-- <th class="align-middle">Latitud</th> -->
                   <!-- <th class="align-middle">Longitud</th> -->
                   <th class="align-middle">Status</th>
@@ -34,7 +34,9 @@
                 <tr *ngFor="let dev of devices">
                   <td>{{ dev.devicesNombre }}</td>
                   <td>{{ dev.devicesCultivo }}</td>
-                  <!-- <td>{{ dev.devicesSerie }}</td> -->
+                  <td [style.color]="getOperationNameByDevId(dev.devicesId) === 'Ninguna' ? 'yellow' : ''">
+                    {{ getOperationNameByDevId(dev.devicesId) }}
+                  </td>
                   <!-- <td>{{ dev.latitud | number: '2.2-2' }}</td> -->
                   <!-- <td>{{ dev.longitud | number: '2.2-2'}}</td> -->
                   <td>
@@ -98,6 +100,7 @@
               <thead class="table-light">
                 <tr>
                   <th class="align-middle">Nombre</th>
+                  <th class="align-middle">Cultivo</th>
                   <th class="align-middle">Area</th>
                   <th class="align-middle">Dispositivos</th>
                   <th class="align-middle">Acción</th>
@@ -106,8 +109,9 @@
               <tbody>
                 <tr *ngFor="let ope of operations">
                   <td>{{ ope.operationName }}</td>
-                  <td>{{ ope.operationArea }} Ha.</td>
-                  <td>
+                  <td>{{ ope.crop.cropName }}</td>
+                  <td>{{ ope.operationArea | number:'1.1-1' }} Ha.</td>
+                  <td [style.color]="getDevicesNames(ope.devices) === 'Ninguno' ? 'yellow' : ''">
                     {{ getDevicesNames(ope.devices) }}
                   </td>
                   <td>

@@ -173,19 +173,66 @@ export class LeafletComponent implements OnInit {
 
     // Function to add markers
     const addMarker = (dev, data, icon) => {
-      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
-      <img src="assets/images/sensor.png" alt=""><br><br>Dispositivo: <b>${dev.devicesNombre}</b><br><br><h2 style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : 'OPTIMO'}</h2></div>
-      <div style="display: flex; align-items: center;">
-        <img src="assets/images/root32px.png" alt=""> 
-        <div>
-          Humedad a 30cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">${data.dataHum1}%</b><br><br><br>
-          Humedad a 60cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">${data.dataHum2}%</b><br>
-        </div>            
+       // Determine the text color based on the value of data.volt
+  const textColor = data.volt < 3.2 ? 'red' : 'black';
+      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+<div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
+
+<div class="row">
+<div class="col-6">
+  <div>
+    <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+  </div>
+</div>
+<div class="col-6">
+  <div>
+  <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
+</div>
+</div>
+<div class="row">
+  <div class="col-12">
+      <img src="assets/images/sensor.png" alt="">
       </div>
-      <br>
-      <img src="assets/images/water.png" alt=""> HR: <b>${data.dataHr}%</b><br><br>
-      <img src="assets/images/termometro.png" alt=""> Temp: <b>${data.dataTemp}</b><br><br>
-    </div>`, { closeButton: false });
+      </div>    
+      <div class="row">
+      <div class="col-12">
+      <h2 style="margin-bottom: 0px;color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+        ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : 'OPTIMO'}
+      </h2>
+      </div>
+      </div>
+<div class="row">
+  <div class="col-4">
+    <img src="assets/images/root50x50.png" alt=""> 
+  </div>
+  <div class="col-8">
+    <div class="row">
+      <div class="col-12">
+        <h5 style="margin-bottom: 0px;margin-top: 5px;color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+          ${data.dataHum1}%
+        </b></h5>
+      </div>
+      <div class="col-12">
+      <h5 style="color: black; text-align: left;">60 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+          ${data.dataHum2}%
+        </b></h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="row">
+  <div class="col-6">
+    <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+  </div>
+  <div class="col-6">
+    <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+  </div>
+</div>
+
+</div>
+
+      `, { closeButton: false });
 
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
       this.lastData.push(data);

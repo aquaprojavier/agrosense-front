@@ -1,8 +1,9 @@
 export class Soil {
-    id: number;
-    tipo: string;
+    id?: number;
+    soilType: string;
     depth?: number;
-    cc: number;
+    stone?: number;
+    cc?: number;
     ur?: number;
-    pmp: number;
+    pmp?: number;
 }

@@ -51,6 +51,7 @@
     "d3": "^7.7.0",
     "echarts": "^5.1.2",
     "firebase": "^8.6.8",
+    "geojson2svg": "^2.0.1",
     "leaflet": "^1.8.0",
     "leaflet-draw": "^1.0.4",
     "metismenujs": "^1.2.1",

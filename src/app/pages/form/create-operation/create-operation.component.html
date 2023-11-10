@@ -1,216 +1,484 @@
 <div class="container-fluid">
-    <!-- start page title -->
-    <app-page-title
-      title="Create Operation"
-      [breadcrumbItems]="breadCrumbItems"
-    ></app-page-title>
-    <!-- end page title -->
-    <div class="row">
-      <div class="col-12 col-lg-3">
-        <div class="card" style="background-color: rgb(42, 48, 66)">
-          <div class="card-body">
-            <form [formGroup]="form" (ngSubmit)="saveOperation()">
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Operación</mat-label>
-                <input matInput type="text" formControlName="operationName" />
-                <mat-icon matSuffix *ngIf="isOperationNameFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isOperationNameFieldInvalid">close</mat-icon>
-                <div *ngIf="operationNameField.touched">
-                  <mat-error *ngIf="operationNameField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="operationNameField.hasError('maxlength')">
-                    Máximo 20 caracteres!
-                  </mat-error>
-                </div>
-              </mat-form-field>
+  <!-- start page title -->
+  <app-page-title
+    title="Create Operation"
+    [breadcrumbItems]="breadCrumbItems"
+  ></app-page-title>
+  <!-- end page title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card" style="background-color: rgb(42, 48, 66)">
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="saveOperation()">
+            GENERAL
+            <div class="row">
+              <div class="col-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Nombre de operación</mat-label>
+                  <input matInput type="text" formControlName="operationName" />
+                  <mat-icon matSuffix *ngIf="isOperationNameFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isOperationNameFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="operationNameField.touched">
+                    <mat-error *ngIf="operationNameField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="operationNameField.hasError('maxlength')"
+                      >Máximo 20 caracteres!</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Cultivo</mat-label>
+                  <input
+                    type="text"
+                    matInput
+                    [formControl]="form.get('crop')"
+                    [matAutocomplete]="cropAuto"
+                  />
+                  <mat-autocomplete #cropAuto="matAutocomplete">
+                    <mat-option *ngFor="let options of cropTypeOptions"[value]="options">
+                      {{ options }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <mat-icon matSuffix *ngIf="isCropFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isCropFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="cropField.touched">
+                    <mat-error *ngIf="cropField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="cropField.hasError('maxlength')"
+                      >Máximo 20 caracteres!</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light"
+                    >Distancia entre Plantas (m.)</mat-label
+                  >
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="betweenPlant"
+                  />
+                  <mat-icon matSuffix *ngIf="isBetweenPlantFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isBetweenPlantFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="betweenPlantField.touched">
+                    <mat-error *ngIf="betweenPlantField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="betweenPlantField.hasError('min')"
+                      >Valor mínimo: 0.15</mat-error
+                    >
+                    <mat-error *ngIf="betweenPlantField.hasError('max')"
+                      >Valor máximo: 15</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Distancia entre hileras (m.)</mat-label>
+                  <input matInput type="number" formControlName="betweenRow" />
+                  <mat-icon matSuffix *ngIf="isBetweenRowFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isBetweenRowFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="betweenRowField.touched">
+                    <mat-error *ngIf="betweenRowField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="betweenRowField.hasError('min')"
+                      >Valor mínimo: 0.3</mat-error
+                    >
+                    <mat-error *ngIf="betweenRowField.hasError('max')"
+                      >Valor máximo: 15</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Año de plantación</mat-label>
+                  <mat-select formControlName="plantingYear">
+                    <mat-option *ngFor="let option of plantingYearOptions" [value]="option">
+                      {{ option }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isPlantingYearFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isPlantingYearFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="plantingYearField.touched">
+                    <mat-error *ngIf="plantingYearField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="plantingYearField.hasError('min')"
+                      >Valor mínimo: 1950</mat-error
+                    >
+                    <mat-error *ngIf="plantingYearField.hasError('max')"
+                      >Valor máximo: 2023</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Tipo</mat-label>
-                <input matInput type="text" formControlName="type" />
-                <mat-icon matSuffix *ngIf="isTypeFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isTypeFieldInvalid">close</mat-icon>
-                <div *ngIf="typeField.touched">
-                  <mat-error *ngIf="typeField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="typeField.hasError('maxlength')">
-                    Máximo 20 caracteres!
-                  </mat-error>
-                </div>
-              </mat-form-field>
+            Dibuje el o los poligonos correspondientes a la operación
+            <div class="row">
+              <div class="col-12">
+                <div id="mapEdit">Cargando mapa...</div>
+              </div>
+            </div>
+            <br />
+            RIEGO
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Cultivo</mat-label>
-                <input matInput type="text" formControlName="crop" />
-                <mat-icon matSuffix *ngIf="isCropFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isCropFieldInvalid">close</mat-icon>
-                <div *ngIf="cropField.touched">
-                  <mat-error *ngIf="cropField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="cropField.hasError('maxlength')">
-                    Máximo 20 caracteres!
-                  </mat-error>
-                </div>
-              </mat-form-field>
+            <div class="row">
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Tipo de riego</mat-label>
+                  <input
+                    type="text"
+                    matInput
+                    [formControl]="form.get('type')"
+                    [matAutocomplete]="typeAuto"
+                  />
+                  <mat-autocomplete #typeAuto="matAutocomplete">
+                    <mat-option
+                      *ngFor="let option of riegoOptions"
+                      [value]="option"
+                    >
+                      {{ option }}
+                    </mat-option>
+                  </mat-autocomplete>
+                  <mat-icon matSuffix *ngIf="isTypeFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isTypeFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="typeField.touched">
+                    <mat-error *ngIf="typeField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="typeField.hasError('maxlength')"
+                      >Máximo 20 caracteres!</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Eficiencia (%)</mat-label>
+                  <mat-select formControlName="efficiency">
+                    <mat-option *ngFor="let option of efficiencyOptions" [value]="option">
+                      {{ option }}%
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isEfficiencyFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isEfficiencyFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="efficiencyField.touched">
+                    <mat-error *ngIf="efficiencyField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="efficiencyField.hasError('min')"
+                      >Valor mínimo: 0</mat-error
+                    >
+                    <mat-error *ngIf="efficiencyField.hasError('max')"
+                      >Valor máximo: 100</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Suelo mojado (%)</mat-label>
+                  <mat-select formControlName="wetSoil">
+                    <mat-option *ngFor="let option of wetSoilOptions" [value]="option">
+                      {{ option }}%
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isWetSoilFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isWetSoilFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="wetSoilField.touched">
+                    <mat-error *ngIf="wetSoilField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="wetSoilField.hasError('min')"
+                      >Valor mínimo: 5</mat-error
+                    >
+                    <mat-error *ngIf="wetSoilField.hasError('max')"
+                      >Valor máximo: 100</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Variedad</mat-label>
-                <input matInput type="text" formControlName="variety" />
-                <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isVarietyFieldInvalid">close</mat-icon>
-                <div *ngIf="varietyField.touched">
-                  <mat-error *ngIf="varietyField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="varietyField.hasError('maxlength')">
-                    Máximo 20 caracteres!
-                  </mat-error>
+            <div class="row">
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light"
+                    >Distancia entre Emisores (m.)</mat-label
+                  >
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="betweenEmitters"
+                  />
+                  <mat-icon matSuffix *ngIf="isBetweenEmittersFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isBetweenEmittersFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="betweenEmittersField.touched">
+                    <mat-error *ngIf="betweenEmittersField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="betweenEmittersField.hasError('min')"
+                      >Valor mínimo: 0.15</mat-error
+                    >
+                    <mat-error *ngIf="betweenEmittersField.hasError('max')"
+                      >Valor máximo: 3</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Laterales por hilera</mat-label>
+                  <mat-select formControlName="rowNumbers">
+                    <mat-option *ngFor="let option of rowNumbersOptions" [value]="option">
+                      {{ option }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isRowNumbersFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isRowNumbersFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="rowNumbersField.touched">
+                    <mat-error *ngIf="rowNumbersField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="rowNumbersField.hasError('min')"
+                      >Valor mínimo: 1</mat-error
+                    >
+                    <mat-error *ngIf="rowNumbersField.hasError('max')"
+                      >Valor máximo: 8</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Caudal del emisor (l/h)</mat-label>
+                  <input matInput type="number" formControlName="emitterFlow" />
+                  <mat-icon matSuffix *ngIf="isEmitterFlowFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isEmitterFlowFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="emitterFlowField.touched">
+                    <mat-error *ngIf="emitterFlowField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="emitterFlowField.hasError('min')"
+                      >Valor mínimo: 0.5</mat-error
+                    >
+                    <mat-error *ngIf="emitterFlowField.hasError('max')"
+                      >Valor máximo: 8</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
+            SUELO
+            <div class="row">
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Tipo de suelo</mat-label>
+                  <mat-select formControlName="soilType">
+                    <mat-option *ngFor="let soil of soilType" [value]="soil">{{ soil }}</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isSoilTypeFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isSoilTypeFieldInvalid">close</mat-icon>
+                </mat-form-field>
+                <div *ngIf="soilTypeField.touched">
+                  <mat-error *ngIf="soilTypeField.hasError('required')">Este campo es requerido!</mat-error>
                 </div>
-              </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Eficiencia</mat-label>
-                <input matInput type="number" formControlName="efficiency" />
-                <mat-icon matSuffix *ngIf="isEfficiencyFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isEfficiencyFieldInvalid">close</mat-icon>
-                <div *ngIf="efficiencyField.touched">
-                  <mat-error *ngIf="efficiencyField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="efficiencyField.hasError('min')">
-                    Valor mínimo: 0
-                  </mat-error>
-                  <mat-error *ngIf="efficiencyField.hasError('max')">
-                    Valor máximo: 100
-                  </mat-error>
-                </div>
-              </mat-form-field>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light"
+                    >Profundidad de raices (cm.)</mat-label
+                  >
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="rootDepth"
+                  />
+                  <mat-icon matSuffix *ngIf="isRootDepthFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isRootDepthFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="rootDepthField.touched">
+                    <mat-error *ngIf="rootDepthField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="rootDepthField.hasError('min')"
+                      >Valor mínimo: 5</mat-error
+                    >
+                    <mat-error *ngIf="rootDepthField.hasError('max')"
+                      >Valor máximo: 300</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+             
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">Piedras (%)</mat-label>
+                  <mat-select formControlName="stone">
+                    <mat-option *ngFor="let option of stoneOptions" [value]="option">
+                      {{ option }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isStoneFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isStoneFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="stoneField.touched">
+                    <mat-error *ngIf="stoneField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="stoneField.hasError('min')"
+                      >Valor mínimo: 1</mat-error
+                    >
+                    <mat-error *ngIf="stoneField.hasError('max')"
+                      >Valor máximo: 90</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Entre Emisores</mat-label>
-                <input matInput type="number" formControlName="betweenEmitters" />
-                <mat-icon matSuffix *ngIf="isBetweenEmittersFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isBetweenEmittersFieldInvalid">close</mat-icon>
-                <div *ngIf="betweenEmittersField.touched">
-                  <mat-error *ngIf="betweenEmittersField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="betweenEmittersField.hasError('min')">
-                    Valor mínimo: 0.15
-                  </mat-error>
-                  <mat-error *ngIf="betweenEmittersField.hasError('max')">
-                    Valor máximo: 3
-                  </mat-error>
-                </div>
-              </mat-form-field>
+            <div class="row">
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Número de Filas</mat-label>
-                <input matInput type="number" formControlName="rowNumbers" />
-                <mat-icon matSuffix *ngIf="isRowNumbersFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isRowNumbersFieldInvalid">close</mat-icon>
-                <div *ngIf="rowNumbersField.touched">
-                  <mat-error *ngIf="rowNumbersField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="rowNumbersField.hasError('min')">
-                    Valor mínimo: 1
-                  </mat-error>
-                  <mat-error *ngIf="rowNumbersField.hasError('max')">
-                    Valor máximo: 8
-                  </mat-error>
-                </div>
-              </mat-form-field>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">CC (%)</mat-label>
+                  <input matInput type="number" formControlName="cc" />
+                  <mat-icon matSuffix *ngIf="isCcFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isCcFieldInvalid">close</mat-icon>
+                  <div *ngIf="ccField.touched">
+                    <mat-error *ngIf="ccField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="ccField.hasError('min')"
+                      >Valor mínimo: 15</mat-error
+                    >
+                    <mat-error *ngIf="ccField.hasError('max')"
+                      >Valor máximo: 70</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Entre Filas</mat-label>
-                <input matInput type="number" formControlName="betweenRow" />
-                <mat-icon matSuffix *ngIf="isBetweenRowFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isBetweenRowFieldInvalid">close</mat-icon>
-                <div *ngIf="betweenRowField.touched">
-                  <mat-error *ngIf="betweenRowField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="betweenRowField.hasError('min')">
-                    Valor mínimo: 0.3
-                  </mat-error>
-                  <mat-error *ngIf="betweenRowField.hasError('max')">
-                    Valor máximo: 8
-                  </mat-error>
-                </div>
-              </mat-form-field>
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Flujo del Emisor</mat-label>
-                <input matInput type="number" formControlName="emitterFlow" />
-                <mat-icon matSuffix *ngIf="isEmitterFlowFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isEmitterFlowFieldInvalid">close</mat-icon>
-                <div *ngIf="emitterFlowField.touched">
-                  <mat-error *ngIf="emitterFlowField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="emitterFlowField.hasError('min')">
-                    Valor mínimo: 0.5
-                  </mat-error>
-                  <mat-error *ngIf="emitterFlowField.hasError('max')">
-                    Valor máximo: 8
-                  </mat-error>
-                </div>
-              </mat-form-field>
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Suelo Húmedo</mat-label>
-                <input matInput type="number" formControlName="wetSoil" />
-                <mat-icon matSuffix *ngIf="isWetSoilFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isWetSoilFieldInvalid">close</mat-icon>
-                <div *ngIf="wetSoilField.touched">
-                  <mat-error *ngIf="wetSoilField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="wetSoilField.hasError('min')">
-                    Valor mínimo: 5
-                  </mat-error>
-                  <mat-error *ngIf="wetSoilField.hasError('max')">
-                    Valor máximo: 100
-                  </mat-error>
-                </div>
-              </mat-form-field>
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">KS</mat-label>
-                <input matInput type="number" formControlName="ks" />
-                <mat-icon matSuffix *ngIf="isKsFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isKsFieldInvalid">close</mat-icon>
-                <div *ngIf="ksField.touched">
-                  <mat-error *ngIf="ksField.hasError('required')">
-                    Este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="ksField.hasError('min')">
-                    Valor mínimo: 0
-                  </mat-error>
-                  <mat-error *ngIf="ksField.hasError('max')">
-                    Valor máximo: 1
-                  </mat-error>
-                </div>
-              </mat-form-field>
-              
-              <br />
-              <button type="submit" class="btn btn-primary w-100">Crear</button>
-            </form>
-          </div>
-        </div>
-      </div>
-  
-      <div class="col-12 col-lg-9">
-        <div class="card">
-          <!-- <button id="botonMapa">Obtener GeoJSON</button> -->
-          <div id="mapEdit">Cargando mapa...</div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">UR (%)</mat-label>
+                  <input matInput type="number" formControlName="ur" />
+                  <mat-icon matSuffix *ngIf="isUrFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isUrFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="urField.touched">
+                    <mat-error *ngIf="urField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="urField.hasError('min')"
+                      >Valor mínimo: 10</mat-error
+                    >
+                    <mat-error *ngIf="urField.hasError('max')"
+                      >Valor máximo: 90</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label class="light">PMP (%)</mat-label>
+                  <input matInput type="number" formControlName="pmp" />
+                  <mat-icon matSuffix *ngIf="isPmpFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isPmpFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="pmpField.touched">
+                    <mat-error *ngIf="pmpField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                    <mat-error *ngIf="pmpField.hasError('min')"
+                      >Valor mínimo: 3</mat-error
+                    >
+                    <mat-error *ngIf="pmpField.hasError('max')"
+                      >Valor máximo: 30</mat-error
+                    >
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <div class="row justify-content-center">
+              <div class="col-lg-3 col-md-12 col-12">
+                <button type="submit" class="btn btn-primary w-100">
+                  Crear
+                </button>
+              </div>
+            </div>
+          </form>
+          
         </div>
       </div>
     </div>
-    <!-- end row -->
+  </div>
+  <!-- end row -->
 </div>
-
-  

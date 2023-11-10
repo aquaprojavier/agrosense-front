@@ -1,3 +1,5 @@
+import { Device } from "./device.models";
+
 export class Property {
     propId?: number;
     propNombre: string;
@@ -7,4 +9,5 @@ export class Property {
     longitud: number;
     geojson: string;
     coordenadas?: [number, number];
+    devices?:[Device]
   }
