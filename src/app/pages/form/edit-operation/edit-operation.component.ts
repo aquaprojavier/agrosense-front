@@ -196,6 +196,7 @@ export class EditOperationComponent implements OnInit {
 
       // Crear objeto Irrigation
       const irrigation: Irrigation = {
+        irrigationId: this.operation.irrigation.irrigationId,
         type: irriType,
         efficiency: efficiency,
         betweenEmitters: betweenEmitters,
@@ -206,11 +207,13 @@ export class EditOperationComponent implements OnInit {
 
       // Crear objeto Crop
       const crop: Crop = {
+        cropId: this.operation.crop.cropId,
         cropName: cropName,
       };
 
       //Crear objrto soil
       const soil: Soil = {
+        id: this.operation.soil.id,
         soilType: soilType,
         depth: depth,
         stone: stone,
@@ -238,7 +241,7 @@ export class EditOperationComponent implements OnInit {
 
           console.log('Se ha guardado el formulario exitosamente:', response);
 
-          Swal.fire('Edición exitosa!', `El dispositivo ${this.form.value.devicesNombre} se actualizó correctamente`, 'success')
+          Swal.fire('Edición exitosa!', `El dispositivo ${this.form.value.operationName} se actualizó correctamente`, 'success')
             .then(() => {
               this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
             });
@@ -302,10 +305,12 @@ export class EditOperationComponent implements OnInit {
       layers.eachLayer((layer: any) => {
         for (const polygonId in this.polygonLayers) {
           if (this.polygonLayers[polygonId] === layer) {
+            // Encuentra el polígono correspondiente al id
             this.polygons.forEach(poly => {
-              console.log("paso 1")
-              console.log(poly.polygonId);
+              // console.log("paso 1")
+              // console.log(poly.polygonId);
               if (poly.polygonId === parseInt(polygonId)) {
+                // Actualiza el GeoJSON del polígono
                 poly.geojson = JSON.stringify(layer.toGeoJSON());
                 console.log(poly.geojson);
                 // this.polygons.push(poly);

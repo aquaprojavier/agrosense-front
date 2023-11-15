@@ -167,6 +167,7 @@ export class EditComponent implements OnInit {
             dev.conected = conected;
           });
         })
+        console.log(this.devices);
       });
   
     this.propertyService.getOperationAndDevicesByPropertyId(propId).subscribe(data => {

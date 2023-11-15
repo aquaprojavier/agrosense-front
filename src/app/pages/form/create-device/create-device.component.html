@@ -63,7 +63,7 @@
               <mat-label class="light">Tipo de suelo</mat-label>
               <mat-select formControlName="soil">
                 <mat-option *ngFor="let soil of soils" [value]="soil">
-                  {{ soil.tipo }}
+                  {{ soil.soilType }}
                 </mat-option>
               </mat-select>
               <!-- <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>

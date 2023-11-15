@@ -27,5 +27,4 @@ export class OperationService {
   public updateOperation (id: number, data: OperationDto) {
     return this.http.put<Operation>(`${baseUrl}/operation/${id}`, data)
   }
-
 }

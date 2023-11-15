@@ -6,6 +6,7 @@ export class DeviceDto {
     latitud: number;
     longitud: number;
     operationId: number;
+    propertyId?: number;
     soilId: number;
     koef1?: number;
     koef2?: number;

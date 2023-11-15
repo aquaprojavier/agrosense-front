@@ -42,6 +42,7 @@ export class CreateDeviceComponent implements OnInit {
   serialNumbers: string[] = [];
   soils: Soil[] = [];
 
+
   greenIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -87,12 +88,14 @@ export class CreateDeviceComponent implements OnInit {
   getSoils() {
     this.soilService.GetSoils().subscribe(data => {
       this.soils = data;
+      console.log(this.soils)
     })
   }
 
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
+      
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         console.log(this.operations)
@@ -137,7 +140,8 @@ export class CreateDeviceComponent implements OnInit {
         latitud: this.form.value.latitud,
         longitud: this.form.value.longitud,
         operationId: this.form.value.opeId,
-        soilId: this.form.value.soil.id
+        soilId: this.form.value.soil.id,
+        propertyId: this.propId
       };
       console.log(deviceDto);
       this.deviceService.createDevice({ data: deviceDto }).subscribe(

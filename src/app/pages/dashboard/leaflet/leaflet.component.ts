@@ -38,6 +38,15 @@ export class LeafletComponent implements OnInit {
   wc: number;
   lastData: Data[] = [];
   sanitizedUrl: SafeResourceUrl | null = null;
+  
+  gaugeIcon = new Icon({
+    iconUrl: 'assets/images/water-meter.png', // Ruta local de tu imagen de 32x32 píxeles
+    iconSize: [32, 32],        // Tamaño del icono [ancho, alto]
+    iconAnchor: [16, 32],      // Punto del icono que se alinea con la ubicación del marcador
+    popupAnchor: [0, -16]      // Punto donde se abrirá el popup en relación con el icono
+});
+
+
 
   redIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -247,11 +256,27 @@ export class LeafletComponent implements OnInit {
         // Formatear ope.operationArea con 2 decimales
       const formattedOperationArea = ope.operationArea.toFixed(2);
 
-        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;">
-      <img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div>
-      ${dev ? `<img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br>` : ''}
-      <img src="assets/images/selection.png" alt=""> Superficie: <b>${formattedOperationArea} ha.</b><br>
-      </div>`, { closeButton: false });
+        poligon.bindPopup(`
+        <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
+          <div class="row">
+            <div class="col-12" style="line-height: 0.5;">
+             <div class="text-center">
+                <img src="assets/images/location.png" alt=""><br><br>
+                Operacion: <b>${ope.operationName}</b><br><br>
+              </div>
+              <div class="text-center">
+                <img src="assets/images/selection.png" alt=""> Superficie: <b>${formattedOperationArea} ha.</b><br>
+              </div>
+              <div class="text-center">
+                <img src="assets/images/grapes.png" alt=""> Cultivo: <b>${ope.crop.cropName}</b><br>
+              </div>
+              ${dev ? `<div class="text-center">
+                          <img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>
+        `, { closeButton: false });
         // Agregar el polígono a la capa de grupo
         polygonLayer.addLayer(poligon);
       });
@@ -268,7 +293,7 @@ export class LeafletComponent implements OnInit {
           this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
             data => {
               if (data.dataHum <= data.pmp) {
-                addMarker(dev, data, this.redIcon);
+                addMarker(dev, data, this.gaugeIcon);
                 addPolygons(ope, "#CB2B3E", this.redIcon, dev);
               } else if (data.dataHum >= data.cc) {
                 addMarker(dev, data, this.blueIcon);
