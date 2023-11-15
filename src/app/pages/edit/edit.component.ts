@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { Property } from 'src/app/core/models/property.models';
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-edit',
@@ -33,6 +33,7 @@ export class EditComponent implements OnInit {
   areSerialNumbersAvailable: boolean
 
   constructor(
+    private sanitizer: DomSanitizer,
     private operationService: OperationService,
     private deviceService: DeviceService,
     private dataService: DataService,
@@ -53,7 +54,7 @@ export class EditComponent implements OnInit {
       }
     )
   }
-  
+
 
   areFreeSerialNumbers(serialId: string) {
     this.dataService.getSerialNumber(serialId).subscribe(data => {
@@ -156,23 +157,95 @@ export class EditComponent implements OnInit {
     });
   }
 
+  getCoordinates(geojson: string): number[][][] | null {
+    try {
+      const parsedGeoJSON = JSON.parse(geojson);
+      if (parsedGeoJSON && parsedGeoJSON.geometry.coordinates && parsedGeoJSON.geometry.coordinates.length > 0) {
+        return parsedGeoJSON.geometry.coordinates;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing GeoJSON:', error);
+      return null;
+    }
+  }
+
+  // Función para obtener el SVG seguro
+  getMiniaturaSegura(coordinates: number[][][]): SafeHtml {
+    const svg = this.getMiniaturaPoligono(coordinates);
+    return this.sanitizer.bypassSecurityTrustHtml(svg);
+  }
+
+  getMinMaxCoordinates(coordinates: number[][][]): [number, number, number, number] | null {
+    if (coordinates && coordinates.length > 0) {
+      const flattenCoordinates = coordinates.reduce((acc, val) => acc.concat(val), []);
+
+      if (flattenCoordinates.length > 0) {
+        const allXCoordinates = flattenCoordinates.map(point => point[0]);
+        const allYCoordinates = flattenCoordinates.map(point => point[1]);
+
+        const minX = Math.min(...allXCoordinates);
+        const minY = Math.min(...allYCoordinates);
+        const maxX = Math.max(...allXCoordinates);
+        const maxY = Math.max(...allYCoordinates);
+
+        return [minX, minY, maxX, maxY];
+      }
+    }
+    return null;
+  }
+
+  getMiniaturaPoligono(coordinates: number[][][]): string {
+    const svgWidth = 50;
+    const svgHeight = 50;
+  
+    if (coordinates && coordinates.length > 0) {
+      const [minX, minY, maxX, maxY] = this.getMinMaxCoordinates(coordinates);
+  
+      const width = maxX - minX;
+      const height = maxY - minY;
+  
+      const xRatio = svgWidth / width;
+      const yRatio = svgHeight / height;
+  
+      const scale = Math.min(xRatio, yRatio);
+  
+      const scaledCoordinates = coordinates[0].map(point => [
+        (point[0] - minX) * scale + (svgWidth - width * scale) / 2,  // Centrar horizontalmente
+        (point[1] - minY) * scale + (svgHeight - height * scale) / 2  // Centrar verticalmente
+      ]);
+  
+      const pathData = scaledCoordinates
+        .map((point, index) => `${index === 0 ? 'M' : 'L'}${point.join(',')}`)
+        .join(' ') + ' Z';
+  
+      return `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg"
+                style="display: block; margin: 0;">
+                <path d="${pathData}" fill="none" stroke= "#0ca2ed" stroke-width="2" />
+              </svg>`;
+    }
+    return '';
+  }
+  
+  
 
   getData(propId: number) {
     this.propertyService.getPropertyById(propId).subscribe(data => {
-      this.property = data; 
+      this.property = data;
       this.devices = [];
       this.property.devices.forEach(dev => {
-          this.devices.push(dev);
-          this.isConected(dev.devicesId).subscribe(conected => {
-            dev.conected = conected;
-          });
-        })
-        console.log(this.devices);
-      });
-  
+        this.devices.push(dev);
+        this.isConected(dev.devicesId).subscribe(conected => {
+          dev.conected = conected;
+        });
+      })
+      console.log(this.devices);
+    });
+
     this.propertyService.getOperationAndDevicesByPropertyId(propId).subscribe(data => {
-      this.operations = data;})
-      
+      this.operations = data;
+    })
+
     //   this.devices = [];
     //   this.operations.forEach(ope => {
     //     ope.devices.forEach(dev => {

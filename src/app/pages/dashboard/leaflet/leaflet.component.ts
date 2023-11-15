@@ -312,6 +312,5 @@ export class LeafletComponent implements OnInit {
     });
 
   };
-
-
+  
 }

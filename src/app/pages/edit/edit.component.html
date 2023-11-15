@@ -91,7 +91,6 @@
               CREAR
             </button>
           </div>
-
           <div class="table-responsive mb-0">
             <table
               *ngIf="operations && operations.length > 0"
@@ -99,6 +98,7 @@
             >
               <thead class="table-light">
                 <tr>
+                  <th class="align-middle">Forma</th>
                   <th class="align-middle">Nombre</th>
                   <th class="align-middle">Cultivo</th>
                   <th class="align-middle">Area</th>
@@ -106,15 +106,17 @@
                   <th class="align-middle">Acción</th>
                 </tr>
               </thead>
+              
               <tbody>
                 <tr *ngFor="let ope of operations">
-                  <td>{{ ope.operationName }}</td>
-                  <td>{{ ope.crop.cropName }}</td>
-                  <td>{{ ope.operationArea | number:'1.1-1' }} Ha.</td>
-                  <td [style.color]="getDevicesNames(ope.devices) === 'Ninguno' ? 'yellow' : ''">
+                  <td class="align-middle" style="display: flex; align-items: center;" [innerHTML]="getMiniaturaSegura(getCoordinates(ope.polygons[0].geojson))"></td>
+                  <td class="align-middle">{{ ope.operationName }}</td>
+                  <td class="align-middle">{{ ope.crop.cropName }}</td>
+                  <td class="align-middle">{{ ope.operationArea | number:'1.1-1' }} Ha.</td>
+                  <td class="align-middle" [style.color]="getDevicesNames(ope.devices) === 'Ninguno' ? 'yellow' : ''">
                     {{ getDevicesNames(ope.devices) }}
                   </td>
-                  <td>
+                  <td class="align-middle">
                     <!-- Button trigger modal -->
                     <button
                       type="button"
