@@ -196,8 +196,9 @@ export class EditComponent implements OnInit {
   }
 
   getMiniaturaPoligono(coordinates: number[][][]): string {
-    const svgWidth = 50;
+    const svgWidth = 80;
     const svgHeight = 50;
+    const scaleFactor = this.getScaleFactor(this.operations);
   
     if (coordinates && coordinates.length > 0) {
       const [minX, minY, maxX, maxY] = this.getMinMaxCoordinates(coordinates);
@@ -205,14 +206,12 @@ export class EditComponent implements OnInit {
       const width = maxX - minX;
       const height = maxY - minY;
   
-      const xRatio = svgWidth / width;
-      const yRatio = svgHeight / height;
-  
-      const scale = Math.min(xRatio, yRatio);
+      const scaledWidth = width * scaleFactor;
+      const scaledHeight = height * scaleFactor;
   
       const scaledCoordinates = coordinates[0].map(point => [
-        (point[0] - minX) * scale + (svgWidth - width * scale) / 2,  // Centrar horizontalmente
-        (point[1] - minY) * scale + (svgHeight - height * scale) / 2  // Centrar verticalmente
+        (point[0] - minX) * scaleFactor + (svgWidth - scaledWidth) / 2, // Centrar horizontalmente
+        (point[1] - minY) * scaleFactor + (svgHeight - scaledHeight) / 2 // Centrar verticalmente
       ]);
   
       const pathData = scaledCoordinates
@@ -221,13 +220,29 @@ export class EditComponent implements OnInit {
   
       return `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg"
                 style="display: block; margin: 0;">
-                <path d="${pathData}" fill="none" stroke= "#0ca2ed" stroke-width="2" />
+                <path d="${pathData}" fill="none" stroke="#0ca2ed" stroke-width="2" />
               </svg>`;
     }
     return '';
   }
   
   
+  getScaleFactor(operations: Operation[]): number {
+    let maxArea = 0;
+    for (const operation of operations) {
+      for (const polygon of operation.polygons) {
+        const area = polygon.area || 0; // Utiliza el área proporcionada en el atributo 'area' del polígono
+        if (area > maxArea) {
+          maxArea = area;
+        }
+      }
+    }
+    // Definir un tamaño máximo deseado para los SVG
+    const maxSize = 120000; // Por ejemplo, 500 es un tamaño arbitrario para la máxima área posible
+    
+    // Calcular el factor de escala en función del área máxima y el tamaño máximo deseado
+    return maxArea !== 0 ? maxSize / maxArea : 1;
+  }
 
   getData(propId: number) {
     this.propertyService.getPropertyById(propId).subscribe(data => {

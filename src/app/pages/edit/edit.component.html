@@ -109,7 +109,12 @@
               
               <tbody>
                 <tr *ngFor="let ope of operations">
-                  <td class="align-middle" style="display: flex; align-items: center;" [innerHTML]="getMiniaturaSegura(getCoordinates(ope.polygons[0].geojson))"></td>
+                  <td>
+                    <div *ngFor="let polygon of ope.polygons">
+                      <div class="align-middle" style="display: flex; align-items: center;" [innerHTML]="getMiniaturaSegura(getCoordinates(polygon.geojson))"></div>
+                    </div>
+                  </td>
+                  <!-- <td class="align-middle" style="display: flex; align-items: center;" [innerHTML]="getMiniaturaSegura(getCoordinates(ope.polygons[0].geojson))"></td> -->
                   <td class="align-middle">{{ ope.operationName }}</td>
                   <td class="align-middle">{{ ope.crop.cropName }}</td>
                   <td class="align-middle">{{ ope.operationArea | number:'1.1-1' }} Ha.</td>
