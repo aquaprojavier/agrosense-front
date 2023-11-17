@@ -163,34 +163,42 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
-    // Crear una capa de grupo para los polígonos
-    let polygonLayer = layerGroup();
-    // Agregar la capa de polígonos al mapa
-    polygonLayer.addTo(this.myMap);
+    // Crear una capa de grupo para los polígonos y agregarla al mapa
+    let polygonLayer = layerGroup().addTo(this.myMap);
+
+    // Declaración del LayerGroup para las capas NDVI y agregarla al mapa
+    const ndviLayerGroup = layerGroup().addTo(this.myMap);
 
     // Agregar control de capas
     const baseLayers = {
       'ArcGIS': arcgisTileLayer
     };
 
-    // Variables para las capas
-    let layerControl;
-    let ndviTileLayer;
-
-    // Función para actualizar el layerControl
-    const updateLayerControl = (baseLayers, overlayLayers) => {
-      // Si el layerControl ya está inicializado, eliminarlo del mapa
-      if (layerControl) {
-        layerControl.remove();
-      }
-      // Crear un nuevo layerControl y agregarlo al mapa
-      layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+    // Capas vacías inicialmente
+    const overlayLayers = {
+      'Polygons': polygonLayer,
+      // 'NDVI': ndviLayerGroup
     };
 
-    // const overlayLayers = {
-    //   'NDVI': this.ndviTileLayer, // Capa de mosaicos NDVI
-    //   'Polygons': polygonLayer // Capa de grupo de polígonos
-    // };
+    //crea un control de capas 
+    let layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+
+    // Función para agregar capas NDVI al LayerGroup
+    const addNDVILayer = (poliId: string, tileURL: string): void => {
+      const newNDVILayer = tileLayer(tileURL, {
+        // Opciones adicionales de la capa de tiles
+      });
+
+      // Agregar la capa NDVI al LayerGroup
+      ndviLayerGroup.addLayer(newNDVILayer);
+
+      // Actualizar el control de capas solo cuando se añada la primera capa NDVI
+      if (ndviLayerGroup.getLayers().length === 1) {
+        if (layerControl) {
+          layerControl.addOverlay(ndviLayerGroup, 'NDVI Group'); // Añadir el LayerGroup al control de capas con un nombre específico
+        }
+      }
+    };
 
     let poligonToGjson;
     let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
@@ -206,112 +214,25 @@ export class LeafletComponent implements OnInit {
     this.myMap.on('focus', () => { this.myMap.scrollWheelZoom.enable(); });
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
 
-    // Function to add markers
-    const addMarker = (dev, data, icon) => {
-      // Determine the text color based on the value of data.volt
-      const textColor = data.volt < 3.2 ? 'red' : 'black';
-      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-<div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
 
-<div class="row">
-<div class="col-6">
-  <div>
-    <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
-  </div>
-</div>
-<div class="col-6">
-  <div>
-  <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
-</div>
-</div>
-<div class="row">
-  <div class="col-12">
-      <img src="assets/images/sensor.png" alt="">
-      </div>
-      </div>    
-      <div class="row">
-      <div class="col-12">
-      <h2 style="margin-bottom: 0px;color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-        ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : 'OPTIMO'}
-      </h2>
-      </div>
-      </div>
-<div class="row">
-  <div class="col-4">
-    <img src="assets/images/root50x50.png" alt=""> 
-  </div>
-  <div class="col-8">
-    <div class="row">
-      <div class="col-12">
-        <h5 style="margin-bottom: 0px;margin-top: 5px;color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-          ${data.dataHum1}%
-        </b></h5>
-      </div>
-      <div class="col-12">
-      <h5 style="color: black; text-align: left;">60 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-          ${data.dataHum2}%
-        </b></h5>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <div class="row">
-  <div class="col-6">
-    <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
-  </div>
-  <div class="col-6">
-    <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
-  </div>
-</div>
-
-</div>
-
-      `, { closeButton: false });
-
-      loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
-      this.lastData.push(data);
-    };
-    const ndviTileLayers = {};
     // Function to add polygons
     const addPolygons = (ope, color, icon = null, dev = null) => {
       ope.polygons.forEach(poli => {
-        let poligonDevice = JSON.parse(poli.geojson);
-        let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
 
-        
-        // Obtener el ID del polígono (cambiar esto por la forma en que identificas cada polígono)
-        const poliId = `poli_${poli.polygonId}`;
-        // Obtener el enlace NDVI para el polígono actual
-        this.getImagesApi(poli.agromonitoringId).subscribe(ndviLink => {
-          // Aquí puedes manejar el enlace NDVI o undefined
+        this.getImagesApi(poli.agromonitoringId).subscribe((ndviLink: string | null) => {
           if (ndviLink) {
-            console.log(`Enlace NDVI para el polígono ${poliId}:`, ndviLink);
-            const tileURL2 = ndviLink;
+            const tileURL = ndviLink;
+            const poliName = poli.name;
 
-            // Actualizar o crear la capa NDVI correspondiente a este polígono
-            let ndviTileLayer = ndviTileLayers[poliId];
-            if (ndviTileLayer) {
-              ndviTileLayer.setUrl(tileURL2);
-            } else {
-              ndviTileLayer = tileLayer(tileURL2, {
-                // Opciones adicionales de la capa de tiles
-              }).addTo(this.myMap);
-              // Almacenar la capa en el objeto ndviTileLayers
-              ndviTileLayers[poliId] = ndviTileLayer;
-            }
-            // Agregar la capa de mosaicos NDVI al control de capas después de obtenerla
-            const overlayLayers = {
-              'NDVI': ndviTileLayer,
-              'Polygons': polygonLayer
-            };
-            updateLayerControl(baseLayers, overlayLayers);
+            // Agregar la capa NDVI al Layer Group
+            addNDVILayer(poliName, tileURL);
           } else {
-            console.log(`No se encontró el enlace NDVI para el polígono ${poliId}.`);
+            console.log(`No se encontró el enlace NDVI para el polígono poli_${poli.name}.`);
           }
         });
 
-
+        let poligonDevice = JSON.parse(poli.geojson);
+        let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
         // Formatear ope.operationArea con 2 decimales
         const formattedOperationArea = ope.operationArea.toFixed(2);
 
@@ -342,6 +263,73 @@ export class LeafletComponent implements OnInit {
     };
 
     this.devices = [];
+
+    // Function to add markers
+    const addMarker = (dev, data, icon) => {
+      // Determine the text color based on the value of data.volt
+      const textColor = data.volt < 3.2 ? 'red' : 'black';
+      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
+  
+  <div class="row">
+  <div class="col-6">
+    <div>
+      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+    </div>
+  </div>
+  <div class="col-6">
+    <div>
+    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
+  </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+        <img src="assets/images/sensor.png" alt="">
+        </div>
+        </div>    
+        <div class="row">
+        <div class="col-12">
+        <h2 style="margin-bottom: 0px;color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+          ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : 'OPTIMO'}
+        </h2>
+        </div>
+        </div>
+  <div class="row">
+    <div class="col-4">
+      <img src="assets/images/root50x50.png" alt=""> 
+    </div>
+    <div class="col-8">
+      <div class="row">
+        <div class="col-12">
+          <h5 style="margin-bottom: 0px;margin-top: 5px;color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+            ${data.dataHum1}%
+          </b></h5>
+        </div>
+        <div class="col-12">
+        <h5 style="color: black; text-align: left;">60 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+            ${data.dataHum2}%
+          </b></h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+    <div class="row">
+    <div class="col-6">
+      <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+    </div>
+    <div class="col-6">
+      <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+    </div>
+  </div>
+  
+  </div>
+  
+        `, { closeButton: false });
+
+      loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
+      this.lastData.push(data);
+    };
 
     operations.forEach(ope => {
       if (ope.devices.length === 0) {
