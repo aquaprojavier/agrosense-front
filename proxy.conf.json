@@ -1,0 +1,9 @@
+{
+    "/agro": {
+      "target": "http://api.agromonitoring.com",
+      "secure": false,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
+  }
+  

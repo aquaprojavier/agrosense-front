@@ -12,6 +12,9 @@ import { Data } from 'src/app/core/models/data.models';
 import { Operation } from 'src/app/core/models/operation.models';
 import { Property } from 'src/app/core/models/property.models';
 import { Device } from 'src/app/core/models/device.models';
+import { AgromonitoringService } from 'src/app/core/services/agromonitoring.service';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
@@ -23,6 +26,7 @@ declare function loadLiquidFillGauge(elementId: string, value: number, wc: numbe
 })
 export class LeafletComponent implements OnInit {
   // bread crumb items
+
   fechaActual: string;
   fechaAyer: string;
   fechaAntier: string;
@@ -38,13 +42,15 @@ export class LeafletComponent implements OnInit {
   wc: number;
   lastData: Data[] = [];
   sanitizedUrl: SafeResourceUrl | null = null;
-  
+  // ndviTileLayer: any;
+  ndviLayerGroup: any; // Crear un layerGroup para las capas NDVI
+
   gaugeIcon = new Icon({
     iconUrl: 'assets/images/water-meter.png', // Ruta local de tu imagen de 32x32 píxeles
     iconSize: [32, 32],        // Tamaño del icono [ancho, alto]
     iconAnchor: [16, 32],      // Punto del icono que se alinea con la ubicación del marcador
     popupAnchor: [0, -16]      // Punto donde se abrirá el popup en relación con el icono
-});
+  });
 
 
 
@@ -87,8 +93,10 @@ export class LeafletComponent implements OnInit {
     private operationService: OperationService,
     private dataService: DataService,
     private cargaScript: CargarService,
-    private sanitizer: DomSanitizer) {
+    private sanitizer: DomSanitizer,
+    private agromonitoringService: AgromonitoringService) {
 
+    this.ndviLayerGroup = layerGroup();
     this.cargaScript.carga(["loadFillGauge"]);
     const hoy = new Date();
     const ayer = new Date(hoy);
@@ -129,6 +137,22 @@ export class LeafletComponent implements OnInit {
     });
   };
 
+  getImagesApi(polygonId: string): Observable<string | undefined> {
+    return this.agromonitoringService.searchImages(1586131200, 1586553600, polygonId).pipe(
+      switchMap(data => {
+        const ndviLink = this.agromonitoringService.getSentinel2NDVILink(data);
+        if (ndviLink) {
+          // console.log('Enlace NDVI de Sentinel-2:', ndviLink);
+          return of(ndviLink); // Devuelve el enlace NDVI si se encuentra
+        } else {
+          // console.log('No se encontró el enlace NDVI para Sentinel-2.');
+          return of(undefined); // Devuelve undefined si no se encuentra
+        }
+      })
+    );
+  }
+
+
   showMap(property, operations) {
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove();
@@ -140,31 +164,33 @@ export class LeafletComponent implements OnInit {
     }).addTo(this.myMap);
 
     // Crear una capa de grupo para los polígonos
-    const polygonLayer = layerGroup();
+    let polygonLayer = layerGroup();
     // Agregar la capa de polígonos al mapa
     polygonLayer.addTo(this.myMap);
 
-    // URL de los tiles recibida de la API (con placeholders)
-    let tileURL = 'http://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/0205e8d1400/6509191675325506540ba823?appid=8dbe5b04b083a07e2c25cd0193c562fc';
-
-    // Agregar capa de tiles con tu polígono
-    let ndviTileLayer = tileLayer(tileURL, {
-      // Opciones adicionales de la capa de tiles
-    });
     // Agregar control de capas
     const baseLayers = {
       'ArcGIS': arcgisTileLayer
     };
 
-    const overlayLayers = {
-      'NDVI': ndviTileLayer, // Capa de mosaicos NDVI
-      'Polygons': polygonLayer // Capa de grupo de polígonos
-    };
-    // Agregar control de capas
-    const layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+    // Variables para las capas
+    let layerControl;
+    let ndviTileLayer;
 
-    // Agregar el control de capas al mapa
-    layerControl.addTo(this.myMap);
+    // Función para actualizar el layerControl
+    const updateLayerControl = (baseLayers, overlayLayers) => {
+      // Si el layerControl ya está inicializado, eliminarlo del mapa
+      if (layerControl) {
+        layerControl.remove();
+      }
+      // Crear un nuevo layerControl y agregarlo al mapa
+      layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+    };
+
+    // const overlayLayers = {
+    //   'NDVI': this.ndviTileLayer, // Capa de mosaicos NDVI
+    //   'Polygons': polygonLayer // Capa de grupo de polígonos
+    // };
 
     let poligonToGjson;
     let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
@@ -182,8 +208,8 @@ export class LeafletComponent implements OnInit {
 
     // Function to add markers
     const addMarker = (dev, data, icon) => {
-       // Determine the text color based on the value of data.volt
-  const textColor = data.volt < 3.2 ? 'red' : 'black';
+      // Determine the text color based on the value of data.volt
+      const textColor = data.volt < 3.2 ? 'red' : 'black';
       marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
 <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
 
@@ -246,15 +272,48 @@ export class LeafletComponent implements OnInit {
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
       this.lastData.push(data);
     };
-
+    const ndviTileLayers = {};
     // Function to add polygons
     const addPolygons = (ope, color, icon = null, dev = null) => {
       ope.polygons.forEach(poli => {
         let poligonDevice = JSON.parse(poli.geojson);
         let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
 
+        
+        // Obtener el ID del polígono (cambiar esto por la forma en que identificas cada polígono)
+        const poliId = `poli_${poli.polygonId}`;
+        // Obtener el enlace NDVI para el polígono actual
+        this.getImagesApi(poli.agromonitoringId).subscribe(ndviLink => {
+          // Aquí puedes manejar el enlace NDVI o undefined
+          if (ndviLink) {
+            console.log(`Enlace NDVI para el polígono ${poliId}:`, ndviLink);
+            const tileURL2 = ndviLink;
+
+            // Actualizar o crear la capa NDVI correspondiente a este polígono
+            let ndviTileLayer = ndviTileLayers[poliId];
+            if (ndviTileLayer) {
+              ndviTileLayer.setUrl(tileURL2);
+            } else {
+              ndviTileLayer = tileLayer(tileURL2, {
+                // Opciones adicionales de la capa de tiles
+              }).addTo(this.myMap);
+              // Almacenar la capa en el objeto ndviTileLayers
+              ndviTileLayers[poliId] = ndviTileLayer;
+            }
+            // Agregar la capa de mosaicos NDVI al control de capas después de obtenerla
+            const overlayLayers = {
+              'NDVI': ndviTileLayer,
+              'Polygons': polygonLayer
+            };
+            updateLayerControl(baseLayers, overlayLayers);
+          } else {
+            console.log(`No se encontró el enlace NDVI para el polígono ${poliId}.`);
+          }
+        });
+
+
         // Formatear ope.operationArea con 2 decimales
-      const formattedOperationArea = ope.operationArea.toFixed(2);
+        const formattedOperationArea = ope.operationArea.toFixed(2);
 
         poligon.bindPopup(`
         <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
@@ -312,5 +371,5 @@ export class LeafletComponent implements OnInit {
     });
 
   };
-  
+
 }
