@@ -142,7 +142,7 @@ export class LeafletComponent implements OnInit {
       switchMap(data => {
         const ndviLink = this.agromonitoringService.getSentinel2NDVILink(data);
         if (ndviLink) {
-          // console.log('Enlace NDVI de Sentinel-2:', ndviLink);
+          console.log('Enlace NDVI de Sentinel-2:', ndviLink);
           return of(ndviLink); // Devuelve el enlace NDVI si se encuentra
         } else {
           // console.log('No se encontró el enlace NDVI para Sentinel-2.');
@@ -151,6 +151,34 @@ export class LeafletComponent implements OnInit {
       })
     );
   }
+
+  getAllImages(layerControl){
+    this.operations.forEach(ope => {
+      ope.polygons.forEach ( poli => {
+        this.getImagesApi(poli.agromonitoringId).subscribe((ndviLink: string | null) => {
+          if (ndviLink) {
+            const tileURL = ndviLink;
+            
+              const newNDVILayer = tileLayer(tileURL, {
+                // Opciones adicionales de la capa de tiles
+              });
+        
+              // Agregar la capa NDVI al LayerGroup
+              this.ndviLayerGroup.addLayer(newNDVILayer);
+        
+              // Actualizar el control de capas solo cuando se añada la primera capa NDVI
+              if (this.ndviLayerGroup.getLayers().length === 1) {
+                if (layerControl) {
+                  layerControl.addOverlay(this.ndviLayerGroup, 'NDVI Group'); // Añadir el LayerGroup al control de capas con un nombre específico
+                }
+              }
+          } else {
+            console.log(`No se encontró el enlace NDVI para el polígono poli_${poli.name}.`);
+          }
+        });
+      })
+    });
+  };
 
 
   showMap(property, operations) {
@@ -177,28 +205,13 @@ export class LeafletComponent implements OnInit {
     // Capas vacías inicialmente
     const overlayLayers = {
       'Polygons': polygonLayer,
-      // 'NDVI': ndviLayerGroup
     };
 
     //crea un control de capas 
     let layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
 
-    // Función para agregar capas NDVI al LayerGroup
-    const addNDVILayer = (poliId: string, tileURL: string): void => {
-      const newNDVILayer = tileLayer(tileURL, {
-        // Opciones adicionales de la capa de tiles
-      });
 
-      // Agregar la capa NDVI al LayerGroup
-      ndviLayerGroup.addLayer(newNDVILayer);
-
-      // Actualizar el control de capas solo cuando se añada la primera capa NDVI
-      if (ndviLayerGroup.getLayers().length === 1) {
-        if (layerControl) {
-          layerControl.addOverlay(ndviLayerGroup, 'NDVI Group'); // Añadir el LayerGroup al control de capas con un nombre específico
-        }
-      }
-    };
+    this.getAllImages(layerControl);
 
     let poligonToGjson;
     let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
@@ -218,18 +231,6 @@ export class LeafletComponent implements OnInit {
     // Function to add polygons
     const addPolygons = (ope, color, icon = null, dev = null) => {
       ope.polygons.forEach(poli => {
-
-        this.getImagesApi(poli.agromonitoringId).subscribe((ndviLink: string | null) => {
-          if (ndviLink) {
-            const tileURL = ndviLink;
-            const poliName = poli.name;
-
-            // Agregar la capa NDVI al Layer Group
-            addNDVILayer(poliName, tileURL);
-          } else {
-            console.log(`No se encontró el enlace NDVI para el polígono poli_${poli.name}.`);
-          }
-        });
 
         let poligonDevice = JSON.parse(poli.geojson);
         let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
