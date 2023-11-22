@@ -22,8 +22,9 @@
               <thead class="table-light">
                 <tr>
                   <th class="align-middle">Nombre</th>
-                  <th class="align-middle">Variedad</th>
+                  <th class="align-middle">Tipo</th>
                   <th class="align-middle">Operacion</th>
+                  <th class="align-middle">Variedad</th>
                   <!-- <th class="align-middle">Latitud</th> -->
                   <!-- <th class="align-middle">Longitud</th> -->
                   <th class="align-middle">Status</th>
@@ -33,10 +34,11 @@
               <tbody>
                 <tr *ngFor="let dev of devices">
                   <td>{{ dev.devicesNombre }}</td>
-                  <td>{{ dev.devicesCultivo }}</td>
+                  <td>{{dev.devicesType}}</td>
                   <td [style.color]="getOperationNameByDevId(dev.devicesId) === 'Ninguna' ? 'yellow' : ''">
                     {{ getOperationNameByDevId(dev.devicesId) }}
                   </td>
+                  <td>{{ dev.devicesCultivo }}</td>
                   <!-- <td>{{ dev.latitud | number: '2.2-2' }}</td> -->
                   <!-- <td>{{ dev.longitud | number: '2.2-2'}}</td> -->
                   <td>

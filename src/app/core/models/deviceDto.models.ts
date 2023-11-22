@@ -1,12 +1,13 @@
 export class DeviceDto {
     devicesId?: number;
     devicesNombre: string;
-    devicesCultivo: string;
+    devicesType?: string;
+    devicesCultivo?: string;
     devicesSerie: string;
     latitud: number;
     longitud: number;
     operationId: number;
-    propertyId?: number;
+    propertyId: number;
     soilId: number;
     koef1?: number;
     koef2?: number;

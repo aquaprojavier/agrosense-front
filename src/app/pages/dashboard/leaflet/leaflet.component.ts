@@ -96,7 +96,7 @@ export class LeafletComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private agromonitoringService: AgromonitoringService) {
 
-    this.ndviLayerGroup = layerGroup();
+    
     this.cargaScript.carga(["loadFillGauge"]);
     const hoy = new Date();
     const ayer = new Date(hoy);
@@ -142,7 +142,6 @@ export class LeafletComponent implements OnInit {
       switchMap(data => {
         const ndviLink = this.agromonitoringService.getSentinel2NDVILink(data);
         if (ndviLink) {
-          console.log('Enlace NDVI de Sentinel-2:', ndviLink);
           return of(ndviLink); // Devuelve el enlace NDVI si se encuentra
         } else {
           // console.log('No se encontró el enlace NDVI para Sentinel-2.');
@@ -153,23 +152,25 @@ export class LeafletComponent implements OnInit {
   }
 
   getAllImages(layerControl){
+
+    this.ndviLayerGroup = layerGroup();
     this.operations.forEach(ope => {
       ope.polygons.forEach ( poli => {
+
         this.getImagesApi(poli.agromonitoringId).subscribe((ndviLink: string | null) => {
           if (ndviLink) {
             const tileURL = ndviLink;
-            
               const newNDVILayer = tileLayer(tileURL, {
                 // Opciones adicionales de la capa de tiles
               });
-        
               // Agregar la capa NDVI al LayerGroup
-              this.ndviLayerGroup.addLayer(newNDVILayer);
+              this.ndviLayerGroup.addLayer(newNDVILayer); 
         
               // Actualizar el control de capas solo cuando se añada la primera capa NDVI
+              
               if (this.ndviLayerGroup.getLayers().length === 1) {
                 if (layerControl) {
-                  layerControl.addOverlay(this.ndviLayerGroup, 'NDVI Group'); // Añadir el LayerGroup al control de capas con un nombre específico
+                  layerControl.addOverlay(this.ndviLayerGroup, 'NDVI'); // Añadir el LayerGroup al control de capas con un nombre específico
                 }
               }
           } else {
@@ -178,6 +179,7 @@ export class LeafletComponent implements OnInit {
         });
       })
     });
+    
   };
 
 
@@ -195,16 +197,18 @@ export class LeafletComponent implements OnInit {
     let polygonLayer = layerGroup().addTo(this.myMap);
 
     // Declaración del LayerGroup para las capas NDVI y agregarla al mapa
-    const ndviLayerGroup = layerGroup().addTo(this.myMap);
+    // this.ndviLayerGroup = layerGroup().addTo(this.myMap);
 
     // Agregar control de capas
     const baseLayers = {
-      'ArcGIS': arcgisTileLayer
+      'ArcGIS': arcgisTileLayer,
+
     };
 
     // Capas vacías inicialmente
     const overlayLayers = {
       'Polygons': polygonLayer,
+      // 'NDVI': ndviLayerGroup
     };
 
     //crea un control de capas 
@@ -251,8 +255,7 @@ export class LeafletComponent implements OnInit {
               <div class="text-center">
                 <img src="assets/images/grapes.png" alt=""> Cultivo: <b>${ope.crop.cropName}</b><br>
               </div>
-              ${dev ? `<div class="text-center">
-                          <img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br>
+              ${dev ? `<div class="text-center">Variedad: <b>${dev.devicesCultivo}</b><br>
               </div>` : ''}
             </div>
           </div>
@@ -332,6 +335,40 @@ export class LeafletComponent implements OnInit {
       this.lastData.push(data);
     };
 
+     // Function to add markers
+     const addSimpleMarker = (dev, icon) => {
+      // Determine the text color based on the value of data.volt
+      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
+  
+  <div class="row">
+  <div class="col-6">
+    <div>
+      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+    </div>
+  </div>
+  <div class="col-6">
+    <div>
+    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: 4 V.</b></h5>  </div>
+  </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+        <img src="assets/images/sensor.png" alt="">
+        </div>
+        </div>    
+        <div class="row">
+        <div class="col-12">
+        <h2 style="margin-bottom: 0px;>
+          CAUDALIMETRO
+        </h2>
+        </div>
+        </div>
+   </div>
+  
+        `, { closeButton: false });
+    };
+
     operations.forEach(ope => {
       if (ope.devices.length === 0) {
         addPolygons(ope, "#302e2e");
@@ -341,7 +378,7 @@ export class LeafletComponent implements OnInit {
           this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
             data => {
               if (data.dataHum <= data.pmp) {
-                addMarker(dev, data, this.gaugeIcon);
+                addMarker(dev, data, this.redIcon);
                 addPolygons(ope, "#CB2B3E", this.redIcon, dev);
               } else if (data.dataHum >= data.cc) {
                 addMarker(dev, data, this.blueIcon);
@@ -358,6 +395,12 @@ export class LeafletComponent implements OnInit {
         });
       }
     });
+
+    property.devices.forEach(dev => {
+      if (dev.devicesType === "Caudalimetro"){
+        addSimpleMarker(dev, this.gaugeIcon);
+      }
+    })
 
   };
 

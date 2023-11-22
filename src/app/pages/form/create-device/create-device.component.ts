@@ -41,6 +41,8 @@ export class CreateDeviceComponent implements OnInit {
   longitud: number;
   serialNumbers: string[] = [];
   soils: Soil[] = [];
+  devicesList = ['Suelo', 'Temp. y HR', 'Caudalimetro']; // Lista de tipos de dispositivos
+
 
 
   greenIcon = new Icon({
@@ -117,24 +119,46 @@ export class CreateDeviceComponent implements OnInit {
   private buildForm() {
     this.form = this.formBuilder.group({
       devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
-      devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
+      devicesTipo: '',
+      devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       opeId: ['', Validators.required],
       soil: ['', Validators.required],
     });
+
+    
+  // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
+  this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
+    if (selectedType === 'Suelo') {
+      this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
+      this.form.get('devicesCultivo').updateValueAndValidity();
+      this.form.get('opeId').setValidators(Validators.required);
+      this.form.get('opeId').updateValueAndValidity();
+      this.form.get('soil').setValidators(Validators.required);
+      this.form.get('soil').updateValueAndValidity();
+    } else {
+      this.form.get('devicesCultivo').clearValidators();
+      this.form.get('devicesCultivo').updateValueAndValidity();
+      this.form.get('opeId').clearValidators();
+      this.form.get('opeId').updateValueAndValidity();
+      this.form.get('soil').clearValidators();
+      this.form.get('soil').updateValueAndValidity();
+    }
+  });
   }
 
   saveDevice() {
     if (this.form.valid) {
       this.operations.forEach(ope => {
         if (this.form.value.opeId == ope.operationId) {
-          this.opeGeojson = ope.polygons[0]
+          this.opeGeojson = ope.polygons[0] //ver esto, se asigna al 1er poligono de la operacion
         }
       })
       const deviceDto: DeviceDto = {
         devicesNombre: this.form.value.devicesNombre,
+        devicesType: this.form.value.devicesTipo,
         devicesCultivo: this.form.value.devicesCultivo,
         devicesSerie: this.form.value.devicesSerie,
         latitud: this.form.value.latitud,
