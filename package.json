@@ -54,6 +54,7 @@
     "geojson2svg": "^2.0.1",
     "leaflet": "^1.8.0",
     "leaflet-draw": "^1.0.4",
+    "leaflet-extra-markers": "^1.2.2",
     "metismenujs": "^1.2.1",
     "ng-apexcharts": "^1.5.12",
     "ng-chartist": "^4.1.0",

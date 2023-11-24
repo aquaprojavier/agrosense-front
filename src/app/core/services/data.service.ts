@@ -14,7 +14,6 @@ export class DataService {
     return this.http.get<Data[]>(`${baseUrl}/data/showByLastDays/${deviceId}/${days}`);
   }
 
-
   public fullDataByDeviceId(deviceId: number){  
     return this.http.get<Data[]>(`${baseUrl}/data/show/${deviceId}`);
   }
@@ -26,6 +25,10 @@ export class DataService {
   //este metodo da error
   public lastDataByDeviceId(deviceId: number){  
     return this.http.get<Data>(`${baseUrl}/device/lastData/${deviceId}`);
+  }
+
+  public lastDatasByDeviceId(deviceId: number, datas: number){  
+    return this.http.get<Data[]>(`${baseUrl}/data/lastDatas/${deviceId}/${datas}`);
   }
 
 }

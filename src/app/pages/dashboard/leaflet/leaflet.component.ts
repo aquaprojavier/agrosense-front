@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { formatDate } from '@angular/common';
-import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup } from 'leaflet';
+import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup, ExtraMarkers, LayerGroup } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
@@ -15,9 +15,11 @@ import { Device } from 'src/app/core/models/device.models';
 import { AgromonitoringService } from 'src/app/core/services/agromonitoring.service';
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import 'leaflet-extra-markers';
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
+type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" | "blue-dark" | "cyan" | "purple" | "violet" | "pink" | "green-dark" | "green" | "green-light" | "black" | "white" | `#${string}`;
 
 @Component({
   selector: 'app-leaflet',
@@ -42,8 +44,8 @@ export class LeafletComponent implements OnInit {
   wc: number;
   lastData: Data[] = [];
   sanitizedUrl: SafeResourceUrl | null = null;
-  // ndviTileLayer: any;
-  ndviLayerGroup: any; // Crear un layerGroup para las capas NDVI
+  polygonLayer: LayerGroup;
+  lastDatas: Data[];
 
   gaugeIcon = new Icon({
     iconUrl: 'assets/images/water-meter.png', // Ruta local de tu imagen de 32x32 píxeles
@@ -51,8 +53,6 @@ export class LeafletComponent implements OnInit {
     iconAnchor: [16, 32],      // Punto del icono que se alinea con la ubicación del marcador
     popupAnchor: [0, -16]      // Punto donde se abrirá el popup en relación con el icono
   });
-
-
 
   redIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -96,7 +96,7 @@ export class LeafletComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private agromonitoringService: AgromonitoringService) {
 
-    
+
     this.cargaScript.carga(["loadFillGauge"]);
     const hoy = new Date();
     const ayer = new Date(hoy);
@@ -126,6 +126,13 @@ export class LeafletComponent implements OnInit {
     );
   };
 
+  getLastDatas(id: number, numbers: number){
+    this.dataService.lastDatasByDeviceId(id, numbers).subscribe(data=>{
+      this.lastDatas = data;
+      console.log(data);
+    })
+  }
+
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
@@ -151,37 +158,61 @@ export class LeafletComponent implements OnInit {
     );
   }
 
-  getAllImages(layerControl){
+  getAllImages(layerControl) {
 
-    this.ndviLayerGroup = layerGroup();
+    // this.polygonLayer = layerGroup();
+    const ndviLayerGroup = layerGroup();
     this.operations.forEach(ope => {
-      ope.polygons.forEach ( poli => {
+      ope.polygons.forEach(poli => {
 
         this.getImagesApi(poli.agromonitoringId).subscribe((ndviLink: string | null) => {
           if (ndviLink) {
             const tileURL = ndviLink;
-              const newNDVILayer = tileLayer(tileURL, {
-                // Opciones adicionales de la capa de tiles
-              });
-              // Agregar la capa NDVI al LayerGroup
-              this.ndviLayerGroup.addLayer(newNDVILayer); 
-        
-              // Actualizar el control de capas solo cuando se añada la primera capa NDVI
-              
-              if (this.ndviLayerGroup.getLayers().length === 1) {
-                if (layerControl) {
-                  layerControl.addOverlay(this.ndviLayerGroup, 'NDVI'); // Añadir el LayerGroup al control de capas con un nombre específico
-                }
+            const newNDVILayer = tileLayer(tileURL, {
+              // Opciones adicionales de la capa de tiles
+            });
+            // Agregar la capa NDVI al LayerGroup
+            ndviLayerGroup.addLayer(newNDVILayer);
+            // Actualizar el control de capas solo cuando se añada la primera capa NDVI
+            if (ndviLayerGroup.getLayers().length === 1) {
+              if (layerControl) {
+                layerControl.addOverlay(ndviLayerGroup, 'NDVI'); // Añadir el LayerGroup al control de capas con un nombre específico
               }
+            }
           } else {
             console.log(`No se encontró el enlace NDVI para el polígono poli_${poli.name}.`);
           }
         });
       })
     });
-    
-  };
 
+  };
+  // Función para crear el ícono de temperatura con color dinámico según la temperatura
+  createTempIcon(temperature: number): Icon {
+    let markerColor: AllowedMarkerColor = 'blue';
+
+    if (temperature < 5) {
+      markerColor = '#088DFC';
+    } else if (temperature >= 5 && temperature < 25) {
+      markerColor = '#A8FAAA';
+    } else if (temperature >= 25 && temperature < 35) {
+      markerColor = '#FFAC33';
+    } else if (temperature >= 35) {
+      markerColor = '#FC3C08';
+    }
+    const tempString = temperature.toString()
+    return ExtraMarkers.icon({
+      shape: 'square',
+      markerColor: markerColor,
+      prefix: '',
+      icon: 'fa-number',
+      iconColor: '#2e222c',
+      iconRotate: 0,
+      extraClasses: '',
+      number: tempString,
+      svg: true
+    });
+  }
 
   showMap(property, operations) {
     if (this.myMap !== undefined && this.myMap !== null) {
@@ -194,21 +225,22 @@ export class LeafletComponent implements OnInit {
     }).addTo(this.myMap);
 
     // Crear una capa de grupo para los polígonos y agregarla al mapa
-    let polygonLayer = layerGroup().addTo(this.myMap);
-
-    // Declaración del LayerGroup para las capas NDVI y agregarla al mapa
-    // this.ndviLayerGroup = layerGroup().addTo(this.myMap);
+    this.polygonLayer = layerGroup().addTo(this.myMap);
+    let soilLayer = layerGroup().addTo(this.myMap);
+    let tempLayer = layerGroup().addTo(this.myMap);
+    let otherLayer = layerGroup().addTo(this.myMap);
 
     // Agregar control de capas
     const baseLayers = {
       'ArcGIS': arcgisTileLayer,
-
     };
 
     // Capas vacías inicialmente
     const overlayLayers = {
-      'Polygons': polygonLayer,
-      // 'NDVI': ndviLayerGroup
+      'Operaciones riego': this.polygonLayer,
+      'Sensores suelo': soilLayer,
+      'Sensores ambiente': tempLayer,
+      'Otros sensores': otherLayer
     };
 
     //crea un control de capas 
@@ -262,7 +294,7 @@ export class LeafletComponent implements OnInit {
         </div>
         `, { closeButton: false });
         // Agregar el polígono a la capa de grupo
-        polygonLayer.addLayer(poligon);
+        this.polygonLayer.addLayer(poligon);
       });
     };
 
@@ -272,7 +304,7 @@ export class LeafletComponent implements OnInit {
     const addMarker = (dev, data, icon) => {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt < 3.2 ? 'red' : 'black';
-      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+      let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
   <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
   
   <div class="row">
@@ -331,14 +363,54 @@ export class LeafletComponent implements OnInit {
   
         `, { closeButton: false });
 
+      soilLayer.addLayer(iconSoil);
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
       this.lastData.push(data);
     };
 
-     // Function to add markers
-     const addSimpleMarker = (dev, icon) => {
+    // Function to add markers
+    const addTempMarker = (dev, data, icon) => {
       // Determine the text color based on the value of data.volt
-      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+      const textColor = data.volt <= 3.2 ? 'red' : 'black';
+      let iconTemp = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
+  
+  <div class="row">
+  <div class="col-6">
+    <div>
+      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+    </div>
+  </div>
+  <div class="col-6">
+    <div>
+    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
+  </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+        <img src="assets/images/sensor.png" alt="">
+        </div>
+        </div>    
+  
+        <div class="row">
+        <div class="col-6">
+          <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+        </div>
+        <div class="col-6">
+          <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+        </div>
+      </div>
+  
+  </div>
+  
+        `, { closeButton: false });
+      tempLayer.addLayer(iconTemp);
+    };
+
+    // Function to add markers
+    const addGaugeMarker = (dev, icon) => {
+      // Determine the text color based on the value of data.volt
+      let gaugeIcon = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
   <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
   
   <div class="row">
@@ -367,6 +439,7 @@ export class LeafletComponent implements OnInit {
    </div>
   
         `, { closeButton: false });
+      otherLayer.addLayer(gaugeIcon);
     };
 
     operations.forEach(ope => {
@@ -397,11 +470,20 @@ export class LeafletComponent implements OnInit {
     });
 
     property.devices.forEach(dev => {
-      if (dev.devicesType === "Caudalimetro"){
-        addSimpleMarker(dev, this.gaugeIcon);
+      
+      if (dev.devicesType === "Caudalimetro") {
+        this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
+          addGaugeMarker(dev, this.gaugeIcon);
+        })
+
+      };
+      if (dev.devicesType === "Temp. / HR") {
+        this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
+          this.getLastDatas(dev.devicesId, 4)
+          const tempIcon = this.createTempIcon(data.dataTemp)
+          addTempMarker(dev, data, tempIcon);
+        });
       }
     })
-
   };
-
 }

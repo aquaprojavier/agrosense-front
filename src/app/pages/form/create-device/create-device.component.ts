@@ -41,7 +41,7 @@ export class CreateDeviceComponent implements OnInit {
   longitud: number;
   serialNumbers: string[] = [];
   soils: Soil[] = [];
-  devicesList = ['Suelo', 'Temp. y HR', 'Caudalimetro']; // Lista de tipos de dispositivos
+  devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
 
 
 
