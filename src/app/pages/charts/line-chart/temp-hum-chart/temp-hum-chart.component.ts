@@ -164,8 +164,6 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-       // Add scrollbar
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
       let scrollbar = mainPanel.set("scrollbarX", am5xy.XYChartScrollbar.new(root, {
         orientation: "horizontal",
         height: 30
@@ -195,8 +193,6 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         visible: true,
         fillOpacity: 0.3
       });
-
-      
 
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/

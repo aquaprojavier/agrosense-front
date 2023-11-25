@@ -17,6 +17,12 @@ import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import 'leaflet-extra-markers';
 
+import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
+
+import * as am5 from "@amcharts/amcharts5";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
+
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 // import { from } from 'rxjs';
 type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" | "blue-dark" | "cyan" | "purple" | "violet" | "pink" | "green-dark" | "green" | "green-light" | "black" | "white" | `#${string}`;
@@ -126,13 +132,6 @@ export class LeafletComponent implements OnInit {
     );
   };
 
-  getLastDatas(id: number, numbers: number){
-    this.dataService.lastDatasByDeviceId(id, numbers).subscribe(data=>{
-      this.lastDatas = data;
-      console.log(data);
-    })
-  }
-
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
@@ -143,6 +142,66 @@ export class LeafletComponent implements OnInit {
       })
     });
   };
+
+
+
+  createValueChart(div, datos, color) {
+    let root = am5.Root.new(div);
+
+    root.setThemes([
+      am5themes_Micro.new(root),
+      am5themes_Dark.new(root)//modo dark
+
+    ]);
+
+    let chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: "none",
+      wheelY: "none"
+    }));
+
+    chart.plotContainer.set("wheelable", false);
+    chart.zoomOutButton.set("forceHidden", true);
+
+    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      strictMinMax: true,
+      extraMax: 0.02,
+      extraMin: 0.02,
+      renderer: am5xy.AxisRendererY.new(root, {})
+    }));
+    
+    let xAxis = chart.xAxes.push(
+      am5xy.DateAxis.new(root, {
+      maxDeviation: 0,
+      baseInterval: {
+        timeUnit: "minute",
+        count: 10
+      },
+      renderer: am5xy.AxisRendererX.new(root, {})
+    })
+    );
+
+    let series = chart.series.push(am5xy.LineSeries.new(root, {
+      xAxis: xAxis,
+      yAxis: yAxis,
+      valueYField: "dataTemp",
+      valueXField: "dataFecha",
+      stroke: color
+    }));
+
+    series.data.processor = am5.DataProcessor.new(root, {
+      numericFields: ["dataTemp"],
+      dateFields: ["dataFecha"],
+      dateFormat: "yyyy-MM-dd HH:mm:ss"
+    });
+
+    series.strokes.template.setAll({
+      strokeWidth: 2
+    });
+    console.log(datos);
+    series.data.setAll(datos);
+  }
 
   getImagesApi(polygonId: string): Observable<string | undefined> {
     return this.agromonitoringService.searchImages(1586131200, 1586553600, polygonId).pipe(
@@ -159,7 +218,6 @@ export class LeafletComponent implements OnInit {
   }
 
   getAllImages(layerControl) {
-
     // this.polygonLayer = layerGroup();
     const ndviLayerGroup = layerGroup();
     this.operations.forEach(ope => {
@@ -387,8 +445,8 @@ export class LeafletComponent implements OnInit {
   </div>
   </div>
   <div class="row">
-    <div class="col-12">
-        <img src="assets/images/sensor.png" alt="">
+    <div id="chartdiv" style="height: 50px">
+        
         </div>
         </div>    
   
@@ -403,8 +461,11 @@ export class LeafletComponent implements OnInit {
   
   </div>
   
-        `, { closeButton: false });
+        `, { closeButton: false }).openPopup();
       tempLayer.addLayer(iconTemp);
+      this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
+      this.createValueChart("chartdiv", lastdata, "#3eedd3")
+      })
     };
 
     // Function to add markers
@@ -470,7 +531,7 @@ export class LeafletComponent implements OnInit {
     });
 
     property.devices.forEach(dev => {
-      
+
       if (dev.devicesType === "Caudalimetro") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           addGaugeMarker(dev, this.gaugeIcon);
@@ -479,9 +540,11 @@ export class LeafletComponent implements OnInit {
       };
       if (dev.devicesType === "Temp. / HR") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
-          this.getLastDatas(dev.devicesId, 4)
-          const tempIcon = this.createTempIcon(data.dataTemp)
+          this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
+            const tempIcon = this.createTempIcon(data.dataTemp)
           addTempMarker(dev, data, tempIcon);
+          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+          })
         });
       }
     })
