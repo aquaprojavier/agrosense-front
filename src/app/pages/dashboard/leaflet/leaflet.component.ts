@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, NgZone, PLATFORM_ID } from '@angular/core';
 import { formatDate } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup, ExtraMarkers, LayerGroup } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -24,7 +25,7 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
-// import { from } from 'rxjs';
+
 type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" | "blue-dark" | "cyan" | "purple" | "violet" | "pink" | "green-dark" | "green" | "green-light" | "black" | "white" | `#${string}`;
 
 @Component({
@@ -94,6 +95,9 @@ export class LeafletComponent implements OnInit {
   });
 
   constructor(
+    @Inject(PLATFORM_ID)
+    private platformId: Object,
+    private zone: NgZone,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private operationService: OperationService,
@@ -143,64 +147,87 @@ export class LeafletComponent implements OnInit {
     });
   };
 
-
+  // Run the function only in the browser
+  browserOnly(f: () => void) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.zone.runOutsideAngular(() => {
+        f();
+      });
+    }
+  }
 
   createValueChart(div, datos, color) {
-    let root = am5.Root.new(div);
+    this.browserOnly(() => {
+      // Dispose previously created Root element
+      this.maybeDisposeRoot(div);
 
-    root.setThemes([
-      am5themes_Micro.new(root),
-      am5themes_Dark.new(root)//modo dark
+      let root = am5.Root.new(div);
 
-    ]);
+      root.setThemes([
+        am5themes_Micro.new(root),
+        am5themes_Dark.new(root)//modo dark
+      ]);
 
-    let chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      wheelX: "none",
-      wheelY: "none"
-    }));
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "none",
+        wheelY: "none"
+      }));
 
-    chart.plotContainer.set("wheelable", false);
-    chart.zoomOutButton.set("forceHidden", true);
+      chart.plotContainer.set("wheelable", false);
+      chart.zoomOutButton.set("forceHidden", true);
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-      strictMinMax: true,
-      extraMax: 0.02,
-      extraMin: 0.02,
-      renderer: am5xy.AxisRendererY.new(root, {})
-    }));
-    
-    let xAxis = chart.xAxes.push(
-      am5xy.DateAxis.new(root, {
-      maxDeviation: 0,
-      baseInterval: {
-        timeUnit: "minute",
-        count: 10
-      },
-      renderer: am5xy.AxisRendererX.new(root, {})
-    })
-    );
+      let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        strictMinMax: true,
+        extraMax: 0.02,
+        extraMin: 0.02,
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
 
-    let series = chart.series.push(am5xy.LineSeries.new(root, {
-      xAxis: xAxis,
-      yAxis: yAxis,
-      valueYField: "dataTemp",
-      valueXField: "dataFecha",
-      stroke: color
-    }));
+      let xAxis = chart.xAxes.push(
+        am5xy.DateAxis.new(root, {
+          maxDeviation: 0,
+          baseInterval: {
+            timeUnit: "minute",
+            count: 10
+          },
+          renderer: am5xy.AxisRendererX.new(root, {})
+        })
+      );
 
-    series.data.processor = am5.DataProcessor.new(root, {
-      numericFields: ["dataTemp"],
-      dateFields: ["dataFecha"],
-      dateFormat: "yyyy-MM-dd HH:mm:ss"
+      let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "dataTemp",
+        valueXField: "dataFecha",
+        stroke: color,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{valueY} C",
+          keepTargetHover: true
+        })
+      }));
+
+      series.data.processor = am5.DataProcessor.new(root, {
+        numericFields: ["dataTemp"],
+        dateFields: ["dataFecha"],
+        dateFormat: "yyyy-MM-dd HH:mm:ss"
+      });
+      // Add cursor
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+      let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+        // yAxis: valueAxis,
+        // xAxis: dateAxis,
+        // behavior: "zoomX"
+      }));
+
+
+      series.strokes.template.setAll({
+        strokeWidth: 2
+      });
+      console.log(datos);
+      series.data.setAll(datos);
     });
-
-    series.strokes.template.setAll({
-      strokeWidth: 2
-    });
-    console.log(datos);
-    series.data.setAll(datos);
   }
 
   getImagesApi(polygonId: string): Observable<string | undefined> {
@@ -258,7 +285,8 @@ export class LeafletComponent implements OnInit {
     } else if (temperature >= 35) {
       markerColor = '#FC3C08';
     }
-    const tempString = temperature.toString()
+    // const tempString = temperature.toString() + '\u2103';
+    const tempString = temperature.toString();
     return ExtraMarkers.icon({
       shape: 'square',
       markerColor: markerColor,
@@ -302,7 +330,7 @@ export class LeafletComponent implements OnInit {
     };
 
     //crea un control de capas 
-    let layerControl = control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(this.myMap);
+    let layerControl = control.layers(baseLayers, overlayLayers).addTo(this.myMap);
 
 
     this.getAllImages(layerControl);
@@ -431,41 +459,40 @@ export class LeafletComponent implements OnInit {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt <= 3.2 ? 'red' : 'black';
       let iconTemp = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
-  
-  <div class="row">
-  <div class="col-6">
-    <div>
-      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
-    </div>
-  </div>
-  <div class="col-6">
-    <div>
-    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
-  </div>
-  </div>
-  <div class="row">
-    <div id="chartdiv" style="height: 50px">
-        
-        </div>
-        </div>    
-  
+        <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
         <div class="row">
         <div class="col-6">
-          <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+          <div>
+            <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+          </div>
         </div>
         <div class="col-6">
-          <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+          <div>
+          <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
         </div>
-      </div>
+        </div>
+        <div class="row">
+          <div id="chartdiv" style="height: 25px; width: 90%">
+              </div>
+              </div>    
+              <div class="row">
+              <div class="col-6">
+                <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+              </div>
+              <div class="col-6">
+                <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+              </div>
+            </div>
+        </div>
   
-  </div>
-  
-        `, { closeButton: false }).openPopup();
+        `, { closeButton: false }).on('click', (e) => {
+        console.log('Hiciste clic en el marcador', e.latlng);
+        this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
+          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+        });
+      });
       tempLayer.addLayer(iconTemp);
-      this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
-      this.createValueChart("chartdiv", lastdata, "#3eedd3")
-      })
+
     };
 
     // Function to add markers
@@ -473,7 +500,6 @@ export class LeafletComponent implements OnInit {
       // Determine the text color based on the value of data.volt
       let gaugeIcon = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
   <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
-  
   <div class="row">
   <div class="col-6">
     <div>
@@ -498,7 +524,6 @@ export class LeafletComponent implements OnInit {
         </div>
         </div>
    </div>
-  
         `, { closeButton: false });
       otherLayer.addLayer(gaugeIcon);
     };
@@ -542,11 +567,20 @@ export class LeafletComponent implements OnInit {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
             const tempIcon = this.createTempIcon(data.dataTemp)
-          addTempMarker(dev, data, tempIcon);
-          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+            addTempMarker(dev, data, tempIcon);
+            this.createValueChart("chartdiv", lastdata, "#3eedd3")
           })
         });
       }
     })
   };
+
+  maybeDisposeRoot(divId) {
+    am5.array.each(am5.registry.rootElements, function (root) {
+      if (root && root.dom.id == divId) {
+        root.dispose();
+      }
+    });
+  }
+
 }

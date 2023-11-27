@@ -22,7 +22,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
-    private zone: NgZone,
+  private zone: NgZone,
   ) { }
 
   ngOnInit(): void {
