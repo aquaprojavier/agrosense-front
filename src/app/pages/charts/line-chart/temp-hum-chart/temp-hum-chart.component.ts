@@ -145,7 +145,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
           keepTargetHover: true
         })
       }));
-
+      
       let valueSeries2 = mainPanel.series.push(am5xy.LineSeries.new(root, {
         name: "DPV",
         valueXField: "dataFecha",

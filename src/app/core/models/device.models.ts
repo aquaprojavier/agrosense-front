@@ -1,3 +1,4 @@
+import { LatLngExpression } from "leaflet";
 import { Soil } from "./soil.model";
 
 export class Device {
@@ -8,6 +9,7 @@ export class Device {
     devicesSerie: string;
     latitud: number;
     longitud: number;
+    coordenadas?: LatLngExpression;
     // operationId: number;
     conected?: boolean;
     soil?: Soil;

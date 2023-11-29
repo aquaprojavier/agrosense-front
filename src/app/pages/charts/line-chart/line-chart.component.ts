@@ -135,7 +135,7 @@ export class LineChartComponent implements OnInit {
       // https://www.amcharts.com/docs/v5/charts/stock-chart/#Adding_panels
       let mainPanel = stockChart.panels.push(am5stock.StockPanel.new(root, {
         // wheelY: "zoomX",
-        panX: true,
+        panX: false,
         panY: false,
         pinchZoomX: true,
         layout: root.verticalLayout
@@ -173,7 +173,6 @@ export class LineChartComponent implements OnInit {
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
-
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
           numericFields: ["dataHum2", "cc", "ur"],

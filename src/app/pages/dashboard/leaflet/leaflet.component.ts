@@ -18,11 +18,11 @@ import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import 'leaflet-extra-markers';
 
+import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
-
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
+// import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
 
@@ -120,7 +120,6 @@ export class LeafletComponent implements OnInit {
     this.fechaAyer = formatDate(ayer, 'dd \'de\' MMMM', 'es');
     this.fechaAntier = formatDate(antier, 'dd \'de\' MMMM', 'es');
     this.fechaAntiantier = formatDate(antiantier, 'dd \'de\' MMMM', 'es');
-
   }
 
   ngOnInit(): void {
@@ -154,7 +153,7 @@ export class LeafletComponent implements OnInit {
         f();
       });
     }
-  }
+  };
 
   createValueChart(div, datos, color) {
     this.browserOnly(() => {
@@ -164,68 +163,80 @@ export class LeafletComponent implements OnInit {
       let root = am5.Root.new(div);
 
       root.setThemes([
-        am5themes_Micro.new(root),
-        am5themes_Dark.new(root)//modo dark
+        // am5themes_Micro.new(root),
+        am5themes_Animated.new(root),
+        // am5themes_Dark.new(root)//modo dark
       ]);
 
       let chart = root.container.children.push(am5xy.XYChart.new(root, {
         panX: false,
         panY: false,
         wheelX: "none",
-        wheelY: "none"
+        wheelY: "none",
       }));
 
-      chart.plotContainer.set("wheelable", false);
-      chart.zoomOutButton.set("forceHidden", true);
+      // chart.plotContainer.set("wheelable", false);
+      // chart.zoomOutButton.set("forceHidden", true);
 
-      let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        strictMinMax: true,
-        extraMax: 0.02,
-        extraMin: 0.02,
-        renderer: am5xy.AxisRendererY.new(root, {})
-      }));
-
-      let xAxis = chart.xAxes.push(
-        am5xy.DateAxis.new(root, {
-          maxDeviation: 0,
-          baseInterval: {
-            timeUnit: "minute",
-            count: 10
-          },
-          renderer: am5xy.AxisRendererX.new(root, {})
-        })
-      );
-
-      let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "dataTemp",
-        valueXField: "dataFecha",
-        stroke: color,
-        tooltip: am5.Tooltip.new(root, {
-          labelText: "{valueY} C",
-          keepTargetHover: true
-        })
-      }));
-
-      series.data.processor = am5.DataProcessor.new(root, {
-        numericFields: ["dataTemp"],
-        dateFields: ["dataFecha"],
-        dateFormat: "yyyy-MM-dd HH:mm:ss"
-      });
       // Add cursor
       // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
       let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-        // yAxis: valueAxis,
-        // xAxis: dateAxis,
-        // behavior: "zoomX"
+        // xAxis: xAxis,
+        behavior: "zoomX"
+      }));
+      // cursor.lineY.set("visible", false);
+
+      // Create axes
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+      let xAxis = chart.xAxes.push(
+        am5xy.DateAxis.new(root, {
+          baseInterval: { timeUnit: "minute", count: 30 },
+          renderer: am5xy.AxisRendererX.new(root, {}),
+          tooltip: am5.Tooltip.new(root, {})
+        })
+      );
+
+      let valueAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        strictMinMax: true,
+        extraMax: 0.02,
+        extraMin: 0.02,
+        renderer: am5xy.AxisRendererY.new(root, {}),
+        tooltip: am5.Tooltip.new(root, {})
       }));
 
+      let series = chart.series.push(am5xy.LineSeries.new(root, {
+        xAxis: xAxis,
+        yAxis: valueAxis,
+        valueYField: "dataTemp",
+        valueXField: "dataFecha",
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{valueY]}",
+          // keepTargetHover: true
+        })
+      }));
 
-      series.strokes.template.setAll({
-        strokeWidth: 2
+      series.fills.template.setAll({
+        fillOpacity: 0.2,
+        visible: true
       });
-      console.log(datos);
+
+      series.bullets.push(function (root) {
+        return am5.Bullet.new(root, {
+          sprite: am5.Circle.new(root, {
+            radius: 4,
+            fill: series.get("fill")
+          })
+        });
+      });
+
+      series.data.processor = am5.DataProcessor.new(root, {
+        dateFields: ["dataFecha"],
+        dateFormat: "yyyy-MM-dd HH:mm:ss"
+      });
+
+      // console.log(datos);
+      series.appear(1000);
+      chart.appear(1000, 100);
       series.data.setAll(datos);
     });
   }
@@ -332,7 +343,6 @@ export class LeafletComponent implements OnInit {
     //crea un control de capas 
     let layerControl = control.layers(baseLayers, overlayLayers).addTo(this.myMap);
 
-
     this.getAllImages(layerControl);
 
     let poligonToGjson;
@@ -387,7 +397,7 @@ export class LeafletComponent implements OnInit {
     this.devices = [];
 
     // Function to add markers
-    const addMarker = (dev, data, icon) => {
+    const addMarker = (dev: Device, data: Data, icon) => {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt < 3.2 ? 'red' : 'black';
       let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
@@ -455,11 +465,11 @@ export class LeafletComponent implements OnInit {
     };
 
     // Function to add markers
-    const addTempMarker = (dev, data, icon) => {
+    const addTempMarker = (dev: Device, data: Data, icon) => {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt <= 3.2 ? 'red' : 'black';
       let iconTemp = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-        <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
+        <div class="container text-center" style="width: 200px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
         <div class="row">
         <div class="col-6">
           <div>
@@ -472,7 +482,7 @@ export class LeafletComponent implements OnInit {
         </div>
         </div>
         <div class="row">
-          <div id="chartdiv" style="height: 25px; width: 90%">
+          <div id="chartdiv" style="width: 100%; height: 150px">
               </div>
               </div>    
               <div class="row">
@@ -486,8 +496,10 @@ export class LeafletComponent implements OnInit {
         </div>
   
         `, { closeButton: false }).on('click', (e) => {
-        console.log('Hiciste clic en el marcador', e.latlng);
-        this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
+        // console.log('Hiciste clic en el marcador', e.latlng);
+        this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
+          console.log(lastdata);
+          // this.createChart("chartDiv");
           this.createValueChart("chartdiv", lastdata, "#3eedd3")
         });
       });
@@ -565,11 +577,8 @@ export class LeafletComponent implements OnInit {
       };
       if (dev.devicesType === "Temp. / HR") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
-          this.dataService.lastDatasByDeviceId(dev.devicesId, 5).subscribe(lastdata => {
-            const tempIcon = this.createTempIcon(data.dataTemp)
-            addTempMarker(dev, data, tempIcon);
-            this.createValueChart("chartdiv", lastdata, "#3eedd3")
-          })
+          const tempIcon = this.createTempIcon(data.dataTemp)
+          addTempMarker(dev, data, tempIcon);
         });
       }
     })
