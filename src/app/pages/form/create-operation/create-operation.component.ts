@@ -120,13 +120,11 @@ export class CreateOperationComponent implements OnInit {
       }
     });
     
-    
     this.breadCrumbItems = [{ label: 'Operation' }, { label: 'Create', active: true }];
     this.activatedRoute.snapshot.params['idProp'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.getData(this.propId);
-      
     },
       (error) => {
         console.log(error);
@@ -468,7 +466,6 @@ export class CreateOperationComponent implements OnInit {
   get isSoilTypeFieldInvalid() {
     return this.soilTypeField.touched && this.soilTypeField.invalid;
   }
-  
   get rootDepthField() {
     return this.form.get('rootDepth');
   }

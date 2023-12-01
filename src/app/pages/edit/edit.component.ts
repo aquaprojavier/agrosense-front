@@ -328,6 +328,4 @@ export class EditComponent implements OnInit {
     const deviceNames = devices.map(dev => dev.devicesNombre);
     return deviceNames.length > 0 ? deviceNames.join(', ') : 'Ninguno';
   }
-
-
 }

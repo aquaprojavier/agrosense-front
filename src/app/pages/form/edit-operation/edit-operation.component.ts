@@ -121,7 +121,6 @@ export class EditOperationComponent implements OnInit {
   };
   // =========================================FORM============================================================
   private initForm() {
-    console.log(this.operation);
     this.form.patchValue({
       operationName: this.operation.operationName,
       crop: this.operation.crop.cropName,

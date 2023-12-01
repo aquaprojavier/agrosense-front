@@ -6,179 +6,349 @@
   ></app-page-title>
   <!-- end page title -->
   <div class="row">
-    <div class="col-12 col-lg-3">
+    <div class="col-12">
       <div class="card" style="background-color: rgb(42, 48, 66)">
         <div class="card-body">
           <form [formGroup]="form" (ngSubmit)="saveDevice()">
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Tipo</mat-label>
-              <mat-select formControlName="devicesTipo">
-                <mat-option
-                  *ngFor="let deviceType of devicesList"
-                  [value]="deviceType"
-                  >{{ deviceType }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Nombre</mat-label>
-              <input matInput type="text" formControlName="devicesNombre" />
-              <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isNameFieldInvalid">close</mat-icon>
-              <div *ngIf="nameField.touched">
-                <mat-error *ngIf="nameField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-                <mat-error *ngIf="nameField.hasError('maxlength')">
-                  maximo 20 caracteres!
-                </mat-error>
+            GENERAL
+            <div class="row">
+              <div class="col-6">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label class="light">Tipo</mat-label>
+                  <mat-select formControlName="devicesTipo">
+                    <mat-option
+                      *ngFor="let deviceType of devicesList"
+                      [value]="deviceType"
+                      >{{ deviceType }}</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
               </div>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Numero de serie</mat-label>
-              <mat-select formControlName="devicesSerie">
-                <mat-option
-                  *ngFor="let serial of serialNumbers"
-                  [value]="serial"
-                >
-                  {{ serial }}
-                </mat-option>
-              </mat-select>
-              <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isSerieFieldInvalid">close</mat-icon>
-              <div *ngIf="serieField.touched">
-                <mat-error *ngIf="serieField.hasError('required')">
-                  Este campo es requerido.
-                </mat-error>
-                <mat-error *ngIf="serieField.hasError('maxlength')">
-                  Máximo 25 caracteres.
-                </mat-error>
-              </div>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Latitud</mat-label>
-              <input
-                matInput
-                type="number"
-                [(ngModel)]="latitud"
-                formControlName="latitud"
-              />
-              <mat-icon matSuffix *ngIf="isLatitudFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isLatitudFieldInvalid">close</mat-icon>
-              <div *ngIf="latitudField.touched">
-                <mat-error *ngIf="latitudField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-                <mat-error
-                  *ngIf="
-                    latitudField.hasError('max') || latitudField.hasError('min')
-                  "
-                >
-                  Este campo debe estar comprendido entre -90 y 90.
-                </mat-error>
-              </div>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Longitud</mat-label>
-              <input
-                matInput
-                type="number"
-                [(ngModel)]="longitud"
-                formControlName="longitud"
-              />
-              <mat-icon matSuffix *ngIf="isLongitudFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isLongitudFieldInvalid"
-                >close</mat-icon
-              >
-              <div *ngIf="longitudField.touched">
-                <mat-error *ngIf="longitudField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-                <mat-error
-                  *ngIf="
-                    longitudField.hasError('max') ||
-                    longitudField.hasError('min')
-                  "
-                >
-                  Este campo debe estar comprendido entre -180 y 180.
-                </mat-error>
-              </div>
-            </mat-form-field>
-
-            <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Variedad</mat-label>
-                <input matInput type="text" formControlName="devicesCultivo" />
-                <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isVarietyFieldInvalid"
-                  >close</mat-icon
-                >
-                <div *ngIf="varietyField.touched">
-                  <mat-error *ngIf="varietyField.hasError('required')">
-                    este campo es requerido!
-                  </mat-error>
-                  <mat-error *ngIf="varietyField.hasError('maxlength')">
-                    maximo 40 caracteres!
-                  </mat-error>
-                </div>
-              </mat-form-field>
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Tipo de suelo</mat-label>
-                <mat-select formControlName="soil">
-                  <mat-option *ngFor="let soil of soils" [value]="soil">
-                    {{ soil.soilType }}
-                  </mat-option>
-                </mat-select>
-                <!-- <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isSerieFieldInvalid">close</mat-icon>
-                <div *ngIf="serieField.touched">
-                  <mat-error *ngIf="serieField.hasError('required')">
-                    Este campo es requerido.
-                  </mat-error>
-                  <mat-error *ngIf="serieField.hasError('maxlength')">
-                    Máximo 25 caracteres.
-                  </mat-error>
-                </div> -->
-              </mat-form-field>
-
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label class="light">Operacion de riego</mat-label>
-                <mat-select formControlName="opeId">
-                  <mat-option
-                    *ngFor="let operation of operations"
-                    [value]="operation.operationId"
+              <div class="col-6">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label class="light">Nombre</mat-label>
+                  <input matInput type="text" formControlName="devicesNombre" />
+                  <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isNameFieldInvalid"
+                    >close</mat-icon
                   >
-                    {{ operation.operationName }}
-                  </mat-option>
-                </mat-select>
-                <mat-icon matSuffix *ngIf="isOpeIdFieldValid">done</mat-icon>
-                <mat-icon matSuffix *ngIf="isOpeIdFieldInvalid">close</mat-icon>
-                <div *ngIf="opeIdField.touched">
-                  <mat-error *ngIf="opeIdField.hasError('required')">
-                    este campo es requerido!
-                  </mat-error>
-                </div>
-              </mat-form-field>
+                  <div *ngIf="nameField.touched">
+                    <mat-error *ngIf="nameField.hasError('required')">
+                      este campo es requerido!
+                    </mat-error>
+                    <mat-error *ngIf="nameField.hasError('maxlength')">
+                      maximo 20 caracteres!
+                    </mat-error>
+                  </div>
+                </mat-form-field>
+              </div>
             </div>
-
+            <div class="row">
+              <div class="col-4">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label class="light">Numero de serie</mat-label>
+                  <mat-select formControlName="devicesSerie">
+                    <mat-option
+                      *ngFor="let serial of serialNumbers"
+                      [value]="serial"
+                    >
+                      {{ serial }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>
+                  <mat-icon matSuffix *ngIf="isSerieFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="serieField.touched">
+                    <mat-error *ngIf="serieField.hasError('required')">
+                      Este campo es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="serieField.hasError('maxlength')">
+                      Máximo 25 caracteres.
+                    </mat-error>
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label class="light">Latitud</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    [(ngModel)]="latitud"
+                    formControlName="latitud"
+                  />
+                  <mat-icon matSuffix *ngIf="isLatitudFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isLatitudFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="latitudField.touched">
+                    <mat-error *ngIf="latitudField.hasError('required')">
+                      este campo es requerido!
+                    </mat-error>
+                    <mat-error
+                      *ngIf="
+                        latitudField.hasError('max') ||
+                        latitudField.hasError('min')
+                      "
+                    >
+                      Este campo debe estar comprendido entre -90 y 90.
+                    </mat-error>
+                  </div>
+                </mat-form-field>
+              </div>
+              <div class="col-4">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label class="light">Longitud</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    [(ngModel)]="longitud"
+                    formControlName="longitud"
+                  />
+                  <mat-icon matSuffix *ngIf="isLongitudFieldValid"
+                    >done</mat-icon
+                  >
+                  <mat-icon matSuffix *ngIf="isLongitudFieldInvalid"
+                    >close</mat-icon
+                  >
+                  <div *ngIf="longitudField.touched">
+                    <mat-error *ngIf="longitudField.hasError('required')">
+                      este campo es requerido!
+                    </mat-error>
+                    <mat-error
+                      *ngIf="
+                        longitudField.hasError('max') ||
+                        longitudField.hasError('min')
+                      "
+                    >
+                      Este campo debe estar comprendido entre -180 y 180.
+                    </mat-error>
+                  </div>
+                </mat-form-field>
+              </div>
+            </div>
+            Ubique el sensor en el mapa.
+            <div class="row">
+              <div class="col-12">
+                <div id="mapEdit">Cargando mapa...</div>
+              </div>
+            </div>
             <br />
-            <button type="submit" class="btn btn-primary w-100">Crear</button>
-          </form>
-          <!-- </div> -->
-        </div>
-      </div>
-    </div>
+            <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
+              SUELO
+              <div class="row">
+                <div class="col-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label class="light">Variedad</mat-label>
+                    <input
+                      matInput
+                      type="text"
+                      formControlName="devicesCultivo"
+                    />
+                    <mat-icon matSuffix *ngIf="isVarietyFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isVarietyFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="varietyField.touched">
+                      <mat-error *ngIf="varietyField.hasError('required')">
+                        este campo es requerido!
+                      </mat-error>
+                      <mat-error *ngIf="varietyField.hasError('maxlength')">
+                        maximo 40 caracteres!
+                      </mat-error>
+                    </div>
+                  </mat-form-field>
+                </div>
+                <div class="col-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label class="light">Operacion de riego</mat-label>
+                    <mat-select formControlName="opeId">
+                      <mat-option
+                        *ngFor="let operation of operations"
+                        [value]="operation.operationId"
+                      >
+                        {{ operation.operationName }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix *ngIf="isOpeIdFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isOpeIdFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="opeIdField.touched">
+                      <mat-error *ngIf="opeIdField.hasError('required')">
+                        este campo es requerido!
+                      </mat-error>
+                    </div>
+                  </mat-form-field>
+                </div>
+              </div>
 
-    <div class="col-12 col-lg-9">
-      <div class="card">
-        <!-- <button id="botonMapa">Obtener GeoJSON</button> -->
-        <div id="mapEdit">Cargando mapa...</div>
+              <div class="row">
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">Tipo de suelo</mat-label>
+                    <mat-select formControlName="soilType">
+                      <mat-option
+                        *ngFor="let soil of soilType"
+                        [value]="soil"
+                        >{{ soil }}</mat-option
+                      >
+                    </mat-select>
+                    <mat-icon matSuffix *ngIf="isSoilTypeFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isSoilTypeFieldInvalid"
+                      >close</mat-icon
+                    >
+                  </mat-form-field>
+                  <div *ngIf="soilTypeField.touched">
+                    <mat-error *ngIf="soilTypeField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                  </div>
+                </div>
+
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light"
+                      >Profundidad de raices (cm.)</mat-label
+                    >
+                    <input matInput type="number" formControlName="rootDepth" />
+                    <mat-icon matSuffix *ngIf="isRootDepthFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isRootDepthFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="rootDepthField.touched">
+                      <mat-error *ngIf="rootDepthField.hasError('required')"
+                        >Este campo es requerido!</mat-error
+                      >
+                      <mat-error *ngIf="rootDepthField.hasError('min')"
+                        >Valor mínimo: 5</mat-error
+                      >
+                      <mat-error *ngIf="rootDepthField.hasError('max')"
+                        >Valor máximo: 300</mat-error
+                      >
+                    </div>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">Piedras (%)</mat-label>
+                    <mat-select formControlName="stone">
+                      <mat-option
+                        *ngFor="let option of stoneOptions"
+                        [value]="option"
+                      >
+                        {{ option }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix *ngIf="isStoneFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isStoneFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="stoneField.touched">
+                      <mat-error *ngIf="stoneField.hasError('required')"
+                        >Este campo es requerido!</mat-error
+                      >
+                      <mat-error *ngIf="stoneField.hasError('min')"
+                        >Valor mínimo: 1</mat-error
+                      >
+                      <mat-error *ngIf="stoneField.hasError('max')"
+                        >Valor máximo: 90</mat-error
+                      >
+                    </div>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">CC (%)</mat-label>
+                    <input matInput type="number" formControlName="cc" />
+                    <mat-icon matSuffix *ngIf="isCcFieldValid">done</mat-icon>
+                    <mat-icon matSuffix *ngIf="isCcFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="ccField.touched">
+                      <mat-error *ngIf="ccField.hasError('required')"
+                        >Este campo es requerido!</mat-error
+                      >
+                      <mat-error *ngIf="ccField.hasError('min')"
+                        >Valor mínimo: 15</mat-error
+                      >
+                      <mat-error *ngIf="ccField.hasError('max')"
+                        >Valor máximo: 70</mat-error
+                      >
+                    </div>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">UR (%)</mat-label>
+                    <input matInput type="number" formControlName="ur" />
+                    <mat-icon matSuffix *ngIf="isUrFieldValid">done</mat-icon>
+                    <mat-icon matSuffix *ngIf="isUrFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="urField.touched">
+                      <mat-error *ngIf="urField.hasError('required')"
+                        >Este campo es requerido!</mat-error
+                      >
+                      <mat-error *ngIf="urField.hasError('min')"
+                        >Valor mínimo: 10</mat-error
+                      >
+                      <mat-error *ngIf="urField.hasError('max')"
+                        >Valor máximo: 90</mat-error
+                      >
+                    </div>
+                  </mat-form-field>
+                </div>
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">PMP (%)</mat-label>
+                    <input matInput type="number" formControlName="pmp" />
+                    <mat-icon matSuffix *ngIf="isPmpFieldValid">done</mat-icon>
+                    <mat-icon matSuffix *ngIf="isPmpFieldInvalid"
+                      >close</mat-icon
+                    >
+                    <div *ngIf="pmpField.touched">
+                      <mat-error *ngIf="pmpField.hasError('required')"
+                        >Este campo es requerido!</mat-error
+                      >
+                      <mat-error *ngIf="pmpField.hasError('min')"
+                        >Valor mínimo: 3</mat-error
+                      >
+                      <mat-error *ngIf="pmpField.hasError('max')"
+                        >Valor máximo: 30</mat-error
+                      >
+                    </div>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-content-center">
+              <div class="col-lg-3 col-md-12 col-12">
+                <button type="submit" class="btn btn-primary w-100">
+                  Crear
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

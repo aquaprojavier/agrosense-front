@@ -42,6 +42,9 @@ export class EditDeviceComponent implements OnInit {
   latitud: number;
   longitud: number;
   soils: Soil[] = [];
+  soilType: string;
+  devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
+
 
   greenIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -58,21 +61,19 @@ export class EditDeviceComponent implements OnInit {
     private propertyService: PropertyService,
     private operationService: OperationService,
     private deviceService: DeviceService,
-    private soilService: SoilService,
+    // private soilService: SoilService,
     private router: Router,
   ) { }
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Edit', active: true }];
-    // this.activatedRoute.snapshot.params['idProp'];
-    // this.activatedRoute.snapshot.params['idDev'];
     this.activatedRoute.params.subscribe((params: Params) => {
+      console.log(params)
+      this.soilType = params['deviceType'];
       this.propId = params['idProp'];
       this.devId = params['idDev'];
-      console.log('+++++++++');
-      console.log(this.devId);
       this.getData(this.propId);
-      this.getSoils();
+      // this.getSoils();
       this.buildForm();
     },
       (error) => {
@@ -81,11 +82,11 @@ export class EditDeviceComponent implements OnInit {
     );
   }
 
-  getSoils() {
-    this.soilService.GetSoils().subscribe(data => {
-      this.soils = data;
-    })
-  }
+  // getSoils() {
+  //   this.soilService.GetSoils().subscribe(data => {
+  //     this.soils = data;
+  //   })
+  // }
 
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
@@ -107,33 +108,64 @@ export class EditDeviceComponent implements OnInit {
   // =========================================FORM============================================================
   private initForm() {
     this.form.patchValue({
+      devicesTipo: this.device.devicesType,
       devicesNombre: this.device.devicesNombre,
       devicesCultivo: this.device.devicesCultivo,
       devicesSerie: this.device.devicesSerie,
       latitud: this.device.latitud,
       longitud: this.device.longitud,
       operationId: this.opeId,
-      soilId: this.device.soil.id//TODO ver esto!
+      soil: this.device.soil.id//TODO ver esto!
     });
     console.log(this.device.soil.id)
   }
-
   private buildForm() {
     this.form = this.formBuilder.group({
       devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
-      devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
-      operationId: ['', Validators.required],
-      soilId: ['', Validators.required],
+      devicesTipo: '',
+      devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
+      opeId: ['', Validators.required],
+      soil: ['', Validators.required],
+    });
+    // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
+    this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
+      if (selectedType === 'Suelo') {
+        this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
+        this.form.get('devicesCultivo').updateValueAndValidity();
+        this.form.get('opeId').setValidators(Validators.required);
+        this.form.get('opeId').updateValueAndValidity();
+        this.form.get('soil').setValidators(Validators.required);
+        this.form.get('soil').updateValueAndValidity();
+      } else {
+        this.form.get('devicesCultivo').clearValidators();
+        this.form.get('devicesCultivo').updateValueAndValidity();
+        this.form.get('opeId').clearValidators();
+        this.form.get('opeId').updateValueAndValidity();
+        this.form.get('soil').clearValidators();
+        this.form.get('soil').updateValueAndValidity();
+      }
     });
   }
+
+  // private buildForm() {
+  //   this.form = this.formBuilder.group({
+  //     devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
+  //     devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
+  //     devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
+  //     latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
+  //     longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
+  //     operationId: ['', Validators.required],
+  //     soilId: ['', Validators.required],
+  //   });
+  // }
 
   upDateDev() {
     if (this.form.valid) {
       console.log(this.form.value);
-      
+
       this.deviceService.editDevice(this.devId, this.form.value).subscribe(
         (response: Device) => {
 
@@ -200,12 +232,12 @@ export class EditDeviceComponent implements OnInit {
     let operationStyleEdit = { color: "#11ede6" };
     let operacionStyleGrey = { color: "#7B7B7B" };
     operations.forEach(ope => {
-      
-        ope.polygons.forEach(poli => {
-          let poligonDevice = JSON.parse(poli.geojson);
-          let poligon = geoJSON(poligonDevice, { style: operacionStyleGrey }).addTo(this.myMap);
-          poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-        });
+
+      ope.polygons.forEach(poli => {
+        let poligonDevice = JSON.parse(poli.geojson);
+        let poligon = geoJSON(poligonDevice, { style: operacionStyleGrey }).addTo(this.myMap);
+        poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+      });
 
       property.devices.forEach(dev => {
 
@@ -228,8 +260,7 @@ export class EditDeviceComponent implements OnInit {
             operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
           });
           this.drawItems.addTo(this.myMap);
-
-        } 
+        }
       });
     });
     this.initForm();
@@ -268,7 +299,6 @@ export class EditDeviceComponent implements OnInit {
   get varietyField() {
     return this.form.get('devicesCultivo')
   }
-
   get latitudField() {
     return this.form.get('latitud')
   }
@@ -287,14 +317,14 @@ export class EditDeviceComponent implements OnInit {
   get isLongitudFieldInvalid() {
     return this.longitudField.touched && this.longitudField.invalid;
   }
-  get operationIdField() {
-    return this.form.get('operationId')
+  get opeIdField() {
+    return this.form.get('opeId')
   }
-  get isOperationIdFieldValid() {
-    return this.operationIdField.touched && this.operationIdField.valid;
+  get isOpeIdFieldValid() {
+    return this.opeIdField.touched && this.opeIdField.valid;
   }
-  get isOperationIdFieldInvalid() {
-    return this.operationIdField.touched && this.operationIdField.invalid;
+  get isOpeIdFieldInvalid() {
+    return this.opeIdField.touched && this.opeIdField.invalid;
   }
 }
 

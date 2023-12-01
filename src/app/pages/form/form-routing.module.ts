@@ -9,7 +9,7 @@ import { EditOperationComponent } from './edit-operation/edit-operation.componen
 const routes: Routes = [
     { path: '', redirectTo: 'layouts', pathMatch: 'full' },
     { path: 'layouts', component: LayoutsComponent },
-    { path: 'edit-device/:idProp/:idDev', component: EditDeviceComponent },
+    { path: 'edit-device/:idProp/:idDev/:deviceType', component: EditDeviceComponent },
     { path: 'create-operation/:idProp', component: CreateOperationComponent},
     { path: 'edit-operation/:idProp/:idOpe', component: EditOperationComponent},
     { path: 'create-device/:idProp', component: CreateDeviceComponent},

@@ -1,7 +1,9 @@
+
+
 <div class="container-fluid">
   <!-- start page title -->
   <app-page-title
-    title="Edit Device"
+    title="Create Device"
     [breadcrumbItems]="breadCrumbItems"
   ></app-page-title>
   <!-- end page title -->
@@ -11,7 +13,18 @@
         <div class="card-body">
           <form [formGroup]="form" (ngSubmit)="upDateDev()">
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Cuadro</mat-label>
+              <mat-label class="light">Tipo</mat-label>
+              <mat-select formControlName="devicesTipo">
+                <mat-option
+                  *ngFor="let deviceType of devicesList"
+                  [value]="deviceType"
+                  >{{ deviceType }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label class="light">Nombre</mat-label>
               <input matInput type="text" formControlName="devicesNombre" />
               <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isNameFieldInvalid">close</mat-icon>
@@ -26,32 +39,13 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Variedad</mat-label>
-              <input matInput type="text" formControlName="devicesCultivo" />
-              <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isVarietyFieldInvalid">close</mat-icon>
-              <div *ngIf="varietyField.touched">
-                <mat-error *ngIf="varietyField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-                <mat-error *ngIf="varietyField.hasError('maxlength')">
-                  maximo 40 caracteres!
-                </mat-error>
-              </div>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Tipo de suelo</mat-label>
-              <mat-select formControlName="soilId">
-                <mat-option *ngFor="let soil of soils" [value]="soil.id">
-                  {{ soil.tipo }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="w-100">
               <mat-label class="light">Latitud</mat-label>
-              <input matInput type="number" [(ngModel)]="latitud" formControlName="latitud" />
+              <input
+                matInput
+                type="number"
+                [(ngModel)]="latitud"
+                formControlName="latitud"
+              />
               <mat-icon matSuffix *ngIf="isLatitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLatitudFieldInvalid">close</mat-icon>
               <div *ngIf="latitudField.touched">
@@ -68,9 +62,14 @@
               </div>
             </mat-form-field>
 
-             <mat-form-field appearance="fill" class="w-100">
+            <mat-form-field appearance="fill" class="w-100">
               <mat-label class="light">Longitud</mat-label>
-              <input matInput type="number"  [(ngModel)]="longitud"  formControlName="longitud" />
+              <input
+                matInput
+                type="number"
+                [(ngModel)]="longitud"
+                formControlName="longitud"
+              />
               <mat-icon matSuffix *ngIf="isLongitudFieldValid">done</mat-icon>
               <mat-icon matSuffix *ngIf="isLongitudFieldInvalid"
                 >close</mat-icon
@@ -90,21 +89,62 @@
               </div>
             </mat-form-field>
 
-           <mat-form-field appearance="fill" class="w-100">
-              <mat-label class="light">Operacion de riego</mat-label>
-              <mat-select formControlName="operationId">
-                <mat-option *ngFor="let operation of operations" [value]="operation.operationId">
-                  {{ operation.operationName }}
-                </mat-option>
-              </mat-select>
-              <mat-icon matSuffix *ngIf="isOperationIdFieldValid">done</mat-icon>
-              <mat-icon matSuffix *ngIf="isOperationIdFieldInvalid">close</mat-icon>
-              <div *ngIf="operationIdField.touched">
-                <mat-error *ngIf="operationIdField.hasError('required')">
-                  este campo es requerido!
-                </mat-error>
-              </div>
-            </mat-form-field>
+            <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
+              <mat-form-field appearance="fill" class="w-100">
+                <mat-label class="light">Variedad</mat-label>
+                <input matInput type="text" formControlName="devicesCultivo" />
+                <mat-icon matSuffix *ngIf="isVarietyFieldValid">done</mat-icon>
+                <mat-icon matSuffix *ngIf="isVarietyFieldInvalid"
+                  >close</mat-icon
+                >
+                <div *ngIf="varietyField.touched">
+                  <mat-error *ngIf="varietyField.hasError('required')">
+                    este campo es requerido!
+                  </mat-error>
+                  <mat-error *ngIf="varietyField.hasError('maxlength')">
+                    maximo 40 caracteres!
+                  </mat-error>
+                </div>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="w-100">
+                <mat-label class="light">Tipo de suelo</mat-label>
+                <mat-select formControlName="soil">
+                  <mat-option *ngFor="let soil of soils" [value]="soil">
+                    {{ soil.soilType }}
+                  </mat-option>
+                </mat-select>
+                <!-- <mat-icon matSuffix *ngIf="isSerieFieldValid">done</mat-icon>
+                <mat-icon matSuffix *ngIf="isSerieFieldInvalid">close</mat-icon>
+                <div *ngIf="serieField.touched">
+                  <mat-error *ngIf="serieField.hasError('required')">
+                    Este campo es requerido.
+                  </mat-error>
+                  <mat-error *ngIf="serieField.hasError('maxlength')">
+                    Máximo 25 caracteres.
+                  </mat-error>
+                </div> -->
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="w-100">
+                <mat-label class="light">Operacion de riego</mat-label>
+                <mat-select formControlName="opeId">
+                  <mat-option
+                    *ngFor="let operation of operations"
+                    [value]="operation.operationId"
+                  >
+                    {{ operation.operationName }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix *ngIf="isOpeIdFieldValid">done</mat-icon>
+                <mat-icon matSuffix *ngIf="isOpeIdFieldInvalid">close</mat-icon>
+                <div *ngIf="opeIdField.touched">
+                  <mat-error *ngIf="opeIdField.hasError('required')">
+                    este campo es requerido!
+                  </mat-error>
+                </div>
+              </mat-form-field>
+            </div>
 
             <br />
             <button type="submit" class="btn btn-primary w-100">Editar</button>
@@ -117,7 +157,7 @@
     <div class="col-12 col-lg-9">
       <div class="card">
         <!-- <button id="botonMapa">Obtener GeoJSON</button> -->
-        <div id="mapEdit">aca va un mapa</div>
+        <div id="mapEdit">Cargando mapa...</div>
       </div>
     </div>
   </div>

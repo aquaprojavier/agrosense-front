@@ -204,7 +204,7 @@ export class LeafletComponent implements OnInit {
         tooltip: am5.Tooltip.new(root, {})
       }));
 
-      let series = chart.series.push(am5xy.LineSeries.new(root, {
+      let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
         xAxis: xAxis,
         yAxis: valueAxis,
         valueYField: "dataTemp",

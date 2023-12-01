@@ -42,7 +42,18 @@ export class CreateDeviceComponent implements OnInit {
   serialNumbers: string[] = [];
   soils: Soil[] = [];
   devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
-
+  soil: Soil;
+  showSoilFields: boolean;
+  soilType: string[] = [
+    "Arenoso",
+    "Franco-arenoso",
+    "Franco",
+    "Franco-arcilloso",
+    "Arcillo-limoso",
+    "Arcilloso",
+    // Agrega más tipos de suelo según tus necesidades
+  ];
+  stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
 
 
   greenIcon = new Icon({
@@ -75,7 +86,7 @@ export class CreateDeviceComponent implements OnInit {
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Create', active: true }];
     this.activatedRoute.snapshot.params['idProp'];
     this.getFreeSerialNumber("draginonestor");
-    this.getSoils();
+    // this.getSoils();
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.getData(this.propId);
@@ -87,17 +98,9 @@ export class CreateDeviceComponent implements OnInit {
     );
   }
 
-  getSoils() {
-    this.soilService.GetSoils().subscribe(data => {
-      this.soils = data;
-      console.log(this.soils)
-    })
-  }
-
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-      
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         console.log(this.operations)
@@ -123,30 +126,102 @@ export class CreateDeviceComponent implements OnInit {
       latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
       devicesTipo: '',
+
       devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       opeId: ['', Validators.required],
-      soil: ['', Validators.required],
+      soilType: ['', [Validators.required]], // Agregar campo 'soilType' con validación requerida
+      rootDepth: ['', [Validators.required]], // Agregar campo 'root' con validación requerida
+      stone: [0, [Validators.required]], // Agregar campo 'cc' con validación requerida
+      cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
+      ur: [50, [Validators.required]], // Agregar campo 'ur' con validación requerida
+      pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
 
-    
-  // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
-  this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
-    if (selectedType === 'Suelo') {
-      this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
-      this.form.get('devicesCultivo').updateValueAndValidity();
-      this.form.get('opeId').setValidators(Validators.required);
-      this.form.get('opeId').updateValueAndValidity();
-      this.form.get('soil').setValidators(Validators.required);
-      this.form.get('soil').updateValueAndValidity();
-    } else {
-      this.form.get('devicesCultivo').clearValidators();
-      this.form.get('devicesCultivo').updateValueAndValidity();
-      this.form.get('opeId').clearValidators();
-      this.form.get('opeId').updateValueAndValidity();
-      this.form.get('soil').clearValidators();
-      this.form.get('soil').updateValueAndValidity();
-    }
-  });
+    // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
+    this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
+      if (selectedType === 'Suelo') {
+        this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
+        this.form.get('devicesCultivo').updateValueAndValidity();
+        this.form.get('opeId').setValidators(Validators.required);
+        this.form.get('opeId').updateValueAndValidity();
+        this.form.get('soilType').setValidators(Validators.required);
+        this.form.get('soilType').updateValueAndValidity();
+        this.form.get('rootDepth').setValidators(Validators.required);
+        this.form.get('rootDepth').updateValueAndValidity();
+        this.form.get('stone').setValidators(Validators.required);
+        this.form.get('stone').updateValueAndValidity();
+        this.form.get('cc').setValidators(Validators.required);
+        this.form.get('cc').updateValueAndValidity();
+        this.form.get('ur').setValidators(Validators.required);
+        this.form.get('ur').updateValueAndValidity();
+        this.form.get('pmp').setValidators(Validators.required);
+        this.form.get('pmp').updateValueAndValidity();
+
+      } else {
+        this.form.get('devicesCultivo').clearValidators();
+        this.form.get('devicesCultivo').updateValueAndValidity();
+        this.form.get('opeId').clearValidators();
+        this.form.get('opeId').updateValueAndValidity();
+        this.form.get('soilType').clearValidators();
+        this.form.get('soilType').updateValueAndValidity();
+        this.form.get('rootDepth').clearValidators();
+        this.form.get('rootDepth').updateValueAndValidity();
+        this.form.get('stone').clearValidators();
+        this.form.get('stone').updateValueAndValidity();
+        this.form.get('cc').clearValidators();
+        this.form.get('cc').updateValueAndValidity();
+        this.form.get('ur').clearValidators();
+        this.form.get('ur').updateValueAndValidity();
+        this.form.get('pmp').clearValidators();
+        this.form.get('pmp').updateValueAndValidity();
+      }
+    });
+
+    this.form.get('opeId').valueChanges.subscribe((selectedOpeId: number) => {
+      this.operations.forEach(ope => {
+        if (ope.operationId === selectedOpeId) {
+          this.form.get('soilType').setValue(ope.soil.soilType);
+          this.form.get('rootDepth').setValue(ope.soil.depth);
+          this.form.get('stone').setValue(ope.soil.stone);
+          this.form.get('cc').setValue(ope.soil.cc);
+          this.form.get('ur').setValue(ope.soil.ur);
+          this.form.get('pmp').setValue(ope.soil.pmp);
+        }
+      })
+    });
+
+    this.form.get('soilType').valueChanges.subscribe((selectedSoilType: string) => {
+      switch (selectedSoilType) {
+        case 'Arenoso':
+          this.form.get('cc').setValue(9);
+          this.form.get('pmp').setValue(4);
+          break;
+        case 'Franco-arenoso':
+          this.form.get('cc').setValue(14);
+          this.form.get('pmp').setValue(6);
+          break;
+        case 'Franco':
+          this.form.get('cc').setValue(22);
+          this.form.get('pmp').setValue(10);
+          break;
+        case 'Franco-arcilloso':
+          this.form.get('cc').setValue(27);
+          this.form.get('pmp').setValue(13);
+          break;
+        case 'Arcillo-limoso':
+          this.form.get('cc').setValue(31);
+          this.form.get('pmp').setValue(15);
+          break;
+        case 'Arcilloso':
+          this.form.get('cc').setValue(35);
+          this.form.get('pmp').setValue(17);
+          break;
+        default:
+          this.form.get('cc').reset();
+          this.form.get('pmp').reset();
+          break;
+      }
+    });
   }
 
   saveDevice() {
@@ -155,18 +230,49 @@ export class CreateDeviceComponent implements OnInit {
         if (this.form.value.opeId == ope.operationId) {
           this.opeGeojson = ope.polygons[0] //ver esto, se asigna al 1er poligono de la operacion
         }
-      })
-      const deviceDto: DeviceDto = {
-        devicesNombre: this.form.value.devicesNombre,
-        devicesType: this.form.value.devicesTipo,
-        devicesCultivo: this.form.value.devicesCultivo,
-        devicesSerie: this.form.value.devicesSerie,
-        latitud: this.form.value.latitud,
-        longitud: this.form.value.longitud,
-        operationId: this.form.value.opeId,
-        soilId: this.form.value.soil.id,
-        propertyId: this.propId
+      });
+      const devicesNombre = this.form.value.devicesNombre;
+      const devicesType = this.form.value.devicesTipo;
+      const devicesSerie = this.form.value.devicesSerie;
+      const latitud = this.form.value.latitud;
+      const longitud = this.form.value.longitud;
+      const operationId = this.form.value.opeId;
+      const propertyId = this.propId;
+
+      const devicesCultivo = this.form.value.devicesCultivo;
+
+      const soilType = this.form.value.soilType;
+      const root = this.form.value.rootDepth;
+      const stone = this.form.value.stone;
+      const cc = this.form.value.cc;
+      const ur = this.form.value.ur;
+      const pmp = this.form.value.pmp;
+
+      //Crear objeto soil
+      const soil: Soil = {
+        soilType: soilType,
+        depth: root,
+        stone: stone,
+        cc: cc,
+        ur: ur,
+        pmp: pmp,
       };
+
+      const deviceDto: DeviceDto = {
+        devicesNombre: devicesNombre,
+        devicesType: devicesType,
+        devicesSerie: devicesSerie,
+        latitud: latitud,
+        longitud: longitud,
+        propertyId: propertyId,
+      };
+      if (devicesNombre === "Suelo") {
+        Object.assign(deviceDto, {
+          operationId: operationId,
+          devicesCultivo: devicesCultivo,
+          soil: soil
+        });
+      }
       console.log(deviceDto);
       this.deviceService.createDevice({ data: deviceDto }).subscribe(
         (response: Device) => {
@@ -246,7 +352,7 @@ export class CreateDeviceComponent implements OnInit {
 
     let operationStyleGrey = { color: "#7B7B7B" };
     let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
-    
+
     operations.forEach(ope => {
       if (ope.devices && ope.devices.length === 0) {
         ope.polygons.forEach(poly => {
@@ -321,5 +427,59 @@ export class CreateDeviceComponent implements OnInit {
   }
   get isOpeIdFieldInvalid() {
     return this.opeIdField.touched && this.opeIdField.invalid;
+  }
+  get stoneField() {
+    return this.form.get('stone');
+  }
+  get isStoneFieldValid() {
+    return this.stoneField.touched && this.stoneField.valid;
+  }
+  get isStoneFieldInvalid() {
+    return this.stoneField.touched && this.stoneField.invalid;
+  }
+  get soilTypeField() {
+    return this.form.get('soilType');
+  }
+  get isSoilTypeFieldValid() {
+    return this.soilTypeField.touched && this.soilTypeField.valid;
+  }
+  get isSoilTypeFieldInvalid() {
+    return this.soilTypeField.touched && this.soilTypeField.invalid;
+  }
+  get rootDepthField() {
+    return this.form.get('rootDepth');
+  }
+  get isRootDepthFieldValid() {
+    return this.rootDepthField.touched && this.rootDepthField.valid;
+  }
+  get isRootDepthFieldInvalid() {
+    return this.rootDepthField.touched && this.rootDepthField.invalid;
+  }
+  get ccField() {
+    return this.form.get('cc');
+  }
+  get isCcFieldValid() {
+    return this.ccField.touched && this.ccField.valid;
+  }
+  get isCcFieldInvalid() {
+    return this.ccField.touched && this.ccField.invalid;
+  }
+  get urField() {
+    return this.form.get('ur');
+  }
+  get isUrFieldValid() {
+    return this.urField.touched && this.urField.valid;
+  }
+  get isUrFieldInvalid() {
+    return this.urField.touched && this.urField.invalid;
+  }
+  get pmpField() {
+    return this.form.get('pmp');
+  }
+  get isPmpFieldValid() {
+    return this.pmpField.touched && this.pmpField.valid;
+  }
+  get isPmpFieldInvalid() {
+    return this.pmpField.touched && this.pmpField.invalid;
   }
 }
