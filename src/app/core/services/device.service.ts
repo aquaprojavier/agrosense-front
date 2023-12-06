@@ -25,7 +25,7 @@ export class DeviceService {
     return this.http.put<Device>(`${baseUrl}/device/${id}`, data);
   }
 
-  public getDevicesById (id : number ) {
+  public getDeviceById (id : number ) {
     return this.http.get<Device>(`${baseUrl}/device/${id}`)
   }
 

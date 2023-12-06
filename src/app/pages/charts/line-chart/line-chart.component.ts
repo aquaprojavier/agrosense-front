@@ -54,7 +54,7 @@ export class LineChartComponent implements OnInit {
   }
 
   getDevice (id: number){
-    this.deviceService.getDevicesById(id).subscribe(dev => {
+    this.deviceService.getDeviceById(id).subscribe(dev => {
       this.device = dev;
       console.log(dev)
     })

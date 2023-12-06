@@ -18,10 +18,10 @@ export class JwtInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     let authReq = req;
     const token = this.loginService.getToken();
-    console.log("entro al interceptor");
+    // console.log("entro al interceptor");
 
     if (token != null) {
-      console.log("paso por interceptor y coloco bearer + token: " + token);
+      // console.log("paso por interceptor y coloco bearer + token: " + token);
       authReq = authReq.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,

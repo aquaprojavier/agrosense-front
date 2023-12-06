@@ -40,10 +40,9 @@ export class CreateDeviceComponent implements OnInit {
   latitud: number;
   longitud: number;
   serialNumbers: string[] = [];
-  soils: Soil[] = [];
+  
   devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
   soil: Soil;
-  showSoilFields: boolean;
   soilType: string[] = [
     "Arenoso",
     "Franco-arenoso",
@@ -156,7 +155,6 @@ export class CreateDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').setValidators(Validators.required);
         this.form.get('pmp').updateValueAndValidity();
-
       } else {
         this.form.get('devicesCultivo').clearValidators();
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -231,15 +229,20 @@ export class CreateDeviceComponent implements OnInit {
           this.opeGeojson = ope.polygons[0] //ver esto, se asigna al 1er poligono de la operacion
         }
       });
+      
       const devicesNombre = this.form.value.devicesNombre;
       const devicesType = this.form.value.devicesTipo;
       const devicesSerie = this.form.value.devicesSerie;
       const latitud = this.form.value.latitud;
       const longitud = this.form.value.longitud;
-      const operationId = this.form.value.opeId;
       const propertyId = this.propId;
+      let operationId = null;
+      let devicesCultivo = null;
+      let soil: Soil = null;
 
-      const devicesCultivo = this.form.value.devicesCultivo;
+      if (devicesType === "Suelo"){
+      operationId = this.form.value.opeId;
+      devicesCultivo = this.form.value.devicesCultivo;
 
       const soilType = this.form.value.soilType;
       const root = this.form.value.rootDepth;
@@ -249,7 +252,7 @@ export class CreateDeviceComponent implements OnInit {
       const pmp = this.form.value.pmp;
 
       //Crear objeto soil
-      const soil: Soil = {
+      soil = {
         soilType: soilType,
         depth: root,
         stone: stone,
@@ -257,7 +260,8 @@ export class CreateDeviceComponent implements OnInit {
         ur: ur,
         pmp: pmp,
       };
-
+      }
+      
       const deviceDto: DeviceDto = {
         devicesNombre: devicesNombre,
         devicesType: devicesType,
@@ -265,14 +269,12 @@ export class CreateDeviceComponent implements OnInit {
         latitud: latitud,
         longitud: longitud,
         propertyId: propertyId,
+
+        devicesCultivo: devicesCultivo,
+        operationId: operationId,
+        soil: soil
       };
-      if (devicesNombre === "Suelo") {
-        Object.assign(deviceDto, {
-          operationId: operationId,
-          devicesCultivo: devicesCultivo,
-          soil: soil
-        });
-      }
+     
       console.log(deviceDto);
       this.deviceService.createDevice({ data: deviceDto }).subscribe(
         (response: Device) => {

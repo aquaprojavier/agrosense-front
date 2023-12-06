@@ -10,7 +10,7 @@ export class Device {
     latitud: number;
     longitud: number;
     coordenadas?: LatLngExpression;
-    // operationId: number;
+    // operationId?: number;
     conected?: boolean;
     soil?: Soil;
 }
