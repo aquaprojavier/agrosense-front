@@ -17,9 +17,13 @@ import { AgromonitoringService } from 'src/app/core/services/agromonitoring.serv
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import 'leaflet-extra-markers';
+import 'heatmap.js';
+import { HeatData } from 'src/app/core/models/heatData.models';
+
+declare const HeatmapOverlay: any;
 
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
-import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
+// import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 // import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
@@ -35,7 +39,14 @@ type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" |
 })
 export class LeafletComponent implements OnInit {
   // bread crumb items
-
+  heatmapLayerGroup: LayerGroup;
+  heatData: any = {
+    data: [
+      { lat: -33.045004, lng: -68.061763, count: 143 },
+      { lat: -33.039752, lng: -68.067137, count: 133 },
+      { lat: -33.052774, lng: -68.062438, count: 163 },
+    ]
+  };
   fechaActual: string;
   fechaAyer: string;
   fechaAntier: string;
@@ -248,7 +259,7 @@ export class LeafletComponent implements OnInit {
         if (ndviLink) {
           return of(ndviLink); // Devuelve el enlace NDVI si se encuentra
         } else {
-          // console.log('No se encontró el enlace NDVI para Sentinel-2.');
+          console.log('No se encontró el enlace NDVI para Sentinel-2.');
           return of(undefined); // Devuelve undefined si no se encuentra
         }
       })
@@ -321,6 +332,9 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
+
+    this.getHeatMapData(this.devices);
+
     // Crear una capa de grupo para los polígonos y agregarla al mapa
     this.polygonLayer = layerGroup().addTo(this.myMap);
     let soilLayer = layerGroup().addTo(this.myMap);
@@ -331,13 +345,14 @@ export class LeafletComponent implements OnInit {
     const baseLayers = {
       'ArcGIS': arcgisTileLayer,
     };
-
+    // const heatmapLayerGroup = layerGroup();
     // Capas vacías inicialmente
     const overlayLayers = {
       'Operaciones riego': this.polygonLayer,
       'Sensores suelo': soilLayer,
       'Sensores ambiente': tempLayer,
-      'Otros sensores': otherLayer
+      'Otros sensores': otherLayer,
+      'Heatmap': this.heatmapLayerGroup // Agregar la capa de heatmap al control de capas
     };
 
     //crea un control de capas 
@@ -487,10 +502,10 @@ export class LeafletComponent implements OnInit {
               </div>    
               <div class="row">
               <div class="col-6">
-                <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+                <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr}</b> %</h5>
               </div>
               <div class="col-6">
-                <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+                <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp}</b> °C</h5>
               </div>
             </div>
         </div>
@@ -499,7 +514,6 @@ export class LeafletComponent implements OnInit {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
           console.log(lastdata);
-          // this.createChart("chartDiv");
           this.createValueChart("chartdiv", lastdata, "#3eedd3")
         });
       });
@@ -508,35 +522,43 @@ export class LeafletComponent implements OnInit {
     };
 
     // Function to add markers
-    const addGaugeMarker = (dev, icon) => {
+    const addGaugeMarker = (dev: Device, data, icon) => {
       // Determine the text color based on the value of data.volt
+      const textColor = data.volt <= 3.2 ? 'red' : 'black';
       let gaugeIcon = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
-  <div class="row">
-  <div class="col-6">
-    <div>
-      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
-    </div>
-  </div>
-  <div class="col-6">
-    <div>
-    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: 4 V.</b></h5>  </div>
-  </div>
-  </div>
-  <div class="row">
-    <div class="col-12">
-        <img src="assets/images/sensor.png" alt="">
+      <div class="container text-center" style="width: 220px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
+      <div class="row">
+      <div class="col-6">
+        <div>
+          <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
         </div>
-        </div>    
-        <div class="row">
-        <div class="col-12">
-        <h2 style="margin-bottom: 0px;>
-          CAUDALIMETRO
-        </h2>
-        </div>
-        </div>
-   </div>
-        `, { closeButton: false });
+      </div>
+      <div class="col-6">
+        <div>
+        <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
+      </div>
+      </div>
+      <div class="row">
+        <div id="chartdiv" style="width: 100%; height: 150px">
+            </div>
+            </div>    
+            <div class="row">
+            <div class="col-6">
+              <h5 style="color: black;margin-bottom: 0px;">Presion:<br><img src="assets/images/pressure.png" alt=""> <b>${data.dataHr}</b> Kg/cm2</h5>
+            </div>
+            <div class="col-6">
+              <h5 style="color: black;margin-bottom: 0px;">Caudal:<br><img src="assets/images/dial24.png" alt=""> <b>${data.dataTemp}</b> m3/h</h5>
+            </div>
+          </div>
+      </div>
+
+      `, { closeButton: false }).on('click', (e) => {
+        // console.log('Hiciste clic en el marcador', e.latlng);
+        this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
+          console.log(lastdata);
+          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+        });
+      });
       otherLayer.addLayer(gaugeIcon);
     };
 
@@ -571,7 +593,7 @@ export class LeafletComponent implements OnInit {
 
       if (dev.devicesType === "Caudalimetro") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
-          addGaugeMarker(dev, this.gaugeIcon);
+          addGaugeMarker(dev, data, this.gaugeIcon);
         })
 
       };
@@ -583,6 +605,46 @@ export class LeafletComponent implements OnInit {
       }
     })
   };
+  //end show map..............
+
+  getHeatMapData (devices: Device[]){
+        // Setting up heat layer config
+        const heatLayerConfig = {
+          "radius": .005,
+          "maxOpacity": .8,
+          "scaleRadius": true,
+          // property below is responsible for colorization of heat layer
+          "useLocalExtrema": true,
+          // here we need to assign property value which represent lat in our data
+          latField: 'lat',
+          // here we need to assign property value which represent lng in our data
+          lngField: 'lng',
+          // here we need to assign property value which represent valueField in our data
+          valueField: 'count'
+        };
+        const heatData: HeatData[] = [];
+        devices.forEach(dev => {
+          if (dev.devicesType === "Temp. / HR") {
+            const newHeatDataItem: HeatData = {
+              lat: dev.latitud,
+              lng: dev.longitud,
+              count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
+            };
+            heatData.push(newHeatDataItem); // Agregar el nuevo objeto HeatData al arreglo
+          }
+        })
+        
+        // Initialising heat layer and passing config
+        const heatmapLayer = new HeatmapOverlay(heatLayerConfig);
+    
+        //Passing data to a layer
+        heatmapLayer.setData(this.heatData);
+        // Crear una nueva LayerGroup para el heatmap y agregar el heatmapLayer a esta capa
+        this.heatmapLayerGroup = layerGroup([heatmapLayer]);
+        //Adding heat layer to a map
+        // heatmapLayerGroup.addTo(this.myMap);
+
+  }
 
   maybeDisposeRoot(divId) {
     am5.array.each(am5.registry.rootElements, function (root) {

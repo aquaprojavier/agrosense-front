@@ -22,6 +22,10 @@ export class PropertyService {
     return this.http.get<Device[]>(`${baseUrl}/property/listDev/${id}`)
   }
 
+  public getDevicesByPropertyId2 ( id : number ){
+    return this.http.get<Device[]>(`${baseUrl}/property/listDevByPropId/${id}`)
+  }
+
   public getPropertyById ( id : any ){
     return this.http.get<Property>(`${baseUrl}/property/${id}`)
   }

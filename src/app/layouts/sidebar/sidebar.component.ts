@@ -10,6 +10,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core/models/auth.models';
+import { Device } from 'src/app/core/models/device.models';
 
 @Component({
   selector: 'app-sidebar',
@@ -29,7 +30,7 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   user: User;
   props: any;
   var: any;
-  devices: any;
+  devices: Device[];
   propertyId: number;
 
   menuItems = [];
@@ -101,8 +102,9 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   // }
 
   changeDevices(idProp: any) {
-    this.propertyService.getDevicesByPropertyId(idProp).subscribe((data) => {
+    this.propertyService.getDevicesByPropertyId2(idProp).subscribe((data) => {
       this.devices = data;
+      console.log(this.devices)
       this.propertyId = idProp;
     });
   }

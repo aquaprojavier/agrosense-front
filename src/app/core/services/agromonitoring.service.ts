@@ -32,13 +32,13 @@ export class AgromonitoringService {
   }
 
   // Método que recibe el array de objetos y devuelve la URL 'ndvi' del 'type' Sentinel-2
-getSentinel2NDVILink(responses: any[]): string | undefined {
-  for (const response of responses) {
-    if (response.type === 'Sentinel-2' && response.tile && response.tile.ndvi) {
-      return response.tile.ndvi;
+  getSentinel2NDVILink(responses: any[]): string | undefined {
+    for (const response of responses) {
+      if (response.type === 'Sentinel-2' && response.tile && response.tile.ndvi) {
+        return response.tile.ndvi + '&paletteid=3';
+      }
     }
+    return undefined; // Si no se encuentra el enlace ndvi
   }
-  return undefined; // Si no se encuentra el enlace ndvi
-}
 }
 
