@@ -1,0 +1,70 @@
+<div class="container-fluid">
+  <!-- start page title -->
+  <div class="row" *ngIf="device">
+    <div class="col-12">
+      <div
+        class="page-title-box d-flex align-items-center justify-content-between"
+      >
+        <h4 class="mb-0 font-size-18">
+          Dispositivo: {{ device.devicesNombre }}
+        </h4>
+        <div class="btn-group">
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 7 }"
+            (click)="onButtonClick(7)"
+          >
+            7D
+          </button>
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 30 }"
+            (click)="onButtonClick(30)"
+          >
+            1M
+          </button>
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 90 }"
+            (click)="onButtonClick(90)"
+          >
+            3M
+          </button>
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 180 }"
+            (click)="onButtonClick(180)"
+          >
+            6M
+          </button>
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 365 }"
+            (click)="onButtonClick(365)"
+          >
+            1A
+          </button>
+          <button
+            class="btn btn-outline-primary"
+            [ngClass]="{ active: selectedDays === 0 }"
+            (click)="onButtonClick(0)"
+          >
+            Max
+          </button>
+        </div>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item active">
+              Tipo: {{ device?.devicesType }}
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end page title -->
+  <div *ngIf="device?.devicesType === 'Suelo'">
+    <app-line-chart [datoschart]="datos" [device]="device"></app-line-chart>
+  </div>
+  <app-temp-hum-chart [datoschart]="datos"></app-temp-hum-chart>
+</div>

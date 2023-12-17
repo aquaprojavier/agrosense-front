@@ -19,6 +19,7 @@ import { switchMap } from 'rxjs/operators';
 import 'leaflet-extra-markers';
 import 'heatmap.js';
 import { HeatData } from 'src/app/core/models/heatData.models';
+import { IconService } from 'src/app/core/services/icon.service';
 
 declare const HeatmapOverlay: any;
 
@@ -40,13 +41,6 @@ type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" |
 export class LeafletComponent implements OnInit {
   // bread crumb items
   heatmapLayerGroup: LayerGroup;
-  heatData: any = {
-    data: [
-      { lat: -33.045004, lng: -68.061763, count: 143 },
-      { lat: -33.039752, lng: -68.067137, count: 133 },
-      { lat: -33.052774, lng: -68.062438, count: 163 },
-    ]
-  };
   fechaActual: string;
   fechaAyer: string;
   fechaAntier: string;
@@ -64,50 +58,15 @@ export class LeafletComponent implements OnInit {
   sanitizedUrl: SafeResourceUrl | null = null;
   polygonLayer: LayerGroup;
   lastDatas: Data[];
-
-  gaugeIcon = new Icon({
-    iconUrl: 'assets/images/water-meter.png', // Ruta local de tu imagen de 32x32 píxeles
-    iconSize: [32, 32],        // Tamaño del icono [ancho, alto]
-    iconAnchor: [16, 32],      // Punto del icono que se alinea con la ubicación del marcador
-    popupAnchor: [0, -16]      // Punto donde se abrirá el popup en relación con el icono
-  });
-
-  redIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-  greenIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-  blueIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-  greyIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  gaugeIcon: Icon;
+  redIcon: Icon;
+  greenIcon: Icon;
+  blueIcon: Icon;
+  greyIcon: Icon;
 
   constructor(
-    @Inject(PLATFORM_ID)
-    private platformId: Object,
+    private iconService: IconService,
+    @Inject(PLATFORM_ID) private platformId: Object,
     private zone: NgZone,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
@@ -135,6 +94,7 @@ export class LeafletComponent implements OnInit {
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Maps' }, { label: 'Leaflet Maps', active: true }];
+    this.getIcons();
     this.activatedRoute.snapshot.params['id'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['id'];
@@ -145,6 +105,13 @@ export class LeafletComponent implements OnInit {
       }
     );
   };
+
+  getIcons(){
+    this.gaugeIcon = this.iconService.getGaugeIcon();
+    this.redIcon = this.iconService.getRedIcon();
+    this.greenIcon = this.iconService.getGreenIcon();
+    this.blueIcon = this.iconService.getBlueIcon();
+  }
 
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
@@ -322,7 +289,7 @@ export class LeafletComponent implements OnInit {
     });
   }
 
-  showMap(property, operations) {
+  showMap(property: Property, operations: Operation[]) {
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove();
     }
@@ -332,8 +299,8 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
-
-    this.getHeatMapData(this.devices);
+    console.log(property.devices);
+    this.getHeatMapData(property.devices);
 
     // Crear una capa de grupo para los polígonos y agregarla al mapa
     this.polygonLayer = layerGroup().addTo(this.myMap);
@@ -607,42 +574,42 @@ export class LeafletComponent implements OnInit {
   };
   //end show map..............
 
-  getHeatMapData (devices: Device[]){
-        // Setting up heat layer config
-        const heatLayerConfig = {
-          "radius": .005,
-          "maxOpacity": .8,
-          "scaleRadius": true,
-          // property below is responsible for colorization of heat layer
-          "useLocalExtrema": true,
-          // here we need to assign property value which represent lat in our data
-          latField: 'lat',
-          // here we need to assign property value which represent lng in our data
-          lngField: 'lng',
-          // here we need to assign property value which represent valueField in our data
-          valueField: 'count'
-        };
-        const heatData: HeatData[] = [];
-        devices.forEach(dev => {
-          if (dev.devicesType === "Temp. / HR") {
-            const newHeatDataItem: HeatData = {
-              lat: dev.latitud,
-              lng: dev.longitud,
-              count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
-            };
-            heatData.push(newHeatDataItem); // Agregar el nuevo objeto HeatData al arreglo
-          }
-        })
-        
-        // Initialising heat layer and passing config
-        const heatmapLayer = new HeatmapOverlay(heatLayerConfig);
-    
-        //Passing data to a layer
-        heatmapLayer.setData(this.heatData);
-        // Crear una nueva LayerGroup para el heatmap y agregar el heatmapLayer a esta capa
-        this.heatmapLayerGroup = layerGroup([heatmapLayer]);
-        //Adding heat layer to a map
-        // heatmapLayerGroup.addTo(this.myMap);
+  getHeatMapData(devices: Device[]) {
+    // Setting up heat layer config
+    const heatLayerConfig = {
+      "radius": .003,
+      "maxOpacity": .8,
+      "scaleRadius": true,
+      // property below is responsible for colorization of heat layer
+      "useLocalExtrema": true,
+      // here we need to assign property value which represent lat in our data
+      latField: 'lat',
+      // here we need to assign property value which represent lng in our data
+      lngField: 'lng',
+      // here we need to assign property value which represent valueField in our data
+      valueField: 'count'
+    };
+
+    // Suponiendo que tienes un array 'devices' que contiene la información de los dispositivos
+    const heatDataArray: HeatData[] = devices
+      .filter(dev => dev.devicesType === "Temp. / HR")
+      .map(dev => ({
+        lat: dev.latitud,
+        lng: dev.longitud,
+        count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
+      }));
+
+    const heatDataObject = { data: heatDataArray };
+
+    // Initialising heat layer and passing config
+    const heatmapLayer = new HeatmapOverlay(heatLayerConfig);
+
+    //Passing data to a layer
+    heatmapLayer.setData(heatDataObject);
+    // Crear una nueva LayerGroup para el heatmap y agregar el heatmapLayer a esta capa
+    this.heatmapLayerGroup = layerGroup([heatmapLayer]);
+    //Adding heat layer to a map
+    // heatmapLayerGroup.addTo(this.myMap);
 
   }
 

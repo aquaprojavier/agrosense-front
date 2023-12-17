@@ -328,7 +328,7 @@
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Tipo de suelo</mat-label>
                   <mat-select formControlName="soilType">
-                    <mat-option *ngFor="let soil of soilType" [value]="soil">{{ soil }}</mat-option>
+                    <mat-option *ngFor="let soil of soilTypeOptions" [value]="soil">{{ soil }}</mat-option>
                   </mat-select>
                   <mat-icon matSuffix *ngIf="isSoilTypeFieldValid">done</mat-icon>
                   <mat-icon matSuffix *ngIf="isSoilTypeFieldInvalid">close</mat-icon>

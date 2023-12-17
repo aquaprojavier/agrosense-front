@@ -16,7 +16,7 @@ import { Soil } from 'src/app/core/models/soil.model';
 import { Operation } from 'src/app/core/models/operation.models';
 import { Property } from 'src/app/core/models/property.models';
 import { DeviceDto } from 'src/app/core/models/deviceDto.models';
-
+import { IconService } from 'src/app/core/services/icon.service';
 
 @Component({
   selector: 'app-edit-device',
@@ -26,7 +26,11 @@ import { DeviceDto } from 'src/app/core/models/deviceDto.models';
 export class EditDeviceComponent implements OnInit {
 
   // @ViewChild('opeGeojsonTextarea', { static: false }) opeGeojsonTextarea!: ElementRef;
-
+  gaugeIcon: Icon;
+  redIcon: Icon;
+  greenIcon: Icon;
+  blueIcon: Icon;
+  greyIcon: Icon;
   breadCrumbItems: Array<{}>;
   user: User;
   property: Property;
@@ -56,16 +60,8 @@ export class EditDeviceComponent implements OnInit {
   ];
   stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
 
-  greenIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-
   constructor(
+    private iconService: IconService,
     private formBuilder: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
@@ -77,6 +73,7 @@ export class EditDeviceComponent implements OnInit {
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Edit', active: true }];
+    this.getIcons();
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.devId = params['idDev'];
@@ -92,6 +89,13 @@ export class EditDeviceComponent implements OnInit {
         console.log(error);
       }
     );
+  }
+
+  getIcons(){
+    this.gaugeIcon = this.iconService.getGaugeIcon();
+    this.redIcon = this.iconService.getRedIcon();
+    this.greenIcon = this.iconService.getGreenIcon();
+    this.blueIcon = this.iconService.getBlueIcon();
   }
 
   getData(propId: number) {
@@ -198,38 +202,38 @@ export class EditDeviceComponent implements OnInit {
         }
       })
     });
-    // this.form.get('soilType').valueChanges.subscribe((selectedSoilType: string) => {
-    //   switch (selectedSoilType) {
-    //     case 'Arenoso':
-    //       this.form.get('cc').setValue(9);
-    //       this.form.get('pmp').setValue(4);
-    //       break;
-    //     case 'Franco-arenoso':
-    //       this.form.get('cc').setValue(14);
-    //       this.form.get('pmp').setValue(6);
-    //       break;
-    //     case 'Franco':
-    //       this.form.get('cc').setValue(22);
-    //       this.form.get('pmp').setValue(10);
-    //       break;
-    //     case 'Franco-arcilloso':
-    //       this.form.get('cc').setValue(27);
-    //       this.form.get('pmp').setValue(13);
-    //       break;
-    //     case 'Arcillo-limoso':
-    //       this.form.get('cc').setValue(31);
-    //       this.form.get('pmp').setValue(15);
-    //       break;
-    //     case 'Arcilloso':
-    //       this.form.get('cc').setValue(35);
-    //       this.form.get('pmp').setValue(17);
-    //       break;
-    //     default:
-    //       this.form.get('cc').reset();
-    //       this.form.get('pmp').reset();
-    //       break;
-    //   }
-    // });
+    this.form.get('soilType').valueChanges.subscribe((selectedSoilType: string) => {
+      switch (selectedSoilType) {
+        case 'Arenoso':
+          this.form.get('cc').setValue(9);
+          this.form.get('pmp').setValue(4);
+          break;
+        case 'Franco-arenoso':
+          this.form.get('cc').setValue(14);
+          this.form.get('pmp').setValue(6);
+          break;
+        case 'Franco':
+          this.form.get('cc').setValue(22);
+          this.form.get('pmp').setValue(10);
+          break;
+        case 'Franco-arcilloso':
+          this.form.get('cc').setValue(27);
+          this.form.get('pmp').setValue(13);
+          break;
+        case 'Arcillo-limoso':
+          this.form.get('cc').setValue(31);
+          this.form.get('pmp').setValue(15);
+          break;
+        case 'Arcilloso':
+          this.form.get('cc').setValue(35);
+          this.form.get('pmp').setValue(17);
+          break;
+        default:
+          this.form.get('cc').reset();
+          this.form.get('pmp').reset();
+          break;
+      }
+    });
   }
 
   upDateDev() {
@@ -362,7 +366,7 @@ export class EditDeviceComponent implements OnInit {
     this.myMap.addControl(drawControl);
     this.myMap.addLayer(this.drawItems);
 
-    this.editPolygon();
+    this.editMarker();
 
     const id = this.getOpeIdSameAsDevId(this.operations, this.devId.toString())
     console.log(id)
@@ -370,7 +374,7 @@ export class EditDeviceComponent implements OnInit {
       let latitude = this.device.latitud;
       let longitude = this.device.longitud;
       // Crear un marcador con la latitud y longitud del objeto
-      const myMarker = marker([latitude, longitude]);
+      const myMarker = marker([latitude, longitude], {icon: this.blueIcon});
       // Agregar el marcador al featureGroup
       this.drawItems.addLayer(myMarker);
     }
@@ -393,7 +397,7 @@ export class EditDeviceComponent implements OnInit {
         let longitude = this.device.longitud;
 
         // Crear un marcador con la latitud y longitud del objeto
-        const myMarker = marker([latitude, longitude]);
+        const myMarker = marker([latitude, longitude], {icon: this.blueIcon});
         // Agregar el marcador al featureGroup
         this.drawItems.addLayer(myMarker);
 
@@ -409,7 +413,7 @@ export class EditDeviceComponent implements OnInit {
     this.initForm();
   };
 
-  editPolygon() {
+  editMarker() {
     // Evento 'draw:edited' para editar capas del featureGroup
     this.myMap.on('draw:edited', (e) => {
       const layers = e.layers;

@@ -1,5 +1,4 @@
 import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
@@ -8,8 +7,7 @@ import { Soil } from 'src/app/core/models/soil.model';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5stock from "@amcharts/amcharts5/stock";
-import { DataService } from 'src/app/core/services/data.service';
-import { DeviceService } from 'src/app/core/services/device.service';
+import * as am5plugins_exporting from "@amcharts/amcharts5/plugins/exporting";
 import { Device } from 'src/app/core/models/device.models';
 
 @Component({
@@ -17,8 +15,10 @@ import { Device } from 'src/app/core/models/device.models';
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss']
 })
-export class LineChartComponent implements OnInit {
+export class LineChartComponent implements OnInit, OnChanges {
 
+  @Input() datoschart: Data[];
+  @Input() device: Device;
   private root!: am5.Root;
   toolbar: any;
   cc: number;
@@ -28,58 +28,53 @@ export class LineChartComponent implements OnInit {
   deviceId: number = 1;
   soil: Soil;
   selectedDays: number = 30; // Valor predeterminado, puedes ajustarlo según tu lógica
-  device: Device
-
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
     private zone: NgZone,
-    private activatedRoute: ActivatedRoute,
-    private dataService: DataService,
-    private deviceService: DeviceService
   ) { }
 
   ngOnInit(): void {
-    this.activatedRoute.snapshot.params['id'];
-    this.activatedRoute.params.subscribe((params: Params) => {
-      this.deviceId = params['id'];
-      this.getData(this.deviceId, 30);
-      this.getSoil(this.deviceId);
-      this.getDevice(this.deviceId);
-    },
-      (error) => {
-        console.log(error);
-      }
-    );
+    this.getSoil();
   }
 
-  getDevice (id: number){
-    this.deviceService.getDeviceById(id).subscribe(dev => {
-      this.device = dev;
-      console.log(dev)
-    })
+  ngOnChanges(changes: SimpleChanges) {
+    // Check if the datoschart input has changed
+    if (changes.datoschart && !changes.datoschart.firstChange) {
+      // If it has changed and it's not the first change, create the graph
+      console.log(this.datoschart);
+      this.createGraph(this.datoschart, "linechartdiv");
+    }
   }
 
-  getData(id: number, days: number) {
-    this.dataService.showDataByIdAndLastDays(id, days).subscribe(data => {
-      this.datos = data
-      this.createGraph(this.datos, "linechartdiv");
-    });
+  // getDevice(id: number) {
+  //   this.deviceService.getDeviceById(id).subscribe(dev => {
+  //     this.device = dev;
+  //     console.log(dev)
+  //   })
+  // }
+
+  getSoil() {
+    this.soil = this.device.soil
+    this.cc = this.soil.cc;
+    this.pmp = this.soil.pmp;
+    this.ur = (this.cc + this.pmp) * (this.soil.ur / 100);
+    console.log(this.cc);
+    console.log(this.pmp);
+    console.log(this.ur);
   }
 
-  onButtonClick(days: number) {
-    this.selectedDays = days; // Actualizar el valor de días seleccionado
-    this.getData(this.deviceId, days); // Llamar a la función getData con el nuevo número de días
-  }  
+  // getData(id: number, days: number) {
+  //   this.dataService.showDataByIdAndLastDays(id, days).subscribe(data => {
+  //     this.datos = data
+  //     this.createGraph(this.datos, "linechartdiv");
+  //   });
+  // }
 
-  getSoil(id: number) {
-    this.deviceService.getSoilByDevicesId(id).subscribe(data => {
-      this.soil = data
-      this.cc = this.soil.cc;
-      this.pmp = this.soil.pmp;
-      this.ur = (this.cc + this.pmp) * 0.5;
-    });
-  }
+  // onButtonClick(days: number) {
+  //   this.selectedDays = days; // Actualizar el valor de días seleccionado
+  //   this.getData(this.deviceId, days); // Llamar a la función getData con el nuevo número de días
+  // }
 
   // Run the function only in the browser
   browserOnly(f: () => void) {
@@ -96,6 +91,20 @@ export class LineChartComponent implements OnInit {
         root.dispose();
       }
     });
+  }
+
+  showNoDataModal(root: am5.Root, divId: string) {
+    // Utiliza el método `Modal` de amCharts para mostrar un modal cuando no hay datos
+    let modal = am5.Modal.new(root, {
+      content: "No hay datos disponibles para este rango de fechas, pruebe otro..."
+    });
+    // Abre el modal
+    modal.open();
+    // Puedes agregar más configuraciones o acciones según sea necesario para tu modal
+    // Por ejemplo, puedes cerrar el modal después de un tiempo determinado
+    // setTimeout(() => {
+    //   modal.close();
+    // }, 3000); // Cierra el modal después de 3 segundos (por ejemplo)
   }
 
   createGraph(apiData: Data[], divId) {
@@ -154,6 +163,8 @@ export class LineChartComponent implements OnInit {
       // Create axes
       // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
       let valueAxis = mainPanel.yAxes.push(am5xy.ValueAxis.new(root, {
+        min: this.pmp - 5,
+        max: this.cc + 5,
         renderer: am5xy.AxisRendererY.new(root, {})
       }));
 
@@ -188,7 +199,7 @@ export class LineChartComponent implements OnInit {
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
         valueSeries3.data.setAll(result);
-        sbSeries.data.setAll(apiData);
+        sbSeries.data.setAll(result);
       };
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
@@ -343,7 +354,7 @@ export class LineChartComponent implements OnInit {
         height: 30
       }));
       stockChart.toolsContainer.children.push(scrollbar);
-      
+
       let sbDateAxis = scrollbar.chart.xAxes.push(am5xy.GaplessDateAxis.new(root, {
         baseInterval: {
           timeUnit: "minute",
@@ -351,11 +362,11 @@ export class LineChartComponent implements OnInit {
         },
         renderer: am5xy.AxisRendererX.new(root, {})
       }));
-      
+
       let sbValueAxis = scrollbar.chart.yAxes.push(am5xy.ValueAxis.new(root, {
         renderer: am5xy.AxisRendererY.new(root, {})
       }));
-      
+
       let sbSeries = scrollbar.chart.series.push(am5xy.LineSeries.new(root, {
         valueYField: "dataHum",
         valueXField: "dataFecha",
@@ -367,8 +378,29 @@ export class LineChartComponent implements OnInit {
         visible: true,
         fillOpacity: 0.3
       });
+
+      let exporting = am5plugins_exporting.Exporting.new(root, {
+        menu: am5plugins_exporting.ExportingMenu.new(root, {
+          container: document.getElementById("linechartdiv")
+        }),
+        dataSource: apiData
+      });
       
-     
+      // exporting.get("menu").set("items", [{
+      //   type: "format",
+      //   format: "png",
+      //   label: "Export image"
+      // }, {
+      //   type: "format",
+      //   format: "xlsx",
+      //   label: "Export xlsx"
+      // }, {
+      //   type: "separator"
+      // }, {
+      //   type: "format",
+      //   format: "print",
+      //   label: "Print"
+      // }]);
 
       // Eliminar el toolbar anterior si existe
       // if (this.toolbar) {
@@ -409,7 +441,14 @@ export class LineChartComponent implements OnInit {
       let legend = mainPanel.children.push(am5.Legend.new(root, {}));
       legend.data.setAll(mainPanel.series.values);
 
-      dataLoaded(apiData);
+      //dispara modal en caso de no haber datos
+      if (apiData.length === 0) {
+        // Si no hay datos, muestra el modal proporcionado por amCharts
+        this.showNoDataModal(root, divId);
+      } else {
+        // Si hay datos, continúa con el proceso normal para renderizar el gráfico
+        dataLoaded(apiData);
+      }
     });
   }
 

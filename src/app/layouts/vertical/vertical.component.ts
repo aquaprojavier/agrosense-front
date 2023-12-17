@@ -1,8 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-
 import { EventService } from '../../core/services/event.service';
-
 import { SIDEBAR_TYPE } from "../layouts.model";
 
 @Component({
@@ -110,7 +108,6 @@ export class VerticalComponent implements OnInit, AfterViewInit {
         break;
     }
   }
-
   /**
    * On mobile toggle button clicked
    */
@@ -123,6 +120,4 @@ export class VerticalComponent implements OnInit, AfterViewInit {
       document.body.classList.remove('vertical-collpsed');
     }
   }
-
-
 }

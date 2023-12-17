@@ -4,6 +4,8 @@ export class Data {
     dataHum?: number;
     dataHum1?: number;
     dataHum2?: number;
+    dataConducSoil?:number;
+    dataTempSoil?:number;
     dataTemp?: number;
     dataHr?: number;
     volt?: number;

@@ -46,7 +46,7 @@ export class CreateOperationComponent implements OnInit {
   drawItems: FeatureGroup;
   geojsonLayer: any;
   polygons: Polygon[] = [];
-  soilType: string[] = [
+  soilTypeOptions: string[] = [
     "Arenoso",
     "Franco-arenoso",
     "Franco",
@@ -55,7 +55,7 @@ export class CreateOperationComponent implements OnInit {
     "Arcilloso",
     // Agrega más tipos de suelo según tus necesidades
   ];
-  plantingYearOptions: number[] = [2023,2022,2021,2020,2019,2018,2017,2016,2015,2014,2013,2012,2011,2010,2009,2008,2007,2006,2005,2004,2003,2002,2001,2000];
+  plantingYearOptions: number[] = []; // Inicializa el array como vacío
   cropTypeOptions: string[] = ['Almendro','Ajo','Cerezo','Ciruela','Damazco','Durazno','Nogal','Olivo','Peral','Pistacho','Uva de mesa', 'Vid vinífera','Zanahoria', 'Zapallo'];
   riegoOptions: string[] = ['goteo', 'aspersión', 'microaspersión', 'surco'];
   wetSoilOptions: number[] = [100,95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,5];
@@ -78,6 +78,7 @@ export class CreateOperationComponent implements OnInit {
 
   ngOnInit(): void {
     this.buildForm();
+    this.getPlantingYears();
     this.form.get('type').valueChanges.subscribe((selectedType: string) => {
       const efficiencyValue = this.efficiencyMap[selectedType];
       if (efficiencyValue !== undefined) {
@@ -130,6 +131,16 @@ export class CreateOperationComponent implements OnInit {
         console.log(error);
       }
     );
+  }
+
+  getPlantingYears(){
+    const currentYear: number = new Date().getFullYear(); // Obtiene el año actual
+    const startYear: number = 1960; // Año inicial deseado
+    const endYear: number = 2023; // Año final deseado
+
+    for (let year = endYear; year >= startYear; year--) {
+      this.plantingYearOptions.push(year);
+    }
   }
 
   getData(id: number) {

@@ -44,15 +44,15 @@ export class EditOperationComponent implements OnInit {
   polygonLayers: { [polygonId: number]: Layer } = {};
 
   soilTypeOptions: string[] = [
-    "arenoso",
-    "franco-arenoso",
-    "franco",
-    "franco-arcilloso",
-    "arcillo-limoso",
-    "arcilloso",
+    "Arenoso",
+    "Franco-arenoso",
+    "Franco",
+    "Franco-arcilloso",
+    "Arcillo-limoso",
+    "Arcilloso",
     // Agrega más tipos de suelo según tus necesidades
   ];
-  plantingYearOptions: number[] = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000];
+  plantingYearOptions: number[] = []; // Inicializa el array como vacío
   cropTypeOptions: string[] = ['Almendro', 'Ajo', 'Cerezo', 'Ciruela', 'Damazco', 'Durazno', 'Nogal', 'Olivo', 'Peral', 'Pistacho', 'Uva de mesa', 'Vid vinífera', 'Zanahoria', 'Zapallo'];
   riegoOptions: string[] = ['goteo', 'aspersión', 'microaspersión', 'surco'];
   wetSoilOptions: number[] = [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5];
@@ -88,6 +88,7 @@ export class EditOperationComponent implements OnInit {
     // this.activatedRoute.snapshot.params['idProp'];
     // this.activatedRoute.snapshot.params['operationId'];
     // Acceder a los parámetros usando subscribe (para escuchar cambios en la URL)
+    this.getPlantingYears();
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.operationId = params['idOpe'];
@@ -101,6 +102,16 @@ export class EditOperationComponent implements OnInit {
       }
     );
   };
+
+  getPlantingYears(){
+    const currentYear: number = new Date().getFullYear(); // Obtiene el año actual
+    const startYear: number = 1960; // Año inicial deseado
+    const endYear: number = 2023; // Año final deseado
+
+    for (let year = endYear; year >= startYear; year--) {
+      this.plantingYearOptions.push(year);
+    }
+  }
 
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
@@ -306,8 +317,7 @@ export class EditOperationComponent implements OnInit {
           if (this.polygonLayers[polygonId] === layer) {
             // Encuentra el polígono correspondiente al id
             this.polygons.forEach(poly => {
-              // console.log("paso 1")
-              // console.log(poly.polygonId);
+              
               if (poly.polygonId === parseInt(polygonId)) {
                 // Actualiza el GeoJSON del polígono
                 poly.geojson = JSON.stringify(layer.toGeoJSON());
@@ -324,6 +334,7 @@ export class EditOperationComponent implements OnInit {
 
       if (ope.operationId == this.operationId) {
         this.operation = ope;
+        console.log(ope)
         ope.devices.forEach(dev => {
           marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
         });
@@ -336,7 +347,6 @@ export class EditOperationComponent implements OnInit {
             onEachFeature: (feature, layer) => {
               // ID del polígono
               const poligono_id = poly.polygonId;
-
               this.polygonLayers[poligono_id] = layer; // Almacenar el layer en el diccionario  
               console.log(this.polygonLayers[poligono_id]);//layer asociado al id del polygon
               this.drawItems.addLayer(layer);

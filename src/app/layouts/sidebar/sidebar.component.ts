@@ -5,9 +5,7 @@ import { LoginService } from '../../core/services/login.service';
 import { UserProfileService } from 'src/app/core/services/user.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { PropertyService } from 'src/app/core/services/property.service';
-
 import { HttpClient } from '@angular/common/http';
-
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core/models/auth.models';
 import { Device } from 'src/app/core/models/device.models';
@@ -32,7 +30,6 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   var: any;
   devices: Device[];
   propertyId: number;
-
   menuItems = [];
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
@@ -104,7 +101,6 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   changeDevices(idProp: any) {
     this.propertyService.getDevicesByPropertyId2(idProp).subscribe((data) => {
       this.devices = data;
-      console.log(this.devices)
       this.propertyId = idProp;
     });
   }

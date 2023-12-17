@@ -3,7 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
 import { Data } from 'src/app/core/models/data.models';
-
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5stock from "@amcharts/amcharts5/stock";
@@ -19,6 +18,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
    private root!: am5.Root;
   toolbar: any;
   @Input() datoschart: Data[];
+ 
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
@@ -32,6 +32,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
     // Check if the datoschart input has changed
     if (changes.datoschart && !changes.datoschart.firstChange) {
       // If it has changed and it's not the first change, create the graph
+      console.log(this.datoschart);
       this.createGraph(this.datoschart, "chartdiv");
     }
   }
@@ -51,6 +52,20 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         root.dispose();
       }
     });
+  }
+
+  showNoDataModal(root: am5.Root, divId: string) {
+    // Utiliza el método `Modal` de amCharts para mostrar un modal cuando no hay datos
+    let modal = am5.Modal.new(root, {
+      content: "No hay datos disponibles para este rango de fechas, pruebe otro..."
+    });
+    // Abre el modal
+    modal.open();
+    // Puedes agregar más configuraciones o acciones según sea necesario para tu modal
+    // Por ejemplo, puedes cerrar el modal después de un tiempo determinado
+    // setTimeout(() => {
+    //   modal.close();
+    // }, 3000); // Cierra el modal después de 3 segundos (por ejemplo)
   }
 
   createGraph(apiData: Data[], divId) {
@@ -118,25 +133,32 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       function dataLoaded(result) {
         // Set data on all series of the chart
         valueSeries.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum1", "cc", "ur"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm:ss"
         });
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum2"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm:ss"
         });
         valueSeries.data.setAll(result);
         valueSeries2.data.setAll(result);
-        sbSeries.data.setAll(apiData);
+        sbSeries.data.setAll(result);
+      }
+      let valueFieldForTemperature = "dataTemp"; // Campo predeterminado para la temperatura
+
+      // Verificar si dataTempSoil es válido en algún objeto de la lista
+      const hasValidDataTempSoil = apiData.some(item => item.dataTempSoil !== null && item.dataTempSoil !== undefined);
+    
+      // Si hay dataTempSoil válida en algún objeto, usar dataTempSoil en lugar de dataTemp
+      if (hasValidDataTempSoil) {
+        valueFieldForTemperature = "dataTempSoil";
       }
 
-      let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
+      let valueSeries = mainPanel.series.push(am5xy.SmoothedXLineSeries.new(root, {
         name: "Temperatura",
         valueXField: "dataFecha",
-        valueYField: "dataTemp",
+        valueYField: valueFieldForTemperature,
         stroke: am5.color("#0981eb"),
         xAxis: dateAxis,
         yAxis: valueAxis,
@@ -146,7 +168,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         })
       }));
       
-      let valueSeries2 = mainPanel.series.push(am5xy.LineSeries.new(root, {
+      let valueSeries2 = mainPanel.series.push(am5xy.SmoothedXLineSeries.new(root, {
         name: "DPV",
         valueXField: "dataFecha",
         valueYField: "dpv",
@@ -161,7 +183,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
 
       let legend = mainPanel.children.push(am5.Legend.new(root, {}));
       legend.data.setAll(mainPanel.series.values);
-      
+
       // Add scrollbar
       // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
       let scrollbar = mainPanel.set("scrollbarX", am5xy.XYChartScrollbar.new(root, {
@@ -182,7 +204,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         renderer: am5xy.AxisRendererY.new(root, {})
       }));
       
-      let sbSeries = scrollbar.chart.series.push(am5xy.LineSeries.new(root, {
+      let sbSeries = scrollbar.chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
         valueYField: "dpv",
         valueXField: "dataFecha",
         xAxis: sbDateAxis,
@@ -200,7 +222,14 @@ export class TempHumChartComponent implements OnInit, OnChanges {
       valueSeries.appear(1000);
       mainPanel.appear(1000, 100);
 
-      dataLoaded(apiData);
+      //modal para en caso de no haber datos
+      if (apiData.length === 0) {
+        // Si no hay datos, muestra el modal proporcionado por amCharts
+        this.showNoDataModal(root, divId);
+      } else {
+        // Si hay datos, continúa con el proceso normal para renderizar el gráfico
+        dataLoaded(apiData);
+      }
     });
   }
 
@@ -212,6 +241,21 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         this.root.dispose();
       }
     });
+  }
+
+  shouldShowTemperatureTitle(): boolean {
+    // Verificar si dataTemp o dataTempSoil tienen valores válidos
+    const hasValidDataTemp = this.datoschart.some(item => item.dataTemp !== null && item.dataTemp !== undefined);
+    const hasValidDataTempSoil = this.datoschart.some(item => item.dataTempSoil !== null && item.dataTempSoil !== undefined);
+
+    return hasValidDataTemp || hasValidDataTempSoil;
+  }
+
+  getTemperatureTitle(): string {
+    // Determinar el título a mostrar
+    const hasValidDataTempSoil = this.datoschart.some(item => item.dataTempSoil !== null && item.dataTempSoil !== undefined);
+
+    return hasValidDataTempSoil ? "Temperatura de Suelo" : "Temperatura y DPV";
   }
 }
 
