@@ -6,6 +6,7 @@ import { Data } from 'src/app/core/models/data.models';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5stock from "@amcharts/amcharts5/stock";
+import * as am5plugins_exporting from "@amcharts/amcharts5/plugins/exporting";
 
 
 @Component({
@@ -66,6 +67,36 @@ export class TempHumChartComponent implements OnInit, OnChanges {
     // setTimeout(() => {
     //   modal.close();
     // }, 3000); // Cierra el modal después de 3 segundos (por ejemplo)
+  }
+
+  formatDataFecha(data) {
+    const formattedData = data.map(item => {
+      // Convertir milisegundos a objeto Date
+      const date = new Date(item.dataFecha);
+      // Formatear la fecha según el formato "yyyy-MM-dd HH:mm"
+      const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+      // Devolver un nuevo objeto con la fecha formateada
+      return { ...item, dataFecha: formattedDate };
+    });
+
+    return formattedData;
+  }
+
+  cleanNullData(data: any[]): any[] {
+    const cleanedData = data.map(item => {
+      const cleanedItem: any = {};
+  
+      Object.entries(item).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && key !== 'dataId') {
+          cleanedItem[key] = value;
+        }
+      });
+  
+      return cleanedItem;
+    });
+  
+    return cleanedData;
   }
 
   createGraph(apiData: Data[], divId) {
@@ -215,6 +246,41 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         visible: true,
         fillOpacity: 0.3
       });
+
+       //setting exporting menu
+       let exporting = am5plugins_exporting.Exporting.new(root, {
+        menu: am5plugins_exporting.ExportingMenu.new(root, {
+          container: document.getElementById(divId)
+        }),
+        dataSource: this.cleanNullData(this.formatDataFecha(apiData)),
+        pdfOptions: {
+          addURL: true,
+          fontSize: 10,
+          pageSize:"A4",
+          includeData: true
+        }
+      });
+     
+      exporting.get("menu").set("items", [
+        {
+          type: "format",
+          format: "xlsx",
+          label: "Export xlsx"
+        }, {
+          type: "format",
+          format: "jpg",
+          label: "Export jpg"
+        }, {
+          type: "format",
+          format: "pdf",
+          label: "Export pdf"
+        }, {
+          type: "separator"
+        }, {
+          type: "format",
+          format: "print",
+          label: "Print chart"
+        }]);
 
       // Make stuff animate on load
       // https://www.amcharts.com/docs/v5/concepts/animations/

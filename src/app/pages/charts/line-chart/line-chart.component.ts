@@ -107,6 +107,37 @@ export class LineChartComponent implements OnInit, OnChanges {
     // }, 3000); // Cierra el modal después de 3 segundos (por ejemplo)
   }
 
+  formatDataFecha(data) {
+    const formattedData = data.map(item => {
+      // Convertir milisegundos a objeto Date
+      const date = new Date(item.dataFecha);
+      // Formatear la fecha según el formato "yyyy-MM-dd HH:mm"
+      const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+      // Devolver un nuevo objeto con la fecha formateada
+      return { ...item, dataFecha: formattedDate };
+    });
+
+    return formattedData;
+  }
+
+  cleanNullData(data: any[]): any[] {
+    const cleanedData = data.map(item => {
+      const cleanedItem: any = {};
+  
+      Object.entries(item).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && key !== 'dataId') {
+          cleanedItem[key] = value;
+        }
+      });
+  
+      return cleanedItem;
+    });
+  
+    return cleanedData;
+  }
+  
+
   createGraph(apiData: Data[], divId) {
     // Chart code goes in here
     this.browserOnly(() => {
@@ -114,7 +145,8 @@ export class LineChartComponent implements OnInit, OnChanges {
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
       // this.maybeDisposeRoot(chartcontrols);
-
+      console.log(apiData);
+      console.log(this.cleanNullData(this.formatDataFecha(apiData)));
       // Remove content from chart divs
       // let chartcontrolsDiv = document.getElementById(chartcontrols);
       // while (chartcontrolsDiv.firstChild) {
@@ -180,19 +212,19 @@ export class LineChartComponent implements OnInit, OnChanges {
       function dataLoaded(result) {
         // Set data on all series of the chart
         valueSeries.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum1", "cc", "ur"],
+          numericFields: ["dataHum1"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
         // Set the data processor and data for valueSeries2
         valueSeries2.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum2", "cc", "ur"],
+          numericFields: ["dataHum2"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
         // Set the data processor and data for valueSeries3
         valueSeries3.data.processor = am5.DataProcessor.new(root, {
-          numericFields: ["dataHum", "cc", "ur"],
+          numericFields: ["dataHum"],
           dateFields: ["dataFecha"],
           dateFormat: "yyyy-MM-dd HH:mm"
         });
@@ -201,6 +233,8 @@ export class LineChartComponent implements OnInit, OnChanges {
         valueSeries3.data.setAll(result);
         sbSeries.data.setAll(result);
       };
+
+      
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
         name: "Humedad 30cm",
@@ -379,29 +413,42 @@ export class LineChartComponent implements OnInit, OnChanges {
         fillOpacity: 0.3
       });
 
+      //setting exporting menu
       let exporting = am5plugins_exporting.Exporting.new(root, {
         menu: am5plugins_exporting.ExportingMenu.new(root, {
-          container: document.getElementById("linechartdiv")
+          container: document.getElementById(divId)
         }),
-        dataSource: apiData
+        dataSource: this.cleanNullData(this.formatDataFecha(apiData)),
+        pdfOptions: {
+          addURL: true,
+          fontSize: 10,
+          pageSize:"A4",
+          includeData: true
+        }
       });
-      
-      // exporting.get("menu").set("items", [{
-      //   type: "format",
-      //   format: "png",
-      //   label: "Export image"
-      // }, {
-      //   type: "format",
-      //   format: "xlsx",
-      //   label: "Export xlsx"
-      // }, {
-      //   type: "separator"
-      // }, {
-      //   type: "format",
-      //   format: "print",
-      //   label: "Print"
-      // }]);
+     
+      exporting.get("menu").set("items", [
+        {
+          type: "format",
+          format: "xlsx",
+          label: "Export xlsx"
+        }, {
+          type: "format",
+          format: "jpg",
+          label: "Export jpg"
+        }, {
+          type: "format",
+          format: "pdf",
+          label: "Export pdf"
+        }, {
+          type: "separator"
+        }, {
+          type: "format",
+          format: "print",
+          label: "Print chart"
+        }]);
 
+        
       // Eliminar el toolbar anterior si existe
       // if (this.toolbar) {
       //   this.toolbar.dispose();
@@ -447,11 +494,12 @@ export class LineChartComponent implements OnInit, OnChanges {
         this.showNoDataModal(root, divId);
       } else {
         // Si hay datos, continúa con el proceso normal para renderizar el gráfico
+        // dataLoaded(apiData);
         dataLoaded(apiData);
       }
     });
   }
-
+  
   ngOnDestroy() {
     // this.root.container.children.clear();
     // Clean up chart when the component is removed
