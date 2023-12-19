@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, Inject, NgZone, PLATFORM_ID, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
@@ -15,12 +15,12 @@ import { Device } from 'src/app/core/models/device.models';
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss']
 })
-export class LineChartComponent implements OnInit, OnChanges {
+export class LineChartComponent implements OnChanges {
 
-  @Input() datoschart: Data[];
-  @Input() device: Device;
   private root!: am5.Root;
   toolbar: any;
+  @Input() datoschart: Data[];
+  @Input() device: Device;
   cc: number;
   pmp: number;
   ur: number;
@@ -34,47 +34,22 @@ export class LineChartComponent implements OnInit, OnChanges {
     private zone: NgZone,
   ) { }
 
-  ngOnInit(): void {
-    this.getSoil();
-  }
-
   ngOnChanges(changes: SimpleChanges) {
     // Check if the datoschart input has changed
     if (changes.datoschart && !changes.datoschart.firstChange) {
       // If it has changed and it's not the first change, create the graph
-      console.log(this.datoschart);
+      this.getSoil();
       this.createGraph(this.datoschart, "linechartdiv");
     }
   }
-
-  // getDevice(id: number) {
-  //   this.deviceService.getDeviceById(id).subscribe(dev => {
-  //     this.device = dev;
-  //     console.log(dev)
-  //   })
-  // }
 
   getSoil() {
     this.soil = this.device.soil
     this.cc = this.soil.cc;
     this.pmp = this.soil.pmp;
     this.ur = (this.cc + this.pmp) * (this.soil.ur / 100);
-    console.log(this.cc);
-    console.log(this.pmp);
-    console.log(this.ur);
+    // console.log(this.soil)
   }
-
-  // getData(id: number, days: number) {
-  //   this.dataService.showDataByIdAndLastDays(id, days).subscribe(data => {
-  //     this.datos = data
-  //     this.createGraph(this.datos, "linechartdiv");
-  //   });
-  // }
-
-  // onButtonClick(days: number) {
-  //   this.selectedDays = days; // Actualizar el valor de días seleccionado
-  //   this.getData(this.deviceId, days); // Llamar a la función getData con el nuevo número de días
-  // }
 
   // Run the function only in the browser
   browserOnly(f: () => void) {
@@ -124,19 +99,19 @@ export class LineChartComponent implements OnInit, OnChanges {
   cleanNullData(data: any[]): any[] {
     const cleanedData = data.map(item => {
       const cleanedItem: any = {};
-  
+
       Object.entries(item).forEach(([key, value]) => {
         if (value !== null && value !== undefined && key !== 'dataId') {
           cleanedItem[key] = value;
         }
       });
-  
+
       return cleanedItem;
     });
-  
+
     return cleanedData;
   }
-  
+
 
   createGraph(apiData: Data[], divId) {
     // Chart code goes in here
@@ -144,15 +119,8 @@ export class LineChartComponent implements OnInit, OnChanges {
 
       // Dispose previously created Root element
       this.maybeDisposeRoot(divId);
-      // this.maybeDisposeRoot(chartcontrols);
-      console.log(apiData);
-      console.log(this.cleanNullData(this.formatDataFecha(apiData)));
-      // Remove content from chart divs
-      // let chartcontrolsDiv = document.getElementById(chartcontrols);
-      // while (chartcontrolsDiv.firstChild) {
-      //   chartcontrolsDiv.removeChild(chartcontrolsDiv.firstChild);
-      // }
 
+      // Remove content from chart divs
       let chartDiv = document.getElementById(divId);
       while (chartDiv.firstChild) {
         chartDiv.removeChild(chartDiv.firstChild);
@@ -234,7 +202,7 @@ export class LineChartComponent implements OnInit, OnChanges {
         sbSeries.data.setAll(result);
       };
 
-      
+
 
       let valueSeries = mainPanel.series.push(am5xy.LineSeries.new(root, {
         name: "Humedad 30cm",
@@ -422,11 +390,11 @@ export class LineChartComponent implements OnInit, OnChanges {
         pdfOptions: {
           addURL: true,
           fontSize: 10,
-          pageSize:"A4",
+          pageSize: "A4",
           includeData: true
         }
       });
-     
+
       exporting.get("menu").set("items", [
         {
           type: "format",
@@ -448,7 +416,7 @@ export class LineChartComponent implements OnInit, OnChanges {
           label: "Print chart"
         }]);
 
-        
+
       // Eliminar el toolbar anterior si existe
       // if (this.toolbar) {
       //   this.toolbar.dispose();
@@ -499,7 +467,7 @@ export class LineChartComponent implements OnInit, OnChanges {
       }
     });
   }
-  
+
   ngOnDestroy() {
     // this.root.container.children.clear();
     // Clean up chart when the component is removed

@@ -15,18 +15,19 @@
     <div id="gauge" class="col-12">
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-5">Agua Disponbible Total %</h4>
+          <h4 class="card-title mb-5">RIEGO - Agua Disponbible Total ( % )</h4>
           <div class="flex-container">
             <div *ngFor="let device of devices">
               <!-- <div *ngIf=""> -->
               <div class="flex-gauge">
+                <div><b>{{ device.devicesNombre }}</b></div>
                 <svg
                   id="fillgauge{{ device.devicesId }}"
                   height="140"
                   style="margin: 5px"
                 ></svg>
-                <div>{{ device.devicesNombre }}</div>
                 <div>{{ device.devicesCultivo }}</div>
+                <!-- <div>{{ device.soil.soilType }}</div> -->
               </div>
             </div>
           </div>
@@ -63,7 +64,7 @@
     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-5">Recomendaciones</h4>
+          <h4 class="card-title mb-5">Recomendaciones de Riego</h4>
           <ul class="verti-timeline list-unstyled">
             <li class="event-list active">
               <div class="event-timeline-dot">

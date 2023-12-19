@@ -6,7 +6,7 @@ import { Soil } from 'src/app/core/models/soil.model';
 import { DataService } from 'src/app/core/services/data.service';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { Device } from 'src/app/core/models/device.models';
-
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-charts',
@@ -31,7 +31,7 @@ export class ChartsComponent implements OnInit {
     this.activatedRoute.snapshot.params['id'];
     this.activatedRoute.params.subscribe((params: Params) => {
       this.deviceId = params['id'];
-      this.getData(this.deviceId, 30);
+      
       this.getDevice(this.deviceId);
     },
       (error) => {
@@ -43,6 +43,7 @@ export class ChartsComponent implements OnInit {
   getDevice(id: number) {
     this.deviceService.getDeviceById(id).subscribe(dev => {
       this.device = dev;
+      this.getData(this.deviceId, 30);
       console.log(dev)
     })
   }

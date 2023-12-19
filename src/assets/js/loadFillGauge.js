@@ -47,25 +47,32 @@ function liquidFillGaugeDefaultSettings() {
     };
   }
 
-  function loadLiquidFillGauge(elementId, value, wc, ur, config) {
+  function loadLiquidFillGauge(elementId, value, wc, ur, pmp, config) {
     if (config == null) config = liquidFillGaugeDefaultSettings();
+    
+    var adt = wc - pmp;
+    var wur = (adt * (ur / 100)) + pmp
 
-    if (value <= ur) {
+    if (value <= pmp) {
       config.waveColor = "#CB2B3E";
       config.textColor = "#fc9da8";
       config.circleColor = "#982E40";
-    } else if (value > wc) {
+    } else if (value >= wc) {
       config.waveColor = "#0481bf";
       config.textColor = "#048dd1";
       config.circleColor = "#02689c";
+    } else if (value <= wur && value > pmp) {
+      config.waveColor = "#CAC428";
+      config.textColor = "#b0a428";
+      config.circleColor = "#988F2E";
     } else {
       config.waveColor = "#2AAD27";
       config.textColor = "#50bd4d";
       config.circleColor = "#137811";
     }
 
-    var ad = wc - ur;
-    value = ((value-ur) * 100) / ad;
+    
+    value = ((value-pmp) * 100) / adt;
     if (value < 0){
       value = 0
     }

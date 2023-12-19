@@ -63,6 +63,7 @@ export class LeafletComponent implements OnInit {
   greenIcon: Icon;
   blueIcon: Icon;
   greyIcon: Icon;
+  yellowIcon: Icon;
 
   constructor(
     private iconService: IconService,
@@ -111,6 +112,7 @@ export class LeafletComponent implements OnInit {
     this.redIcon = this.iconService.getRedIcon();
     this.greenIcon = this.iconService.getGreenIcon();
     this.blueIcon = this.iconService.getBlueIcon();
+    this.yellowIcon = this.iconService.getYellowIcon();
   }
 
   getData(id: number) {
@@ -328,7 +330,7 @@ export class LeafletComponent implements OnInit {
     this.getAllImages(layerControl);
 
     let poligonToGjson;
-    let poligonoStyle = { color: "#e8e81c", weight: 2.5, opacity: 1, fillOpacity: 0.0 };
+    let poligonoStyle = { color: "#144be0", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
     let bounds;
 
     // Poligono de la Propiedad
@@ -427,7 +429,6 @@ export class LeafletComponent implements OnInit {
       </div>
     </div>
   </div>
-  
     <div class="row">
     <div class="col-6">
       <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
@@ -435,14 +436,11 @@ export class LeafletComponent implements OnInit {
     <div class="col-6">
       <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
     </div>
+   </div>
   </div>
-  
-  </div>
-  
         `, { closeButton: false });
-
       soilLayer.addLayer(iconSoil);
-      loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, data.cc, data.pmp);
+      loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, dev.soil.cc, dev.soil.ur, dev.soil.pmp);
       this.lastData.push(data);
     };
 
@@ -518,7 +516,6 @@ export class LeafletComponent implements OnInit {
             </div>
           </div>
       </div>
-
       `, { closeButton: false }).on('click', (e) => {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
@@ -537,13 +534,22 @@ export class LeafletComponent implements OnInit {
           this.devices.push(dev);
           this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
             data => {
-              if (data.dataHum <= data.pmp) {
+              console.log(data);
+              console.log(dev);
+
+              const adt = dev.soil.cc - dev.soil.pmp;
+              const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
+
+              if (data.dataHum <= dev.soil.pmp) {
                 addMarker(dev, data, this.redIcon);
                 addPolygons(ope, "#CB2B3E", this.redIcon, dev);
-              } else if (data.dataHum >= data.cc) {
+              } else if (data.dataHum >= dev.soil.cc) {
                 addMarker(dev, data, this.blueIcon);
                 addPolygons(ope, "#0481bf", this.blueIcon, dev);
-              } else if (data.dataHum > data.pmp && data.dataHum < data.cc) {
+              } else if (data.dataHum > dev.soil.pmp && data.dataHum <= wur) {
+                addMarker(dev, data, this.yellowIcon);
+                addPolygons(ope, "#CAC428", this.yellowIcon, dev);
+              } else if (data.dataHum > wur && data.dataHum < dev.soil.cc) {
                 addMarker(dev, data, this.greenIcon);
                 addPolygons(ope, "#2AAD27", this.greenIcon, dev);
               }
@@ -598,9 +604,7 @@ export class LeafletComponent implements OnInit {
         lng: dev.longitud,
         count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
       }));
-
     const heatDataObject = { data: heatDataArray };
-
     // Initialising heat layer and passing config
     const heatmapLayer = new HeatmapOverlay(heatLayerConfig);
 

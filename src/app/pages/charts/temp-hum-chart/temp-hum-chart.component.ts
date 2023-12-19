@@ -14,26 +14,22 @@ import * as am5plugins_exporting from "@amcharts/amcharts5/plugins/exporting";
   templateUrl: './temp-hum-chart.component.html',
   styleUrls: ['./temp-hum-chart.component.scss']
 })
-export class TempHumChartComponent implements OnInit, OnChanges {
+export class TempHumChartComponent implements OnChanges {
 
-   private root!: am5.Root;
+  private root!: am5.Root;
   toolbar: any;
   @Input() datoschart: Data[];
- 
+
 
   constructor(@Inject(PLATFORM_ID)
   private platformId: Object,
-  private zone: NgZone,
+    private zone: NgZone,
   ) { }
-
-  ngOnInit(): void {
-  }
 
   ngOnChanges(changes: SimpleChanges) {
     // Check if the datoschart input has changed
     if (changes.datoschart && !changes.datoschart.firstChange) {
       // If it has changed and it's not the first change, create the graph
-      console.log(this.datoschart);
       this.createGraph(this.datoschart, "chartdiv");
     }
   }
@@ -86,16 +82,16 @@ export class TempHumChartComponent implements OnInit, OnChanges {
   cleanNullData(data: any[]): any[] {
     const cleanedData = data.map(item => {
       const cleanedItem: any = {};
-  
+
       Object.entries(item).forEach(([key, value]) => {
         if (value !== null && value !== undefined && key !== 'dataId') {
           cleanedItem[key] = value;
         }
       });
-  
+
       return cleanedItem;
     });
-  
+
     return cleanedData;
   }
 
@@ -180,7 +176,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
 
       // Verificar si dataTempSoil es válido en algún objeto de la lista
       const hasValidDataTempSoil = apiData.some(item => item.dataTempSoil !== null && item.dataTempSoil !== undefined);
-    
+
       // Si hay dataTempSoil válida en algún objeto, usar dataTempSoil en lugar de dataTemp
       if (hasValidDataTempSoil) {
         valueFieldForTemperature = "dataTempSoil";
@@ -198,7 +194,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
           keepTargetHover: true
         })
       }));
-      
+
       let valueSeries2 = mainPanel.series.push(am5xy.SmoothedXLineSeries.new(root, {
         name: "DPV",
         valueXField: "dataFecha",
@@ -222,7 +218,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         height: 30
       }));
       stockChart.toolsContainer.children.push(scrollbar);
-      
+
       let sbDateAxis = scrollbar.chart.xAxes.push(am5xy.GaplessDateAxis.new(root, {
         baseInterval: {
           timeUnit: "minute",
@@ -230,11 +226,11 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         },
         renderer: am5xy.AxisRendererX.new(root, {})
       }));
-      
+
       let sbValueAxis = scrollbar.chart.yAxes.push(am5xy.ValueAxis.new(root, {
         renderer: am5xy.AxisRendererY.new(root, {})
       }));
-      
+
       let sbSeries = scrollbar.chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
         valueYField: "dpv",
         valueXField: "dataFecha",
@@ -247,8 +243,8 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         fillOpacity: 0.3
       });
 
-       //setting exporting menu
-       let exporting = am5plugins_exporting.Exporting.new(root, {
+      //setting exporting menu
+      let exporting = am5plugins_exporting.Exporting.new(root, {
         menu: am5plugins_exporting.ExportingMenu.new(root, {
           container: document.getElementById(divId)
         }),
@@ -256,11 +252,11 @@ export class TempHumChartComponent implements OnInit, OnChanges {
         pdfOptions: {
           addURL: true,
           fontSize: 10,
-          pageSize:"A4",
+          pageSize: "A4",
           includeData: true
         }
       });
-     
+
       exporting.get("menu").set("items", [
         {
           type: "format",
@@ -299,7 +295,7 @@ export class TempHumChartComponent implements OnInit, OnChanges {
     });
   }
 
- ngOnDestroy() {
+  ngOnDestroy() {
     // this.root.container.children.clear();
     // Clean up chart when the component is removed
     this.browserOnly(() => {
