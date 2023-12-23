@@ -141,57 +141,51 @@ export class LeafletComponent implements OnInit {
       this.maybeDisposeRoot(div);
 
       let root = am5.Root.new(div);
-
       root.setThemes([
-        // am5themes_Micro.new(root),
         am5themes_Animated.new(root),
-        // am5themes_Dark.new(root)//modo dark
       ]);
 
       let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        panX: false,
-        panY: false,
-        wheelX: "none",
-        wheelY: "none",
+        // panX: false,
+        // panY: false,
+        // wheelX: "none",
+        // wheelY: "none",
       }));
-
-      // chart.plotContainer.set("wheelable", false);
-      // chart.zoomOutButton.set("forceHidden", true);
 
       // Add cursor
       // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
       let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
         // xAxis: xAxis,
-        behavior: "zoomX"
+        // behavior: "zoomX"
       }));
-      // cursor.lineY.set("visible", false);
+      cursor.lineY.set("visible", false);
 
       // Create axes
       // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
       let xAxis = chart.xAxes.push(
         am5xy.DateAxis.new(root, {
+          // groupData: true,
           baseInterval: { timeUnit: "minute", count: 30 },
           renderer: am5xy.AxisRendererX.new(root, {}),
-          tooltip: am5.Tooltip.new(root, {})
+          // tooltip: am5.Tooltip.new(root, {})
         })
       );
 
       let valueAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
         strictMinMax: true,
-        extraMax: 0.02,
-        extraMin: 0.02,
+        extraMax: 0.1,
+        extraMin: 0.1,
         renderer: am5xy.AxisRendererY.new(root, {}),
-        tooltip: am5.Tooltip.new(root, {})
+        // tooltip: am5.Tooltip.new(root, {})
       }));
 
-      let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
+      let series = chart.series.push(am5xy.LineSeries.new(root, {
         xAxis: xAxis,
         yAxis: valueAxis,
         valueYField: "dataTemp",
         valueXField: "dataFecha",
         tooltip: am5.Tooltip.new(root, {
-          labelText: "{valueY]}",
-          // keepTargetHover: true
+          labelText: "{valueY}"
         })
       }));
 
@@ -301,7 +295,6 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
-    console.log(property.devices);
     this.getHeatMapData(property.devices);
 
     // Crear una capa de grupo para los polígonos y agregarla al mapa
@@ -385,63 +378,76 @@ export class LeafletComponent implements OnInit {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt < 3.2 ? 'red' : 'black';
       let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-  <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">   
-  
-  <div class="row">
-  <div class="col-6">
-    <div>
-      <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
-    </div>
-  </div>
-  <div class="col-6">
-    <div>
-    <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
-  </div>
-  </div>
-  <div class="row">
-    <div class="col-12">
-        <img src="assets/images/sensor.png" alt="">
+      <div class="container text-center" style="width: 200px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
+
+          <div class="row">
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+              </div>
+            </div>
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div id="soilId" style="width: 100%; height: 150px;"></div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <h2 style="margin-bottom: 0px; color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' :icon === this.yellowIcon ? '#c9b802' : 'green'};">
+                ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' :icon === this.yellowIcon ? 'PRECAUCIÓN': 'OPTIMO'}
+              </h2>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <img src="assets/images/root50x50.png" alt="">
+            </div>
+            <div class="col-8">
+              <div class="row">
+                <div class="col-12">
+                  <h5 style="margin-bottom: 0px; margin-top: 5px; color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+                      ${data.dataHum1}%
+                    </b>
+                  </h5>
+                </div>
+                <div class="col-12">
+                  <h5 style="color: black; text-align: left;">60 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+                      ${data.dataHum2}%
+                    </b>
+                  </h5>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
+            </div>
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
+            </div>
+          </div>
+
         </div>
-        </div>    
-        <div class="row">
-        <div class="col-12">
-        <h2 style="margin-bottom: 0px;color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-          ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : 'OPTIMO'}
-        </h2>
-        </div>
-        </div>
-  <div class="row">
-    <div class="col-4">
-      <img src="assets/images/root50x50.png" alt=""> 
-    </div>
-    <div class="col-8">
-      <div class="row">
-        <div class="col-12">
-          <h5 style="margin-bottom: 0px;margin-top: 5px;color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-            ${data.dataHum1}%
-          </b></h5>
-        </div>
-        <div class="col-12">
-        <h5 style="color: black; text-align: left;">60 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
-            ${data.dataHum2}%
-          </b></h5>
-        </div>
-      </div>
-    </div>
-  </div>
-    <div class="row">
-    <div class="col-6">
-      <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr} %</b></h5>
-    </div>
-    <div class="col-6">
-      <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp} °C</b></h5>
-    </div>
-   </div>
-  </div>
-        `, { closeButton: false });
-      soilLayer.addLayer(iconSoil);
+
+        `, { closeButton: false }).on('click', (e) => {
+          // console.log('Hiciste clic en el marcador', e.latlng);
+          this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
+            console.log(lastdata);
+            this.createValueChart("soilId", lastdata, "#3eedd3")
+          });
+        });      
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, dev.soil.cc, dev.soil.ur, dev.soil.pmp);
-      this.lastData.push(data);
+      soilLayer.addLayer(iconSoil);
+      // this.lastData.push(data);
     };
 
     // Function to add markers
@@ -449,30 +455,34 @@ export class LeafletComponent implements OnInit {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt <= 3.2 ? 'red' : 'black';
       let iconTemp = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-        <div class="container text-center" style="width: 200px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
-        <div class="row">
-        <div class="col-6">
-          <div>
-            <h5 style="color: black;margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
-          </div>
-        </div>
-        <div class="col-6">
-          <div>
-          <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>  </div>
-        </div>
-        </div>
-        <div class="row">
-          <div id="chartdiv" style="width: 100%; height: 150px">
-              </div>
-              </div>    
-              <div class="row">
-              <div class="col-6">
-                <h5 style="color: black;margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr}</b> %</h5>
-              </div>
-              <div class="col-6">
-                <h5 style="color: black;margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp}</b> °C</h5>
+      <div class="container text-center" style="width: 200px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
+
+          <div class="row">
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
               </div>
             </div>
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div id="chartdiv" style="width: 100%; height: 150px;"></div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">HR:<br><img src="assets/images/water.png" alt=""> <b>${data.dataHr}</b> %</h5>
+            </div>
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTemp}</b> °C</h5>
+            </div>
+          </div>
+
         </div>
   
         `, { closeButton: false }).on('click', (e) => {
@@ -491,7 +501,7 @@ export class LeafletComponent implements OnInit {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt <= 3.2 ? 'red' : 'black';
       let gaugeIcon = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
-      <div class="container text-center" style="width: 220px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
+      <div class="container text-center" style="width: 200px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
       <div class="row">
       <div class="col-6">
         <div>
@@ -519,7 +529,6 @@ export class LeafletComponent implements OnInit {
       `, { closeButton: false }).on('click', (e) => {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
-          console.log(lastdata);
           this.createValueChart("chartdiv", lastdata, "#3eedd3")
         });
       });
@@ -534,9 +543,6 @@ export class LeafletComponent implements OnInit {
           this.devices.push(dev);
           this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
             data => {
-              console.log(data);
-              console.log(dev);
-
               const adt = dev.soil.cc - dev.soil.pmp;
               const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
 

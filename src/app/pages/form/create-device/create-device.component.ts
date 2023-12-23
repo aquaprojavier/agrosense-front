@@ -1,13 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Popup } from 'leaflet';
+import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Marker } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DeviceDto } from 'src/app/core/models/deviceDto.models';
 import { DeviceService } from 'src/app/core/services/device.service';
 import { DataService } from 'src/app/core/services/data.service';
-import { SoilService } from 'src/app/core/services/soil.service';
 import { User } from 'src/app/core/models/auth.models';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Device } from '../../../core/models/device.models';
@@ -15,6 +14,7 @@ import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { Operation } from 'src/app/core/models/operation.models';
 import { Soil } from '../../../core/models/soil.model';
+import { IconService } from 'src/app/core/services/icon.service';
 
 @Component({
   selector: 'app-create-device',
@@ -23,6 +23,11 @@ import { Soil } from '../../../core/models/soil.model';
 })
 export class CreateDeviceComponent implements OnInit {
 
+  gaugeIcon: Icon;
+  redIcon: Icon;
+  greenIcon: Icon;
+  blueIcon: Icon;
+  greyIcon: Icon;
   breadCrumbItems: Array<{}>;
   user: User;
   property: any;
@@ -53,39 +58,24 @@ export class CreateDeviceComponent implements OnInit {
     // Agrega más tipos de suelo según tus necesidades
   ];
   stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
+  psmOptions: number[] = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 
-
-  greenIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-  greyIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-
-  constructor(private formBuilder: FormBuilder,
+  constructor(
+    private formBuilder: FormBuilder,
+    private iconService: IconService,
     private activatedRoute: ActivatedRoute,
     private propertyService: PropertyService,
     private operationService: OperationService,
     private deviceService: DeviceService,
     private dataService: DataService,
-    private soilService: SoilService,
     private router: Router,) { }
 
   ngOnInit(): void {
+    
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Create', active: true }];
+    this.getIcons();
     this.activatedRoute.snapshot.params['idProp'];
     this.getFreeSerialNumber("draginonestor");
-    // this.getSoils();
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['idProp'];
       this.getData(this.propId);
@@ -95,6 +85,13 @@ export class CreateDeviceComponent implements OnInit {
         console.log(error);
       }
     );
+  }
+
+  getIcons(){
+    this.redIcon = this.iconService.getRedIcon();
+    this.greenIcon = this.iconService.getGreenIcon();
+    this.blueIcon = this.iconService.getBlueIcon();
+    this.greyIcon = this.iconService.getGreyIcon();
   }
 
   getData(id: number) {
@@ -134,6 +131,7 @@ export class CreateDeviceComponent implements OnInit {
       cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
       ur: [50, [Validators.required]], // Agregar campo 'ur' con validación requerida
       pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
+      psm: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
 
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
@@ -155,6 +153,8 @@ export class CreateDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').setValidators(Validators.required);
         this.form.get('pmp').updateValueAndValidity();
+        this.form.get('psm').setValidators(Validators.required);
+        this.form.get('psm').updateValueAndValidity();
       } else {
         this.form.get('devicesCultivo').clearValidators();
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -172,6 +172,8 @@ export class CreateDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').clearValidators();
         this.form.get('pmp').updateValueAndValidity();
+        this.form.get('psm').clearValidators();
+        this.form.get('psm').updateValueAndValidity();
       }
     });
 
@@ -184,6 +186,7 @@ export class CreateDeviceComponent implements OnInit {
           this.form.get('cc').setValue(ope.soil.cc);
           this.form.get('ur').setValue(ope.soil.ur);
           this.form.get('pmp').setValue(ope.soil.pmp);
+          this.form.get('psm').setValue(ope.soil.psm)
         }
       })
     });
@@ -250,6 +253,7 @@ export class CreateDeviceComponent implements OnInit {
       const cc = this.form.value.cc;
       const ur = this.form.value.ur;
       const pmp = this.form.value.pmp;
+      const psm = this.form.value.psm;
 
       //Crear objeto soil
       soil = {
@@ -259,6 +263,7 @@ export class CreateDeviceComponent implements OnInit {
         cc: cc,
         ur: ur,
         pmp: pmp,
+        psm: psm,
       };
       }
       
@@ -269,7 +274,6 @@ export class CreateDeviceComponent implements OnInit {
         latitud: latitud,
         longitud: longitud,
         propertyId: propertyId,
-
         devicesCultivo: devicesCultivo,
         operationId: operationId,
         soil: soil
@@ -326,6 +330,9 @@ export class CreateDeviceComponent implements OnInit {
         polyline: false,
         circlemarker: false,
         polygon: false,
+        marker: {
+          icon: this.blueIcon
+        }
       },
       edit: {
         featureGroup: this.drawItems,
@@ -340,6 +347,7 @@ export class CreateDeviceComponent implements OnInit {
     this.myMap.on('draw:created', (e) => {
       let type = e.layerType;
       const layer = e.layer;
+      console.log(e);
       if (type === 'marker') {
         console.log(type);
         let coordenadas = layer.toGeoJSON().geometry.coordinates;
@@ -384,6 +392,15 @@ export class CreateDeviceComponent implements OnInit {
   }
   get isNameFieldInvalid() {
     return this.nameField.touched && this.nameField.invalid;
+  }
+  get psmField() {
+    return this.form.get('psm');
+  }
+  get isPsmFieldValid() {
+    return this.psmField.touched && this.psmField.valid;
+  }
+  get isPsmFieldInvalid() {
+    return this.psmField.touched && this.psmField.invalid;
   }
   get isVarietyFieldValid() {
     return this.varietyField.touched && this.varietyField.valid;

@@ -63,7 +63,7 @@ function liquidFillGaugeDefaultSettings() {
       config.circleColor = "#02689c";
     } else if (value <= wur && value > pmp) {
       config.waveColor = "#CAC428";
-      config.textColor = "#b0a428";
+      config.textColor = "#ffeb19";
       config.circleColor = "#988F2E";
     } else {
       config.waveColor = "#2AAD27";

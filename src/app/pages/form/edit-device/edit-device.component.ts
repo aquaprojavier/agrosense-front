@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Marker } from 'leaflet';
 import 'leaflet-draw';
-import { SoilService } from 'src/app/core/services/soil.service';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
@@ -59,6 +58,7 @@ export class EditDeviceComponent implements OnInit {
     // Agrega más tipos de suelo según tus necesidades
   ];
   stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
+  psmOptions: number[] = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 
   constructor(
     private iconService: IconService,
@@ -67,7 +67,6 @@ export class EditDeviceComponent implements OnInit {
     private propertyService: PropertyService,
     private operationService: OperationService,
     private deviceService: DeviceService,
-    // private soilService: SoilService,
     private router: Router,
   ) { }
 
@@ -151,6 +150,7 @@ export class EditDeviceComponent implements OnInit {
       cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
       ur: ['', [Validators.required]], // Agregar campo 'ur' con validación requerida
       pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
+      psm: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
     this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
@@ -171,6 +171,8 @@ export class EditDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').setValidators(Validators.required);
         this.form.get('pmp').updateValueAndValidity();
+        this.form.get('psm').setValidators(Validators.required);
+        this.form.get('psm').updateValueAndValidity();
       } else {
         this.form.get('devicesCultivo').clearValidators();
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -188,6 +190,8 @@ export class EditDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').clearValidators();
         this.form.get('pmp').updateValueAndValidity();
+        this.form.get('psm').clearValidators();
+        this.form.get('psm').updateValueAndValidity();
       }
     });
     this.form.get('opeId').valueChanges.subscribe((selectedOpeId: number) => {
@@ -199,6 +203,7 @@ export class EditDeviceComponent implements OnInit {
           this.form.get('cc').setValue(ope.soil.cc);
           this.form.get('ur').setValue(ope.soil.ur);
           this.form.get('pmp').setValue(ope.soil.pmp);
+          this.form.get('psm').setValue(ope.soil.psm);
         }
       })
     });
@@ -265,7 +270,7 @@ export class EditDeviceComponent implements OnInit {
         const cc = this.form.value.cc;
         const ur = this.form.value.ur;
         const pmp = this.form.value.pmp;
-
+        const psm = this.form.value.psm;
         //Crear objeto soil
         soil = {
           soilType: soilType,
@@ -274,6 +279,7 @@ export class EditDeviceComponent implements OnInit {
           cc: cc,
           ur: ur,
           pmp: pmp,
+          psm: psm,
         };
       }
 
@@ -541,6 +547,15 @@ export class EditDeviceComponent implements OnInit {
   }
   get isPmpFieldInvalid() {
     return this.pmpField.touched && this.pmpField.invalid;
+  }
+  get psmField() {
+    return this.form.get('psm');
+  }
+  get isPsmFieldValid() {
+    return this.psmField.touched && this.psmField.valid;
+  }
+  get isPsmFieldInvalid() {
+    return this.psmField.touched && this.psmField.invalid;
   }
 }
 

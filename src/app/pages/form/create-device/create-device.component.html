@@ -13,7 +13,7 @@
             GENERAL
             <div class="row">
               <div class="col-6">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Tipo</mat-label>
                   <mat-select formControlName="devicesTipo">
                     <mat-option
@@ -25,7 +25,7 @@
                 </mat-form-field>
               </div>
               <div class="col-6">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Nombre</mat-label>
                   <input matInput type="text" formControlName="devicesNombre" />
                   <mat-icon matSuffix *ngIf="isNameFieldValid">done</mat-icon>
@@ -45,7 +45,7 @@
             </div>
             <div class="row">
               <div class="col-4">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Numero de serie</mat-label>
                   <mat-select formControlName="devicesSerie">
                     <mat-option
@@ -70,7 +70,7 @@
                 </mat-form-field>
               </div>
               <div class="col-4">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Latitud</mat-label>
                   <input
                     matInput
@@ -100,7 +100,7 @@
                 </mat-form-field>
               </div>
               <div class="col-4">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Longitud</mat-label>
                   <input
                     matInput
@@ -140,8 +140,8 @@
             <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
               SUELO
               <div class="row">
-                <div class="col-6">
-                  <mat-form-field appearance="fill" class="w-100">
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light">Variedad</mat-label>
                     <input
                       matInput
@@ -164,8 +164,8 @@
                     </div>
                   </mat-form-field>
                 </div>
-                <div class="col-6">
-                  <mat-form-field appearance="fill" class="w-100">
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light">Operacion de riego</mat-label>
                     <mat-select formControlName="opeId">
                       <mat-option
@@ -188,9 +188,6 @@
                     </div>
                   </mat-form-field>
                 </div>
-              </div>
-
-              <div class="row">
                 <div class="col-4">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light">Tipo de suelo</mat-label>
@@ -210,6 +207,32 @@
                   </mat-form-field>
                   <div *ngIf="soilTypeField.touched">
                     <mat-error *ngIf="soilTypeField.hasError('required')"
+                      >Este campo es requerido!</mat-error
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label class="light">Suelo mojado (%)</mat-label>
+                    <mat-select formControlName="psm">
+                      <mat-option
+                        *ngFor="let psm of psmOptions"
+                        [value]="psm"
+                        >{{ psm }}</mat-option
+                      >
+                    </mat-select>
+                    <mat-icon matSuffix *ngIf="isPsmFieldValid"
+                      >done</mat-icon
+                    >
+                    <mat-icon matSuffix *ngIf="isPsmFieldInvalid"
+                      >close</mat-icon
+                    >
+                  </mat-form-field>
+                  <div *ngIf="psmField.touched">
+                    <mat-error *ngIf="psmField.hasError('required')"
                       >Este campo es requerido!</mat-error
                     >
                   </div>
