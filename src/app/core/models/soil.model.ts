@@ -6,5 +6,4 @@ export class Soil {
     cc?: number;
     ur?: number;
     pmp?: number;
-    psm?: number;
 }

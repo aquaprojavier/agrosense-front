@@ -214,31 +214,8 @@
               </div>
 
               <div class="row">
-                <div class="col-4">
-                  <mat-form-field appearance="outline" class="w-100">
-                    <mat-label class="light">Suelo mojado (%)</mat-label>
-                    <mat-select formControlName="psm">
-                      <mat-option
-                        *ngFor="let psm of psmOptions"
-                        [value]="psm"
-                        >{{ psm }}</mat-option
-                      >
-                    </mat-select>
-                    <mat-icon matSuffix *ngIf="isPsmFieldValid"
-                      >done</mat-icon
-                    >
-                    <mat-icon matSuffix *ngIf="isPsmFieldInvalid"
-                      >close</mat-icon
-                    >
-                  </mat-form-field>
-                  <div *ngIf="psmField.touched">
-                    <mat-error *ngIf="psmField.hasError('required')"
-                      >Este campo es requerido!</mat-error
-                    >
-                  </div>
-                </div>
 
-                <div class="col-4">
+                <div class="col-6">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light"
                       >Profundidad de raices (cm.)</mat-label
@@ -264,7 +241,7 @@
                   </mat-form-field>
                 </div>
 
-                <div class="col-4">
+                <div class="col-6">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light">Piedras (%)</mat-label>
                     <mat-select formControlName="stone">

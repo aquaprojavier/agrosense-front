@@ -45,7 +45,6 @@ export class CreateDeviceComponent implements OnInit {
   latitud: number;
   longitud: number;
   serialNumbers: string[] = [];
-  
   devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
   soil: Soil;
   soilType: string[] = [
@@ -58,7 +57,6 @@ export class CreateDeviceComponent implements OnInit {
     // Agrega más tipos de suelo según tus necesidades
   ];
   stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
-  psmOptions: number[] = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 
   constructor(
     private formBuilder: FormBuilder,
@@ -131,7 +129,6 @@ export class CreateDeviceComponent implements OnInit {
       cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
       ur: [50, [Validators.required]], // Agregar campo 'ur' con validación requerida
       pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
-      psm: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
 
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
@@ -153,8 +150,6 @@ export class CreateDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').setValidators(Validators.required);
         this.form.get('pmp').updateValueAndValidity();
-        this.form.get('psm').setValidators(Validators.required);
-        this.form.get('psm').updateValueAndValidity();
       } else {
         this.form.get('devicesCultivo').clearValidators();
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -172,8 +167,6 @@ export class CreateDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').clearValidators();
         this.form.get('pmp').updateValueAndValidity();
-        this.form.get('psm').clearValidators();
-        this.form.get('psm').updateValueAndValidity();
       }
     });
 
@@ -186,7 +179,6 @@ export class CreateDeviceComponent implements OnInit {
           this.form.get('cc').setValue(ope.soil.cc);
           this.form.get('ur').setValue(ope.soil.ur);
           this.form.get('pmp').setValue(ope.soil.pmp);
-          this.form.get('psm').setValue(ope.soil.psm)
         }
       })
     });
@@ -253,7 +245,6 @@ export class CreateDeviceComponent implements OnInit {
       const cc = this.form.value.cc;
       const ur = this.form.value.ur;
       const pmp = this.form.value.pmp;
-      const psm = this.form.value.psm;
 
       //Crear objeto soil
       soil = {
@@ -262,8 +253,7 @@ export class CreateDeviceComponent implements OnInit {
         stone: stone,
         cc: cc,
         ur: ur,
-        pmp: pmp,
-        psm: psm,
+        pmp: pmp
       };
       }
       

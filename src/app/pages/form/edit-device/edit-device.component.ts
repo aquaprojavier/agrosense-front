@@ -150,7 +150,6 @@ export class EditDeviceComponent implements OnInit {
       cc: ['', [Validators.required]], // Agregar campo 'cc' con validación requerida
       ur: ['', [Validators.required]], // Agregar campo 'ur' con validación requerida
       pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
-      psm: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
     this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
@@ -171,8 +170,6 @@ export class EditDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').setValidators(Validators.required);
         this.form.get('pmp').updateValueAndValidity();
-        this.form.get('psm').setValidators(Validators.required);
-        this.form.get('psm').updateValueAndValidity();
       } else {
         this.form.get('devicesCultivo').clearValidators();
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -190,8 +187,6 @@ export class EditDeviceComponent implements OnInit {
         this.form.get('ur').updateValueAndValidity();
         this.form.get('pmp').clearValidators();
         this.form.get('pmp').updateValueAndValidity();
-        this.form.get('psm').clearValidators();
-        this.form.get('psm').updateValueAndValidity();
       }
     });
     this.form.get('opeId').valueChanges.subscribe((selectedOpeId: number) => {
@@ -203,7 +198,6 @@ export class EditDeviceComponent implements OnInit {
           this.form.get('cc').setValue(ope.soil.cc);
           this.form.get('ur').setValue(ope.soil.ur);
           this.form.get('pmp').setValue(ope.soil.pmp);
-          this.form.get('psm').setValue(ope.soil.psm);
         }
       })
     });
@@ -278,8 +272,7 @@ export class EditDeviceComponent implements OnInit {
           stone: stone,
           cc: cc,
           ur: ur,
-          pmp: pmp,
-          psm: psm,
+          pmp: pmp
         };
       }
 
