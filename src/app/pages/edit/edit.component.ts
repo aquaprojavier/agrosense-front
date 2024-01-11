@@ -300,14 +300,16 @@ export class EditComponent implements OnInit {
     let valor: string = "Ninguna";
     if (this.operations && this.operations.length > 0) {
       for (const ope of this.operations) {
-        if (ope.devices) {
-          for (const dev of ope.devices) {
-            if (dev.devicesId === devId) {
-              valor = ope.operationName;
-              break; // Para salir del bucle si encontramos una coincidencia
+        ope.polygons.forEach ( poly => {
+          if (poly.devices) {
+            for (const dev of poly.devices) {
+              if (dev.devicesId === devId) {
+                valor = ope.operationName;
+                break; // Para salir del bucle si encontramos una coincidencia
+              }
             }
           }
-        }
+        })
       }
     }
     return valor;

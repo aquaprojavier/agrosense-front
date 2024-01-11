@@ -15,6 +15,7 @@ import { Polygon } from 'src/app/core/models/polygon.models';
 import { Crop } from '../../../core/models/crop.models';
 import { Irrigation } from 'src/app/core/models/irrigation.models'; 
 import { Soil } from 'src/app/core/models/soil.model';
+import { Property } from 'src/app/core/models/property.models';
 
 @Component({
   selector: 'app-create-operation',
@@ -273,7 +274,7 @@ export class CreateOperationComponent implements OnInit {
     }
   }
   // =========================================MAP==========================================================
-  showMap(property, operations) {
+  showMap(property: Property, operations: Operation[]) {
 
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
@@ -327,12 +328,9 @@ export class CreateOperationComponent implements OnInit {
         let poligonDevice = JSON.parse(poly.geojson);
         let poligon = geoJSON(poligonDevice, { style: operationStyleYellow }).addTo(this.myMap);
         poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-      })
-
-      ope.devices.forEach(dev => {
-
-        marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
-
+        poly.devices.forEach(dev => {
+          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+        });
       });
     });
   };

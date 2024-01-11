@@ -15,6 +15,7 @@ import { Polygon } from 'src/app/core/models/polygon.models';
 import { OperationDto } from 'src/app/core/models/operationDto.models';
 import { Irrigation } from 'src/app/core/models/irrigation.models';
 import { Crop } from 'src/app/core/models/crop.models';
+import { Property } from 'src/app/core/models/property.models';
 
 @Component({
   selector: 'app-edit-operation',
@@ -267,7 +268,7 @@ export class EditOperationComponent implements OnInit {
   // =========================================MAP==========================================================
 
 
-  showMap(property, operations) {
+  showMap(property: Property, operations: Operation[]) {
     console.log(operations);
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
@@ -335,8 +336,10 @@ export class EditOperationComponent implements OnInit {
       if (ope.operationId == this.operationId) {
         this.operation = ope;
         console.log(ope)
-        ope.devices.forEach(dev => {
-          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+        ope.polygons.forEach(poly => {
+          poly.devices.forEach(dev =>{
+            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+          })
         });
         ope.polygons.forEach(poly => {
 
@@ -357,26 +360,28 @@ export class EditOperationComponent implements OnInit {
         });
 
       } else {
-        if (ope.devices && ope.devices.length === 0) {
-          //Operacion sin dispositivos          
-          ope.polygons.forEach(poly => {
-            let poligonDevice = JSON.parse(poly.geojson);
-            let poligon = geoJSON(poligonDevice, { style: operationStyleGrey }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-          });
-        } else {
-          ope.devices.forEach(dev => {
-
-            marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
-
-            let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+        ope.polygons.forEach( poly => {
+          if (poly.devices && poly.devices.length === 0) {
+            //Operacion sin dispositivos          
             ope.polygons.forEach(poly => {
-              let operationObj = JSON.parse(poly.geojson);
-              let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
-              operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
-            })
-          });
-        }
+              let poligonDevice = JSON.parse(poly.geojson);
+              let poligon = geoJSON(poligonDevice, { style: operationStyleGrey }).addTo(this.myMap);
+              poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+            });
+          } else {
+            poly.devices.forEach(dev => {
+  
+              marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
+  
+              let operationStyleGrey = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+              ope.polygons.forEach(poly => {
+                let operationObj = JSON.parse(poly.geojson);
+                let operationToGjson = geoJSON(operationObj, { style: operationStyleGrey }).addTo(this.myMap);
+                operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`)
+              })
+            });
+          }
+        })
       }
     });
     this.initForm();

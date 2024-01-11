@@ -120,8 +120,8 @@
                   <td class="align-middle">{{ ope.operationName }}</td>
                   <td class="align-middle">{{ ope.crop.cropName }}</td>
                   <td class="align-middle">{{ ope.operationArea | number:'1.1-1' }} Ha.</td>
-                  <td class="align-middle" [style.color]="getDevicesNames(ope.devices) === 'Ninguno' ? 'yellow' : ''">
-                    {{ getDevicesNames(ope.devices) }}
+                  <td class="align-middle" [style.color]="getDevicesNames(ope.polygons[0].devices) === 'Ninguno' ? 'yellow' : ''">
+                    {{ getDevicesNames(ope.polygons[0].devices) }}
                   </td>
                   <td class="align-middle">
                     <!-- Button trigger modal -->

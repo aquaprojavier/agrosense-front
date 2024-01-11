@@ -536,36 +536,38 @@ export class LeafletComponent implements OnInit {
     };
 
     operations.forEach(ope => {
-      if (ope.devices.length === 0) {
-        addPolygons(ope, "#302e2e");
-      } else {
-        ope.devices.forEach(dev => {
-          this.devices.push(dev);
-          this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
-            data => {
-              const adt = dev.soil.cc - dev.soil.pmp;
-              const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
-
-              if (data.dataHum <= dev.soil.pmp) {
-                addMarker(dev, data, this.redIcon);
-                addPolygons(ope, "#CB2B3E", this.redIcon, dev);
-              } else if (data.dataHum >= dev.soil.cc) {
-                addMarker(dev, data, this.blueIcon);
-                addPolygons(ope, "#0481bf", this.blueIcon, dev);
-              } else if (data.dataHum > dev.soil.pmp && data.dataHum <= wur) {
-                addMarker(dev, data, this.yellowIcon);
-                addPolygons(ope, "#CAC428", this.yellowIcon, dev);
-              } else if (data.dataHum > wur && data.dataHum < dev.soil.cc) {
-                addMarker(dev, data, this.greenIcon);
-                addPolygons(ope, "#2AAD27", this.greenIcon, dev);
+      ope.polygons.forEach(poly => {
+        if (poly.devices.length === 0) {
+          addPolygons(ope, "#302e2e");
+        } else {
+          poly.devices.forEach(dev => {
+            this.devices.push(dev);
+            this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(
+              data => {
+                const adt = dev.soil.cc - dev.soil.pmp;
+                const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
+  
+                if (data.dataHum <= dev.soil.pmp) {
+                  addMarker(dev, data, this.redIcon);
+                  addPolygons(ope, "#CB2B3E", this.redIcon, dev);
+                } else if (data.dataHum >= dev.soil.cc) {
+                  addMarker(dev, data, this.blueIcon);
+                  addPolygons(ope, "#0481bf", this.blueIcon, dev);
+                } else if (data.dataHum > dev.soil.pmp && data.dataHum <= wur) {
+                  addMarker(dev, data, this.yellowIcon);
+                  addPolygons(ope, "#CAC428", this.yellowIcon, dev);
+                } else if (data.dataHum > wur && data.dataHum < dev.soil.cc) {
+                  addMarker(dev, data, this.greenIcon);
+                  addPolygons(ope, "#2AAD27", this.greenIcon, dev);
+                }
+              },
+              error => {
+                console.log(error);
               }
-            },
-            error => {
-              console.log(error);
-            }
-          );
-        });
-      }
+            );
+          });
+        }
+      })
     });
 
     property.devices.forEach(dev => {

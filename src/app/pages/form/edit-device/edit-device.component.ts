@@ -312,11 +312,13 @@ export class EditDeviceComponent implements OnInit {
 
   getOpeIdSameAsDevId(Opes: Operation[], id: string): number | number {
     for (const ope of Opes) {
-      for (const dev of ope.devices) {
-        if (dev.devicesId.toString() === id) {
-          return ope.operationId;
+      ope.polygons.forEach( poly => {
+        for (const dev of poly.devices) {
+          if (dev.devicesId.toString() === id) {
+            return ope.operationId;
+          }
         }
-      }
+      })
     }
     return -1; // Retorno si no se encuentra ninguna coincidencia
   }

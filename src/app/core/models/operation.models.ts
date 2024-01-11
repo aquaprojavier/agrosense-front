@@ -14,7 +14,6 @@ export class Operation {
     betweenRow?: number;
     crop?: Crop;
     polygons?: Polygon[];
-    devices?: Device[];
     irrigation?: Irrigation;
     soil?: Soil;
 }
