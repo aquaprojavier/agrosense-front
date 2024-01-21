@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Icon } from 'leaflet';
-
+import { Icon, ExtraMarkers } from 'leaflet';
+import 'leaflet-extra-markers';
 
 @Injectable({
   providedIn: 'root'
@@ -68,6 +68,20 @@ export class IconService {
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
+    });
+  }
+
+  getSimpleTempIcon(): Icon {
+    return ExtraMarkers.icon({
+      shape: 'square',
+      markerColor: 'white',
+      prefix: '',
+      icon: 'fa-number',
+      iconColor: '#2e222c',
+      iconRotate: 0,
+      extraClasses: '',
+      number: 'T',
+      svg: true
     });
   }
 

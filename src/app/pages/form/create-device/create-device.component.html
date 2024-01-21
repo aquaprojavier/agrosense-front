@@ -19,8 +19,9 @@
                     <mat-option
                       *ngFor="let deviceType of devicesList"
                       [value]="deviceType"
-                      >{{ deviceType }}</mat-option
-                    >
+                      >{{ deviceType }}
+                      <img [src]="getDeviceTypeImage(deviceType)" alt="{{ deviceType }}">
+                      </mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
@@ -128,7 +129,7 @@
                 </mat-form-field>
               </div>
             </div>
-            Ubique el sensor en el mapa.
+            Ubique el sensor en el mapa o coloque sus coordenadas arriba.
             <div class="row">
               <div class="col-12">
                 <div id="mapEdit">Cargando mapa...</div>
@@ -136,7 +137,6 @@
             </div>
             <br />
             <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
-              SUELO
               <div class="row">
                 <div class="col-4">
                   <mat-form-field appearance="outline" class="w-100">

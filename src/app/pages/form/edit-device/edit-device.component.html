@@ -15,14 +15,7 @@
               <div class="col-6">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label class="light">Tipo</mat-label>
-                  <input matInput type="text" formControlName="devicesTipo" />
-                  <!-- <mat-select formControlName="devicesTipo">
-                    <mat-option
-                      *ngFor="let deviceType of devicesList"
-                      [value]="deviceType"
-                      >{{ deviceType }}</mat-option
-                    >
-                  </mat-select> -->
+                  <input matInput type="text" formControlName="devicesTipo" [readonly]="true"/>
                 </mat-form-field>
               </div>
               <div class="col-6">
@@ -52,6 +45,7 @@
                     matInput
                     type="string"
                     formControlName="devicesSerie"
+                    [readonly]="true"
                   />
                 </mat-form-field>
               </div>
@@ -114,7 +108,7 @@
                 </mat-form-field>
               </div>
             </div>
-            Ubique el sensor en el mapa.
+            Ubique el sensor en el mapa o coloque sus coordenadas arriba.
             <div class="row">
               <div class="col-12">
                 <div id="mapEdit">Cargando mapa...</div>
@@ -122,7 +116,6 @@
             </div>
             <br />
             <div *ngIf="form.get('devicesTipo').value === 'Suelo'">
-              SUELO
               <div class="row">
                 <div class="col-4">
 

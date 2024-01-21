@@ -155,6 +155,20 @@ export class EditComponent implements OnInit {
         );
       }
     });
+  };
+
+  getDeviceTypeImage(deviceType: string) {
+    switch (deviceType) {
+      case 'Suelo':
+        return 'assets/images/root32px.png'; // Ruta de imagen para Tipo1
+      case 'Temp.':
+        return 'assets/images/temperature32.png'; // Ruta de imagen para Tipo2
+      case 'Caudal':
+        return 'assets/images/water-meter32.png'; // Ruta de imagen para Tipo2
+      // Agrega más casos según sea necesario para otros tipos de dispositivos
+      default:
+        return 'assets/images/smart-farm64.png'; // Ruta de imagen por defecto
+    }
   }
 
   getCoordinates(geojson: string): number[][][] | null {

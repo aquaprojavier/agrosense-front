@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, NgZone, PLATFORM_ID } from '@angular/core';
 import { formatDate } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
-import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup, ExtraMarkers, LayerGroup } from 'leaflet';
+import { control, geoJSON, Icon, LatLng, Map, marker, tileLayer, layerGroup, ExtraMarkers, Marker, LayerGroup } from 'leaflet';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
 import { DataService } from 'src/app/core/services/data.service';
@@ -322,14 +322,14 @@ export class LeafletComponent implements OnInit {
 
     this.getAllImages(layerControl);
 
-    let poligonToGjson;
-    let poligonoStyle = { color: "#144be0", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
-    let bounds;
+    // let poligonToGjson;
+    let propertyStyle = { color: "#1ce5e8", weight: 2, opacity: 1, fillOpacity: 0.0};
+    // let bounds;
 
     // Poligono de la Propiedad
     let poligonObj = JSON.parse(property.geojson);
-    poligonToGjson = geoJSON(poligonObj, { style: poligonoStyle }).addTo(this.myMap);
-    bounds = poligonToGjson.getBounds();
+    let poligonToGjson = geoJSON(poligonObj, { style: propertyStyle }).addTo(this.myMap);
+    let bounds = poligonToGjson.getBounds();
     this.myMap.fitBounds(bounds);
 
     this.myMap.scrollWheelZoom.disable();
@@ -572,13 +572,13 @@ export class LeafletComponent implements OnInit {
 
     property.devices.forEach(dev => {
 
-      if (dev.devicesType === "Caudalimetro") {
+      if (dev.devicesType === "Caudal") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           addGaugeMarker(dev, data, this.gaugeIcon);
         })
 
       };
-      if (dev.devicesType === "Temp. / HR") {
+      if (dev.devicesType === "Temp.") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           const tempIcon = this.createTempIcon(data.dataTemp)
           addTempMarker(dev, data, tempIcon);

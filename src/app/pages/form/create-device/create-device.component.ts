@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, Marker } from 'leaflet';
+import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, layerGroup } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -16,6 +16,10 @@ import { Operation } from 'src/app/core/models/operation.models';
 import { Soil } from '../../../core/models/soil.model';
 import { IconService } from 'src/app/core/services/icon.service';
 import { Property } from 'src/app/core/models/property.models';
+import { Polygon } from 'src/app/core/models/polygon.models';
+import * as turf from '@turf/turf';
+import { combineLatest } from 'rxjs';
+
 
 @Component({
   selector: 'app-create-device',
@@ -23,12 +27,14 @@ import { Property } from 'src/app/core/models/property.models';
   styleUrls: ['./create-device.component.scss']
 })
 export class CreateDeviceComponent implements OnInit {
-
+  iconoGral: Icon;
   gaugeIcon: Icon;
   redIcon: Icon;
   greenIcon: Icon;
   blueIcon: Icon;
   greyIcon: Icon;
+  tempIcon: Icon;
+  selectedType: string;
   breadCrumbItems: Array<{}>;
   user: User;
   property: any;
@@ -36,6 +42,7 @@ export class CreateDeviceComponent implements OnInit {
   device: Device;
   deviceDto: DeviceDto;
   opeId: number;
+  polyId: number;
   propId: number;
   devId: number;
   myMap = null;
@@ -46,7 +53,8 @@ export class CreateDeviceComponent implements OnInit {
   latitud: number;
   longitud: number;
   serialNumbers: string[] = [];
-  devicesList = ['Suelo', 'Temp. / HR', 'Caudalimetro', 'Estación meteorológica']; // Lista de tipos de dispositivos
+  polygons: Polygon[] = [];
+  devicesList = ['Suelo', 'Temp.', 'Caudal']; // Lista de tipos de dispositivos
   soil: Soil;
   soilType: string[] = [
     "Arenoso",
@@ -70,9 +78,10 @@ export class CreateDeviceComponent implements OnInit {
     private router: Router,) { }
 
   ngOnInit(): void {
-    
+
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Create', active: true }];
     this.getIcons();
+    this.iconoGral = this.blueIcon;
     this.activatedRoute.snapshot.params['idProp'];
     this.getFreeSerialNumber("draginonestor");
     this.activatedRoute.params.subscribe((params: Params) => {
@@ -86,11 +95,13 @@ export class CreateDeviceComponent implements OnInit {
     );
   }
 
-  getIcons(){
+  getIcons() {
+    this.gaugeIcon = this.iconService.getGaugeIcon();
     this.redIcon = this.iconService.getRedIcon();
     this.greenIcon = this.iconService.getGreenIcon();
     this.blueIcon = this.iconService.getBlueIcon();
     this.greyIcon = this.iconService.getGreyIcon();
+    this.tempIcon = this.iconService.getSimpleTempIcon();
   }
 
   getData(id: number) {
@@ -118,8 +129,8 @@ export class CreateDeviceComponent implements OnInit {
     this.form = this.formBuilder.group({
       devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
-      latitud: ['', [Validators.required, Validators.min(-90), Validators.max(90)]],
-      longitud: ['', [Validators.required, Validators.min(-180), Validators.max(180)]],
+      latitud: ['', [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/), Validators.min(-90), Validators.max(90)]],
+      longitud: ['', [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/), Validators.min(-180), Validators.max(180)]],
       devicesTipo: '',
 
       devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
@@ -132,8 +143,31 @@ export class CreateDeviceComponent implements OnInit {
       pmp: ['', [Validators.required]], // Agregar campo 'pmp' con validación requerida
     });
 
+    combineLatest([
+      this.form.get('latitud').valueChanges,
+      this.form.get('longitud').valueChanges
+    ]).subscribe(([latitud, longitud]) => {
+      // Verificar si ambas latitud y longitud son válidas antes de actualizar el marcador
+      if (latitud !== null && longitud !== null) {
+        this.actualizarMarcadorDesdeFormulario();
+      }
+    });
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
     this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
+      //la siguiente era una logica para al crear un device se cree con el icono correspondiente, no funciono bien
+      switch (selectedType) {
+        case "Soil":
+          this.iconoGral = this.greyIcon
+          break;
+        case "Temp.":
+          this.iconoGral = this.tempIcon
+          break;
+        case "Caudal":
+          this.iconoGral = this.gaugeIcon
+          break;
+        default:
+          this.iconoGral = this.greyIcon
+      };
       if (selectedType === 'Suelo') {
         this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -216,7 +250,7 @@ export class CreateDeviceComponent implements OnInit {
           break;
       }
     });
-  }
+  };
 
   saveDevice() {
     if (this.form.valid) {
@@ -225,39 +259,40 @@ export class CreateDeviceComponent implements OnInit {
           this.opeGeojson = ope.polygons[0] //ver esto, se asigna al 1er poligono de la operacion
         }
       });
-      
+
       const devicesNombre = this.form.value.devicesNombre;
       const devicesType = this.form.value.devicesTipo;
       const devicesSerie = this.form.value.devicesSerie;
       const latitud = this.form.value.latitud;
       const longitud = this.form.value.longitud;
       const propertyId = this.propId;
+      const polygonId = this.polyId;
       let operationId = null;
       let devicesCultivo = null;
       let soil: Soil = null;
 
-      if (devicesType === "Suelo"){
-      operationId = this.form.value.opeId;
-      devicesCultivo = this.form.value.devicesCultivo;
+      if (devicesType === "Suelo") {
+        operationId = this.form.value.opeId;
+        devicesCultivo = this.form.value.devicesCultivo;
 
-      const soilType = this.form.value.soilType;
-      const root = this.form.value.rootDepth;
-      const stone = this.form.value.stone;
-      const cc = this.form.value.cc;
-      const ur = this.form.value.ur;
-      const pmp = this.form.value.pmp;
+        const soilType = this.form.value.soilType;
+        const root = this.form.value.rootDepth;
+        const stone = this.form.value.stone;
+        const cc = this.form.value.cc;
+        const ur = this.form.value.ur;
+        const pmp = this.form.value.pmp;
 
-      //Crear objeto soil
-      soil = {
-        soilType: soilType,
-        depth: root,
-        stone: stone,
-        cc: cc,
-        ur: ur,
-        pmp: pmp
-      };
+        //Crear objeto soil
+        soil = {
+          soilType: soilType,
+          depth: root,
+          stone: stone,
+          cc: cc,
+          ur: ur,
+          pmp: pmp
+        };
       }
-      
+
       const deviceDto: DeviceDto = {
         devicesNombre: devicesNombre,
         devicesType: devicesType,
@@ -265,21 +300,25 @@ export class CreateDeviceComponent implements OnInit {
         latitud: latitud,
         longitud: longitud,
         propertyId: propertyId,
+        polygonId: polygonId,
         devicesCultivo: devicesCultivo,
         operationId: operationId,
         soil: soil
       };
-     
+
       console.log(deviceDto);
       this.deviceService.createDevice({ data: deviceDto }).subscribe(
         (response: Device) => {
 
           console.log('Se ha creado el dispositivo exitosamente:', response);
 
-          Swal.fire('Creación exitosa!', `El dispositivo ${deviceDto.devicesNombre} fue creado correctamente`, 'success')
-            .then(() => {
-              this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
-            });
+          Swal.fire({
+            title: 'Creación exitosa!',
+            html: `El dispositivo <strong>${deviceDto.devicesNombre}</strong> fue creado correctamente`,
+            icon: 'success'
+          }).then(() => {
+            this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
+          });
         },
         error => {
           console.error('Error en la respuesta del backend:', error);
@@ -289,6 +328,7 @@ export class CreateDeviceComponent implements OnInit {
       this.form.markAllAsTouched();
     }
   }
+  // =========================================MAP==========================================================
 
   // Actualiza los valores del formulario con las nuevas coordenadas
   actualizarCoordenadas(latitud: number, longitud: number) {
@@ -296,9 +336,65 @@ export class CreateDeviceComponent implements OnInit {
       latitud: latitud,
       longitud: longitud,
     });
+    // Llamada al método para actualizar el marcador desde el formulario
+    // this.actualizarMarcadorDesdeFormulario();
   }
-  // =========================================MAP==========================================================
+  // Actualiza los valores desde el formulario hacia el mapa
+  actualizarMarcadorDesdeFormulario() {
+
+    const latitud = this.form.get('latitud').value;
+    const longitud = this.form.get('longitud').value;
+    const selectedType: string = this.form.get('devicesTipo').value;
+
+    // Elimina el marcador existente solo si hay algo en el featureGroup
+    if (this.drawItems.getLayers().length > 0) {
+      this.drawItems.clearLayers();
+    }
+    // Crea un nuevo marcador en la posición actualizada
+    const nuevoMarcador = marker([latitud, longitud], { icon: this.iconoGral });
+    nuevoMarcador.addTo(this.myMap);
+    this.drawItems.addLayer(nuevoMarcador);
+
+    // Centra el mapa en la nueva posición
+    this.myMap.setView([latitud, longitud], 15);
+
+    // Verificar si el tipo seleccionado es 'Suelo' para realizar la lógica del polígono
+    if (selectedType === 'Suelo') {
+
+      // Verificar si el marcador está dentro de algún polígono
+      const punto = turf.point([longitud, latitud]); // Cambia el orden si es necesario
+
+      this.operations.forEach((operation) => {
+        operation.polygons.forEach((polygon) => {
+          try {
+            const geojsonObject = JSON.parse(polygon.geojson);
+            if (turf.booleanPointInPolygon(punto, geojsonObject)) {
+              this.polyId = polygon.polygonId;
+              this.opeId = operation.operationId;
+
+              // Supongamos que has detectado polygonId y operationId al agregar el marcador
+              const polygonIdDetectado = this.polyId;
+              const operationIdDetectado = this.opeId;
+
+              // Buscar la operación correspondiente al operationId detectado
+              const operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
+
+              // Verificar si se encontró la operación
+              if (operationCorrespondiente) {
+                // Establecer el valor del formControl 'opeId' con el operationId detectado
+                this.form.get('opeId').patchValue(operationCorrespondiente.operationId);
+              }
+            }
+          } catch (error) {
+            console.error('Error al parsear el GeoJSON:', error);
+          }
+        });
+      });
+    }
+  };
+
   showMap(property: Property, operations: Operation[]) {
+    const selectedType = this.form.get('devicesTipo').value;
 
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove(); // should remove the map from UI and clean the inner children of DOM element
@@ -311,13 +407,110 @@ export class CreateDeviceComponent implements OnInit {
 
     //Dibuja el poligono de la propiedad y centra el foco en esta.
     let propertyObj = JSON.parse(property.geojson);
-    let propertyStyle = { color: "#e8e81c", weight: 2, opacity: 1, fillOpacity: 0.0 };
+    let propertyStyle = { color: "#1ce5e8", weight: 2, opacity: 1, fillOpacity: 0.0 };
     let propertyToGjson = geoJSON(propertyObj, { style: propertyStyle }).addTo(this.myMap);
     this.myMap.fitBounds(propertyToGjson.getBounds());
 
     this.myMap.scrollWheelZoom.disable();
     this.myMap.on('focus', () => { this.myMap.scrollWheelZoom.enable(); });
     this.myMap.on('blur', () => { this.myMap.scrollWheelZoom.disable(); });
+
+    let operationStyleblack = { color: "#0f0f0f", weight: 1.5, opacity: 1, fillOpacity: 0.05 };
+    let operationStyleYellow = { color: "#e1e858", weight: 1.5, opacity: 1, fillOpacity: 0.05 };
+
+    // Function to add markers
+    const addMarker = (dev: Device, icon: Icon) => {
+      const formattedLatitud = dev.latitud.toFixed(3);
+      const formattedLongitud = dev.longitud.toFixed(3);
+      marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(
+        `
+            <div class="container text-center" style="width: 130px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
+      
+                <div class="row">
+                  <div class="col-12">
+                    <div>
+                      <h5 style="color: black; margin-bottom: 0px;">Dispositivo: <b>${dev.devicesNombre}</b></h5>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="row">
+                  <div class="col-12">
+                    <h2 style="color: black; margin-bottom: 0px;">
+                     ${dev.devicesType}
+                    </h2>
+                  </div>
+                </div>
+      
+                <div class="row">
+                  <div class="col-12" style="margin-bottom: 10px;">
+                    <img src="${getDeviceTypeImage(dev.devicesType)}" alt="">
+                  </div>
+                </div>
+      
+                <div class="row">
+                  <div class="col-6">
+                    <h5 style="color: black; margin-bottom: 0px;">Latitud:<br><b>${formattedLatitud}</b></h5>
+                  </div>
+                  <div class="col-6">
+                    <h5 style="color: black; margin-bottom: 0px;">Longitud:<br><b>${formattedLongitud}</b></h5>
+                  </div>
+                </div>
+              </div>
+              `, { closeButton: false }
+      );
+    };
+
+    function getDeviceTypeImage(deviceType) {
+      switch (deviceType) {
+        case 'Suelo':
+          return 'assets/images/metering64.png'; // Ruta de imagen para Tipo1
+        case 'Temp.':
+          return 'assets/images/temperature64.png'; // Ruta de imagen para Tipo2
+        case 'Caudal':
+          return 'assets/images/water-meter64.png'; // Ruta de imagen para Tipo2
+        // Agrega más casos según sea necesario para otros tipos de dispositivos
+        default:
+          return 'assets/images/smart-farm64.png'; // Ruta de imagen por defecto
+      }
+    }
+
+    property.devices.forEach(dev => {
+      if (dev.devicesType === 'Temp.') {
+        addMarker(dev, this.tempIcon);
+      } else if (dev.devicesType === 'Caudal') {
+        addMarker(dev, this.gaugeIcon);
+      }
+    });
+
+    operations.forEach(ope => {
+      // Verificar si la operación tiene algún polígono con dispositivos
+      if (ope.polygons.some(poly => poly.devices && poly.devices.length > 0)) {
+
+        ope.polygons.forEach(poly => {
+          this.polygons.push(poly)
+          let operationObj = JSON.parse(poly.geojson);
+          let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
+          operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+          poly.devices.forEach(dev => {
+
+            addMarker(dev, this.greyIcon)
+
+            let operationObj = JSON.parse(poly.geojson);
+            let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
+            operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+          })
+        })
+      } else {
+        // la operacion no tiene ningun poligono
+        ope.polygons.forEach(poly => {
+          this.polygons.push(poly)
+          let poligonDevice = JSON.parse(poly.geojson);
+          let poligon = geoJSON(poligonDevice, { style: operationStyleblack }).addTo(this.myMap);
+          poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+        })
+      }
+    });
 
     // FeatureGroup is to store editable layers
     this.drawItems = new FeatureGroup();
@@ -335,6 +528,7 @@ export class CreateDeviceComponent implements OnInit {
       },
       edit: {
         featureGroup: this.drawItems,
+        edit: false,  // Deshabilitar la edición directa
         remove: true
       }
     });
@@ -346,44 +540,83 @@ export class CreateDeviceComponent implements OnInit {
     this.myMap.on('draw:created', (e) => {
       let type = e.layerType;
       const layer = e.layer;
-      console.log(e);
+      
       if (type === 'marker') {
-        console.log(type);
+        // Elimina el marcador existente
+       
+        this.drawItems.clearLayers();
+       
+
         let coordenadas = layer.toGeoJSON().geometry.coordinates;
         this.actualizarCoordenadas(coordenadas[1], coordenadas[0]);
         console.log(coordenadas[1]);
         console.log(coordenadas[0]);
-      };
-      // this.opeGeojson = JSON.stringify(layer.toGeoJSON());
-      this.drawItems.addLayer(layer);
-    });
 
-    let operationStyleGrey = { color: "#7B7B7B" };
-    let operationStyleYellow = { color: "#e8e81c", weight: 1.5, opacity: 1, fillOpacity: 0.0 };
+        // Verificar si el tipo seleccionado es 'Suelo' para realizar la lógica del polígono
+        if (selectedType === 'Suelo') {
 
-    operations.forEach(ope => {
-      ope.polygons.forEach(poly => {
-        if (poly.devices && poly.devices.length === 0) {
-          ope.polygons.forEach(poly => {
-            let poligonDevice = JSON.parse(poly.geojson);
-            let poligon = geoJSON(poligonDevice, { style: operationStyleGrey }).addTo(this.myMap);
-            poligon.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
-          })
-        }
-  
-        poly.devices.forEach(dev => {
-  
-          marker(dev.coordenadas, { icon: this.greyIcon }).addTo(this.myMap);
-  
-          ope.polygons.forEach(poly => {
-            let operationObj = JSON.parse(poly.geojson);
-            let operationToGjson = geoJSON(operationObj, { style: operationStyleYellow }).addTo(this.myMap);
-            operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${ope.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""> Variedad: <b>${dev.devicesCultivo}</b><br><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${ope.operationArea} ha.</b><br></Div>`, { closeButton: false })
+          // Verificar si el marcador está dentro de algún polígono
+          const punto = turf.point([coordenadas[0], coordenadas[1]]); // Cambia el orden si es necesario
+          // Recorre tus polígonos y verifica la intersección
+
+          this.operations.forEach((operation) => {
+            operation.polygons.forEach((polygon) => {
+              try {
+                const geojsonObject = JSON.parse(polygon.geojson);
+                if (turf.booleanPointInPolygon(punto, geojsonObject)) {
+                  this.polyId = polygon.polygonId;
+                  this.opeId = operation.operationId;
+
+                  // Supongamos que has detectado polygonId y operationId al agregar el marcador
+                  const polygonIdDetectado = this.polyId;
+                  const operationIdDetectado = this.opeId;
+
+                  // Buscar la operación correspondiente al operationId detectado
+                  const operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
+
+                  // Verificar si se encontró la operación
+                  if (operationCorrespondiente) {
+                    // Establecer el valor del formControl 'opeId' con el operationId detectado
+                    this.form.get('opeId').patchValue(operationCorrespondiente.operationId);
+                  }
+                  // Actualizar el formulario desde el marcador, no funciona, ver !
+                  this.form.get('latitud').patchValue(coordenadas[1]);
+                  this.form.get('longitud').patchValue(coordenadas[0]);
+                }
+              } catch (error) {
+                console.error('Error al parsear el GeoJSON:', error);
+              }
+            });
           });
-        });
-      });
+        }
+        // this.drawItems.addLayer(layer);
+        console.log(this.drawItems.getLayers())
+      };
+
+
     });
   };
+
+  getDeviceTypeImage(deviceType: string) {
+    switch (deviceType) {
+      case 'Suelo':
+        return 'assets/images/root32px.png'; // Ruta de imagen para Tipo1
+      case 'Temp.':
+        return 'assets/images/temperature32.png'; // Ruta de imagen para Tipo2
+      case 'Caudal':
+        return 'assets/images/water-meter32.png'; // Ruta de imagen para Tipo2
+      // Agrega más casos según sea necesario para otros tipos de dispositivos
+    }
+  }
+
+
+  ngOnDestroy() {
+    if (this.myMap) {
+      this.myMap.off(); // Desvincula todos los eventos del mapa
+      this.myMap.remove();
+    }
+  }
+
 
   get nameField() {
     return this.form.get('devicesNombre');

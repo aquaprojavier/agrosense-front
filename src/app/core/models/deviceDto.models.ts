@@ -8,6 +8,7 @@ export class DeviceDto {
     devicesSerie: string;
     latitud: number;
     longitud: number;
+    polygonId?: number;
     operationId?: number;
     propertyId: number;
     soil?: Soil;

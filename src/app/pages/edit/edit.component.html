@@ -7,13 +7,12 @@
             <h4 class="card-title mb-0">Dispositivos</h4>
             <button
               type="button"
-              class="btn btn-primary btn-sm btn-rounded"
+              class="btn btn-primary btn-md btn-rounded"
               (click)="createDevice()"
             >
              CREAR
             </button>
           </div>          
-
           <div class="table-responsive mb-0">
             <table
               *ngIf="devices && devices.length > 0"
@@ -21,26 +20,25 @@
             >
               <thead class="table-light">
                 <tr>
-                  <th class="align-middle">Nombre</th>
-                  <th class="align-middle">Tipo</th>
-                  <th class="align-middle">Operacion</th>
-                  <th class="align-middle">Variedad</th>
-                  <!-- <th class="align-middle">Latitud</th> -->
-                  <!-- <th class="align-middle">Longitud</th> -->
-                  <th class="align-middle">Status</th>
-                  <th class="align-middle">Acción</th>
+                  <th>Nombre</th>
+                  <th style="text-align: center;">Tipo</th>
+                  <th>Operacion</th>
+                  <th>Variedad</th>
+                  <th>Status</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let dev of devices">
                   <td>{{ dev.devicesNombre }}</td>
-                  <td>{{dev.devicesType}}</td>
+                  <td style="display: flex; align-items: center; justify-content: space-around;">
+                    <!-- {{ dev.devicesType }} -->
+                    <img [src]="getDeviceTypeImage(dev.devicesType)" alt="{{ dev.devicesType }}">
+                  </td>
                   <td [style.color]="getOperationNameByDevId(dev.devicesId) === 'Ninguna' ? 'yellow' : ''">
                     {{ getOperationNameByDevId(dev.devicesId) }}
                   </td>
                   <td>{{ dev.devicesCultivo }}</td>
-                  <!-- <td>{{ dev.latitud | number: '2.2-2' }}</td> -->
-                  <!-- <td>{{ dev.longitud | number: '2.2-2'}}</td> -->
                   <td>
                     <span
                       class="badge badge-pill font-size-11"
@@ -61,6 +59,7 @@
                     >
                     <i class="bi bi-pencil-fill"></i>
                     </button>
+                    &nbsp; <!-- Agrega un espacio en blanco -->
                     <button
                       type="button"
                       class="btn btn-danger btn-sm btn-rounded"
@@ -87,7 +86,7 @@
             <h4 class="card-title mb-0">Operaciones de Riego</h4>
             <button
               type="button"
-              class="btn btn-primary btn-sm btn-rounded"
+              class="btn btn-primary btn-md btn-rounded"
               routerLink="/form/create-operation/{{ propId }}"
             >
               CREAR
@@ -131,6 +130,7 @@
                       routerLink="/form/edit-operation/{{ propId }}/{{ope.operationId}}"
                     ><i class="bi bi-pencil-fill"></i>
                     </button>
+                    &nbsp; <!-- Agrega un espacio en blanco -->
                     <button
                       type="button"
                       class="btn btn-danger btn-sm btn-rounded"
