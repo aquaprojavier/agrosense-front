@@ -14,8 +14,8 @@ import { Operation } from 'src/app/core/models/operation.models';
 import { Property } from 'src/app/core/models/property.models';
 import { Device } from 'src/app/core/models/device.models';
 import { AgromonitoringService } from 'src/app/core/services/agromonitoring.service';
-import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of, forkJoin, EMPTY } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
 import 'leaflet-extra-markers';
 import 'heatmap.js';
 import { HeatData } from 'src/app/core/models/heatData.models';
@@ -58,6 +58,8 @@ export class LeafletComponent implements OnInit {
   sanitizedUrl: SafeResourceUrl | null = null;
   polygonLayer: LayerGroup;
   lastDatas: Data[];
+  lastDataTempArray: Data[] = [];
+  heatDataArray: HeatData[] = [];
   gaugeIcon: Icon;
   redIcon: Icon;
   greenIcon: Icon;
@@ -107,7 +109,7 @@ export class LeafletComponent implements OnInit {
     );
   };
 
-  getIcons(){
+  getIcons() {
     this.gaugeIcon = this.iconService.getGaugeIcon();
     this.redIcon = this.iconService.getRedIcon();
     this.greenIcon = this.iconService.getGreenIcon();
@@ -121,7 +123,9 @@ export class LeafletComponent implements OnInit {
       this.sanitizedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.meteoblue.com/en/weather/widget/daily/${this.property?.propUbic}?geoloc=fixed&days=7&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&precipunit=MILLIMETER&coloured=coloured&pictoicon=0&pictoicon=1&maxtemperature=0&maxtemperature=1&mintemperature=0&mintemperature=1&windspeed=0&windspeed=1&windgust=0&winddirection=0&winddirection=1&uv=0&humidity=0&precipitation=0&precipitation=1&precipitationprobability=0&precipitationprobability=1&spot=0&spot=1&pressure=0&layout=dark`);
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
-        this.showMap(this.property, this.operations)
+        this.crearHeatMap(this.property).subscribe(() => {
+          this.showMap(this.property, this.operations)
+        });
       })
     });
   };
@@ -295,7 +299,8 @@ export class LeafletComponent implements OnInit {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(this.myMap);
 
-    this.getHeatMapData(property.devices);
+    // this.getHeatMapData(this.heatDataArray);
+    // console.log(this.heatDataArray)
 
     // Crear una capa de grupo para los polígonos y agregarla al mapa
     this.polygonLayer = layerGroup().addTo(this.myMap);
@@ -323,7 +328,7 @@ export class LeafletComponent implements OnInit {
     this.getAllImages(layerControl);
 
     // let poligonToGjson;
-    let propertyStyle = { color: "#1ce5e8", weight: 2, opacity: 1, fillOpacity: 0.0};
+    let propertyStyle = { color: "#1ce5e8", weight: 2, opacity: 1, fillOpacity: 0.0 };
     // let bounds;
 
     // Poligono de la Propiedad
@@ -399,8 +404,8 @@ export class LeafletComponent implements OnInit {
 
           <div class="row">
             <div class="col-12">
-              <h2 style="margin-bottom: 0px; color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' :icon === this.yellowIcon ? '#c9b802' : 'green'};">
-                ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' :icon === this.yellowIcon ? 'PRECAUCIÓN': 'OPTIMO'}
+              <h2 style="margin-bottom: 0px; color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : icon === this.yellowIcon ? '#c9b802' : 'green'};">
+                ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : icon === this.yellowIcon ? 'PRECAUCIÓN' : 'OPTIMO'}
               </h2>
             </div>
           </div>
@@ -439,12 +444,12 @@ export class LeafletComponent implements OnInit {
         </div>
 
         `, { closeButton: false }).on('click', (e) => {
-          // console.log('Hiciste clic en el marcador', e.latlng);
-          this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
-            console.log(lastdata);
-            this.createValueChart("soilId", lastdata, "#3eedd3")
-          });
-        });      
+        // console.log('Hiciste clic en el marcador', e.latlng);
+        this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
+          console.log(lastdata);
+          this.createValueChart("soilId", lastdata, "#3eedd3")
+        });
+      });
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, dev.soil.cc, dev.soil.ur, dev.soil.pmp);
       soilLayer.addLayer(iconSoil);
       // this.lastData.push(data);
@@ -546,7 +551,7 @@ export class LeafletComponent implements OnInit {
               data => {
                 const adt = dev.soil.cc - dev.soil.pmp;
                 const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
-  
+
                 if (data.dataHum <= dev.soil.pmp) {
                   addMarker(dev, data, this.redIcon);
                   addPolygons(ope, "#CB2B3E", this.redIcon, dev);
@@ -576,19 +581,67 @@ export class LeafletComponent implements OnInit {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           addGaugeMarker(dev, data, this.gaugeIcon);
         })
-
       };
       if (dev.devicesType === "Temp.") {
         this.dataService.lastDataByDeviceId(dev.devicesId).subscribe(data => {
           const tempIcon = this.createTempIcon(data.dataTemp)
+          this.lastDataTempArray.push(data)
           addTempMarker(dev, data, tempIcon);
         });
       }
     })
-  };
-  //end show map..............
 
-  getHeatMapData(devices: Device[]) {
+  };
+  crearHeatMap(property: Property): Observable<void> {
+    return new Observable<void>(observer => {
+      // Tu lógica existente para crear el heatmap
+      const heatDataArray: HeatData[] = [];
+      // Array de observables para almacenar las suscripciones a lastDataByDeviceId
+      // const observables: Observable<Data>[] = [];
+
+      // Mapear dispositivos a observables
+      const observablesArray = property.devices
+        .filter(dev => dev.devicesType === 'Temp.')
+        .map(dev => this.dataService.lastDataByDeviceId(dev.devicesId)
+          .pipe(
+            catchError(error => {
+              console.error(`Error obteniendo datos para el dispositivo ${dev.devicesId}`, error);
+              return EMPTY; // Continuar con otras observables incluso si una falla
+            })
+          )
+        );
+      // forkJoin combina las observables en un solo observable cuando todas están completas
+      forkJoin(observablesArray).subscribe((dataArray: Data[]) => {
+     
+        for (let i = 0; i < property.devices.length; i++) {
+          dataArray.forEach(data => {
+            const dev = property.devices[i];
+            if (data.serie === dev.devicesSerie) {
+              const heatData: HeatData = {
+                lat: dev.latitud,
+                lng: dev.longitud,
+                count: data.dataTemp as number
+                // Asegúrate de que data.dataTemp sea de tipo number
+              };
+              heatDataArray.push(heatData);
+            }
+          })
+        }
+        // Ahora heatDataArray está completo, puedes hacer lo que necesites con él
+        this.heatDataArray = heatDataArray;
+
+        // Llamar a getHeatMapData después de que heatDataArray se haya completado
+        this.getHeatMapData(this.heatDataArray);
+
+        // Notificar al observador
+        observer.next();
+        observer.complete();
+      });
+    });
+  }
+
+  // TODO ver el count de heatDataArray, que sea el ultimo valor de temp
+  getHeatMapData(heatData: HeatData[]) {
     // Setting up heat layer config
     const heatLayerConfig = {
       "radius": .003,
@@ -604,15 +657,8 @@ export class LeafletComponent implements OnInit {
       valueField: 'count'
     };
 
-    // Suponiendo que tienes un array 'devices' que contiene la información de los dispositivos
-    const heatDataArray: HeatData[] = devices
-      .filter(dev => dev.devicesType === "Temp. / HR")
-      .map(dev => ({
-        lat: dev.latitud,
-        lng: dev.longitud,
-        count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
-      }));
-    const heatDataObject = { data: heatDataArray };
+    // count: Math.floor(Math.random() * 6) + 25 // Generar un número aleatorio entre 25 y 30
+    const heatDataObject = { data: heatData };
     // Initialising heat layer and passing config
     const heatmapLayer = new HeatmapOverlay(heatLayerConfig);
 
@@ -620,9 +666,6 @@ export class LeafletComponent implements OnInit {
     heatmapLayer.setData(heatDataObject);
     // Crear una nueva LayerGroup para el heatmap y agregar el heatmapLayer a esta capa
     this.heatmapLayerGroup = layerGroup([heatmapLayer]);
-    //Adding heat layer to a map
-    // heatmapLayerGroup.addTo(this.myMap);
-
   }
 
   maybeDisposeRoot(divId) {

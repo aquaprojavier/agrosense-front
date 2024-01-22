@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control, layerGroup } from 'leaflet';
+import { geoJSON, Icon, Map, marker, tileLayer, FeatureGroup, Control } from 'leaflet';
 import 'leaflet-draw';
 import { PropertyService } from 'src/app/core/services/property.service';
 import { OperationService } from 'src/app/core/services/operation.service';
@@ -66,6 +66,7 @@ export class CreateDeviceComponent implements OnInit {
     // Agrega más tipos de suelo según tus necesidades
   ];
   stoneOptions: number[] = [90, 80, 70, 60, 50, 40, 20, 10, 5, 0];
+  operationCorrespondiente: Operation
 
   constructor(
     private formBuilder: FormBuilder,
@@ -81,7 +82,7 @@ export class CreateDeviceComponent implements OnInit {
 
     this.breadCrumbItems = [{ label: 'Device' }, { label: 'Create', active: true }];
     this.getIcons();
-    this.iconoGral = this.blueIcon;
+    this.iconoGral = this.greyIcon;
     this.activatedRoute.snapshot.params['idProp'];
     this.getFreeSerialNumber("draginonestor");
     this.activatedRoute.params.subscribe((params: Params) => {
@@ -129,10 +130,9 @@ export class CreateDeviceComponent implements OnInit {
     this.form = this.formBuilder.group({
       devicesNombre: ['', [Validators.required, Validators.maxLength(20)]],
       devicesSerie: ['', [Validators.required, Validators.maxLength(25)]],
-      latitud: ['', [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/), Validators.min(-90), Validators.max(90)]],
-      longitud: ['', [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/), Validators.min(-180), Validators.max(180)]],
+      latitud: ['', [Validators.required, Validators.pattern(/^-?\d+\.\d{3,}$/), Validators.min(-90), Validators.max(90)]],
+      longitud: ['', [Validators.required, Validators.pattern(/^-?\d+\.\d{3,}$/), Validators.min(-180), Validators.max(180)]],
       devicesTipo: '',
-
       devicesCultivo: ['', [Validators.required, Validators.maxLength(40)]],
       opeId: ['', Validators.required],
       soilType: ['', [Validators.required]], // Agregar campo 'soilType' con validación requerida
@@ -148,16 +148,18 @@ export class CreateDeviceComponent implements OnInit {
       this.form.get('longitud').valueChanges
     ]).subscribe(([latitud, longitud]) => {
       // Verificar si ambas latitud y longitud son válidas antes de actualizar el marcador
-      if (latitud !== null && longitud !== null) {
+      if (this.form.get('latitud').valid && this.form.get('longitud').valid) {
         this.actualizarMarcadorDesdeFormulario();
       }
     });
+
+
     // Controlamos los cambios en devicesTipo para mostrar u ocultar los campos adicionales
     this.form.get('devicesTipo').valueChanges.subscribe((selectedType: string) => {
       //la siguiente era una logica para al crear un device se cree con el icono correspondiente, no funciono bien
       switch (selectedType) {
-        case "Soil":
-          this.iconoGral = this.greyIcon
+        case "Suelo":
+          this.iconoGral = this.blueIcon
           break;
         case "Temp.":
           this.iconoGral = this.tempIcon
@@ -168,6 +170,7 @@ export class CreateDeviceComponent implements OnInit {
         default:
           this.iconoGral = this.greyIcon
       };
+
       if (selectedType === 'Suelo') {
         this.form.get('devicesCultivo').setValidators([Validators.required, Validators.maxLength(40)]);
         this.form.get('devicesCultivo').updateValueAndValidity();
@@ -336,8 +339,6 @@ export class CreateDeviceComponent implements OnInit {
       latitud: latitud,
       longitud: longitud,
     });
-    // Llamada al método para actualizar el marcador desde el formulario
-    // this.actualizarMarcadorDesdeFormulario();
   }
   // Actualiza los valores desde el formulario hacia el mapa
   actualizarMarcadorDesdeFormulario() {
@@ -346,6 +347,8 @@ export class CreateDeviceComponent implements OnInit {
     const longitud = this.form.get('longitud').value;
     const selectedType: string = this.form.get('devicesTipo').value;
 
+    console.log(latitud);
+    console.log(longitud);
     // Elimina el marcador existente solo si hay algo en el featureGroup
     if (this.drawItems.getLayers().length > 0) {
       this.drawItems.clearLayers();
@@ -363,6 +366,7 @@ export class CreateDeviceComponent implements OnInit {
 
       // Verificar si el marcador está dentro de algún polígono
       const punto = turf.point([longitud, latitud]); // Cambia el orden si es necesario
+      let puntoEnPoligono = false;
 
       this.operations.forEach((operation) => {
         operation.polygons.forEach((polygon) => {
@@ -377,21 +381,46 @@ export class CreateDeviceComponent implements OnInit {
               const operationIdDetectado = this.opeId;
 
               // Buscar la operación correspondiente al operationId detectado
-              const operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
+              this.operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
 
               // Verificar si se encontró la operación
-              if (operationCorrespondiente) {
+              if (this.operationCorrespondiente) {
+                this.myMap.removeLayer(geojsonObject);
+                //cambiar color de poligono
+                let operationStyleBlue = { color: "#444afc", weight: 1.5, opacity: 1, fillOpacity: 0.05 };
+                let operationToGjson = geoJSON(geojsonObject, { style: operationStyleBlue }).addTo(this.myMap);
+                operationToGjson.bindPopup(`<div style="line-height: 0.5;"><div style="text-align: center;"><img src="assets/images/location.png" alt=""><br><br>Operacion: <b>${operation.operationName}</b><br><br></div><img src="assets/images/grapes.png" alt=""><br><img src="assets/images/selection.png" alt=""> Superficie: <b>${operation.operationArea} ha.</b><br></Div>`, { closeButton: false })
+
                 // Establecer el valor del formControl 'opeId' con el operationId detectado
-                this.form.get('opeId').patchValue(operationCorrespondiente.operationId);
+                this.form.get('opeId').patchValue(this.operationCorrespondiente.operationId);
               }
+              puntoEnPoligono = true;
             }
           } catch (error) {
             console.error('Error al parsear el GeoJSON:', error);
           }
         });
       });
+      console.log('fuera del poligono')
+      if (!puntoEnPoligono) {
+        this.mostrarAlerta();
+        this.drawItems.clearLayers();
+      }
     }
   };
+
+  mostrarAlerta() {
+    Swal.fire({
+      icon: 'error',
+      title: 'Punto fuera de polígonos',
+      text: 'El marcador no está dentro de ningún polígono.',
+      confirmButtonText: 'Aceptar'
+    }).then(() => {
+      // Borrar los campos de latitud y longitud
+      this.form.get('latitud').setValue(null);
+      this.form.get('longitud').setValue(null);
+    });
+  }
 
   showMap(property: Property, operations: Operation[]) {
     const selectedType = this.form.get('devicesTipo').value;
@@ -540,55 +569,49 @@ export class CreateDeviceComponent implements OnInit {
     this.myMap.on('draw:created', (e) => {
       let type = e.layerType;
       const layer = e.layer;
-      
+
       if (type === 'marker') {
-        // Elimina el marcador existente
-       
-        this.drawItems.clearLayers();
-       
 
         let coordenadas = layer.toGeoJSON().geometry.coordinates;
         this.actualizarCoordenadas(coordenadas[1], coordenadas[0]);
-        console.log(coordenadas[1]);
-        console.log(coordenadas[0]);
 
-        // Verificar si el tipo seleccionado es 'Suelo' para realizar la lógica del polígono
-        if (selectedType === 'Suelo') {
+        // // Verificar si el tipo seleccionado es 'Suelo' para realizar la lógica del polígono
+        // if (selectedType === 'Suelo') {
 
-          // Verificar si el marcador está dentro de algún polígono
-          const punto = turf.point([coordenadas[0], coordenadas[1]]); // Cambia el orden si es necesario
-          // Recorre tus polígonos y verifica la intersección
+        //   // Verificar si el marcador está dentro de algún polígono
+        //   const punto = turf.point([coordenadas[0], coordenadas[1]]); // Cambia el orden si es necesario
+        //   // Recorre tus polígonos y verifica la intersección
 
-          this.operations.forEach((operation) => {
-            operation.polygons.forEach((polygon) => {
-              try {
-                const geojsonObject = JSON.parse(polygon.geojson);
-                if (turf.booleanPointInPolygon(punto, geojsonObject)) {
-                  this.polyId = polygon.polygonId;
-                  this.opeId = operation.operationId;
+        //   this.operations.forEach((operation) => {
+        //     operation.polygons.forEach((polygon) => {
+        //       try {
+        //         const geojsonObject = JSON.parse(polygon.geojson);
+        //         if (turf.booleanPointInPolygon(punto, geojsonObject)) {
+        //           this.polyId = polygon.polygonId;
+        //           this.opeId = operation.operationId;
 
-                  // Supongamos que has detectado polygonId y operationId al agregar el marcador
-                  const polygonIdDetectado = this.polyId;
-                  const operationIdDetectado = this.opeId;
+        //           // Supongamos que has detectado polygonId y operationId al agregar el marcador
+        //           const polygonIdDetectado = this.polyId;
+        //           const operationIdDetectado = this.opeId;
 
-                  // Buscar la operación correspondiente al operationId detectado
-                  const operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
+        //           // Buscar la operación correspondiente al operationId detectado
+        //           const operationCorrespondiente = this.operations.find(ope => ope.operationId === operationIdDetectado);
 
-                  // Verificar si se encontró la operación
-                  if (operationCorrespondiente) {
-                    // Establecer el valor del formControl 'opeId' con el operationId detectado
-                    this.form.get('opeId').patchValue(operationCorrespondiente.operationId);
-                  }
-                  // Actualizar el formulario desde el marcador, no funciona, ver !
-                  this.form.get('latitud').patchValue(coordenadas[1]);
-                  this.form.get('longitud').patchValue(coordenadas[0]);
-                }
-              } catch (error) {
-                console.error('Error al parsear el GeoJSON:', error);
-              }
-            });
-          });
-        }
+        //           // Verificar si se encontró la operación
+        //           if (operationCorrespondiente) {
+        //             // Establecer el valor del formControl 'opeId' con el operationId detectado
+        //             this.form.get('opeId').patchValue(operationCorrespondiente.operationId);
+        //           }
+        //           // Actualizar el formulario desde el marcador, no funciona, ver !
+        //           this.form.get('latitud').patchValue(coordenadas[1]);
+        //           this.form.get('longitud').patchValue(coordenadas[0]);
+        //         }
+        //       } catch (error) {
+        //         console.error('Error al parsear el GeoJSON:', error);
+        //       }
+        //     });
+        //   });
+        // }
         // this.drawItems.addLayer(layer);
         console.log(this.drawItems.getLayers())
       };

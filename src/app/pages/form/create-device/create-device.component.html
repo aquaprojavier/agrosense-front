@@ -77,6 +77,7 @@
                     matInput
                     type="number"
                     formControlName="latitud"
+                    id="latitudInput"
                   />
                   <mat-icon matSuffix *ngIf="isLatitudFieldValid"
                     >done</mat-icon
@@ -106,6 +107,7 @@
                     matInput
                     type="number"
                     formControlName="longitud"
+                    id="longitudInput" 
                   />
                   <mat-icon matSuffix *ngIf="isLongitudFieldValid"
                     >done</mat-icon
@@ -165,14 +167,7 @@
                 <div class="col-4">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label class="light">Operacion de riego</mat-label>
-                    <mat-select formControlName="opeId">
-                      <mat-option
-                        *ngFor="let operation of operations"
-                        [value]="operation.operationId"
-                      >
-                        {{ operation.operationName }}
-                      </mat-option>
-                    </mat-select>
+                    <input matInput formControlName="opeId" [value]="operationCorrespondiente?.operationName" readonly>
                     <mat-icon matSuffix *ngIf="isOpeIdFieldValid"
                       >done</mat-icon
                     >
