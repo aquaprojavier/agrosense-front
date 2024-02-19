@@ -18,7 +18,7 @@ export class AgromonitoringService {
     return this.http.get<any[]>(url);
   }
 
-  // Paso 2: Obtener imágenes y datos para cada URL proporcionada
+  // Paso 2: Obtener imágenes y datos para cada URL proporcionada. creo que no se usa...
   getDataFromUrls(urls: string[]): Observable<any[]> {
     const requests: Observable<any>[] = [];
 

@@ -22,7 +22,7 @@
                 <tr>
                   <th>Nombre</th>
                   <th style="text-align: center;">Tipo</th>
-                  <th>Operacion</th>
+                  <th>Asignado a:</th>
                   <th>Variedad</th>
                   <th>Status</th>
                   <th>Acción</th>
@@ -35,8 +35,8 @@
                     <!-- {{ dev.devicesType }} -->
                     <img [src]="getDeviceTypeImage(dev.devicesType)" alt="{{ dev.devicesType }}">
                   </td>
-                  <td [style.color]="getOperationNameByDevId(dev.devicesId) === 'Ninguna' ? 'yellow' : ''">
-                    {{ getOperationNameByDevId(dev.devicesId) }}
+                  <td [style.color]="getOperationNameByDevId(dev.devicesId) !== property.propNombre ? 'yellow' : ''">
+                    {{ getOperationNameByDevId(dev.devicesId) === property.propNombre ? property.propNombre : getOperationNameByDevId(dev.devicesId) }}
                   </td>
                   <td>{{ dev.devicesCultivo }}</td>
                   <td>

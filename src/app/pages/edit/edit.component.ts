@@ -311,34 +311,20 @@ export class EditComponent implements OnInit {
     );
   }
   getOperationNameByDevId(devId: number): string {
-    let valor: string = "Ninguna";
-    if (this.operations && this.operations.length > 0) {
-      for (const ope of this.operations) {
-        ope.polygons.forEach ( poly => {
-          if (poly.devices) {
-            for (const dev of poly.devices) {
-              if (dev.devicesId === devId) {
-                valor = ope.operationName;
-                break; // Para salir del bucle si encontramos una coincidencia
-              }
-            }
-          }
-        })
-      }
+    const operation = this.operations.find(ope =>
+      ope.polygons.some(poly =>
+        poly.devices && poly.devices.some(dev => dev.devicesId === devId)
+      )
+    );
+  
+    // Si se encuentra una operación asociada, devolver su nombre
+    if (operation) {
+      return operation.operationName;
     }
-    return valor;
+  
+    // Si no se encuentra ninguna operación asociada, devolver el nombre de la propiedad
+    return this.property.propNombre;
   }
-  // getOperationNameByDevId (devId: number): string {
-  //   let valor: string = "Ninguna";
-  //   this.operations.forEach ( ope =>{
-  //     ope.devices.forEach (dev => {
-  //       if (dev.devicesId === devId) {
-  //         valor = ope.operationName
-  //       }
-  //     })
-  //   })
-  //   return valor;
-  // }
 
   getDevicesNames(devices: Device[]): string {
     const deviceNames = devices.map(dev => dev.devicesNombre);

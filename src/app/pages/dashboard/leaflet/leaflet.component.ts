@@ -20,6 +20,7 @@ import 'leaflet-extra-markers';
 import 'heatmap.js';
 import { HeatData } from 'src/app/core/models/heatData.models';
 import { IconService } from 'src/app/core/services/icon.service';
+import { RecomendationService } from 'src/app/core/services/recomendation.service';
 
 declare const HeatmapOverlay: any;
 
@@ -27,6 +28,7 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 // import am5themes_Dark from "@amcharts/amcharts5/themes/Dark";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import { Recomendation } from 'src/app/core/models/recom.models';
 // import am5themes_Micro from "@amcharts/amcharts5/themes/Micro";
 
 declare function loadLiquidFillGauge(elementId: string, value: number, wc: number, ur: number, config?: any): void;
@@ -66,6 +68,7 @@ export class LeafletComponent implements OnInit {
   blueIcon: Icon;
   greyIcon: Icon;
   yellowIcon: Icon;
+  todayRecom: Recomendation[];
 
   constructor(
     private iconService: IconService,
@@ -77,7 +80,8 @@ export class LeafletComponent implements OnInit {
     private dataService: DataService,
     private cargaScript: CargarService,
     private sanitizer: DomSanitizer,
-    private agromonitoringService: AgromonitoringService) {
+    private agromonitoringService: AgromonitoringService,
+    private recomendationService: RecomendationService) {
 
 
     this.cargaScript.carga(["loadFillGauge"]);
@@ -102,6 +106,7 @@ export class LeafletComponent implements OnInit {
     this.activatedRoute.params.subscribe((params: Params) => {
       this.propId = params['id'];
       this.getData(this.propId);
+      this.getRecomendation(this.propId);
     },
       (error) => {
         console.log(error);
@@ -109,6 +114,12 @@ export class LeafletComponent implements OnInit {
     );
   };
 
+  getRecomendation(propId: number): void {
+    this.recomendationService.getPropertyById(propId).subscribe(data => {
+      this.todayRecom = data;
+    });
+  }
+  
   getIcons() {
     this.gaugeIcon = this.iconService.getGaugeIcon();
     this.redIcon = this.iconService.getRedIcon();
@@ -596,10 +607,7 @@ export class LeafletComponent implements OnInit {
     return new Observable<void>(observer => {
       // Tu lógica existente para crear el heatmap
       const heatDataArray: HeatData[] = [];
-      // Array de observables para almacenar las suscripciones a lastDataByDeviceId
-      // const observables: Observable<Data>[] = [];
 
-      // Mapear dispositivos a observables
       const observablesArray = property.devices
         .filter(dev => dev.devicesType === 'Temp.')
         .map(dev => this.dataService.lastDataByDeviceId(dev.devicesId)
