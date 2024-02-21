@@ -11,7 +11,7 @@ export class RecomendationService {
 
   constructor(private http: HttpClient) { }
 
-  public getPropertyById ( propId : number ){
-    return this.http.get<Recomendation[]>(`${baseUrl}/recomendationByProp/${propId}`)
+  public getRecomendationByProp ( propId : number ){
+    return this.http.get<Recomendation[]>(`${baseUrl}/getRecomendationByProp/${propId}`)
   }
 }

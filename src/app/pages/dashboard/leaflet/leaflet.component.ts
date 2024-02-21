@@ -42,6 +42,7 @@ type AllowedMarkerColor = "orange" | "red" | "orange-dark" | "yellow" | "blue" |
 })
 export class LeafletComponent implements OnInit {
   // bread crumb items
+  currentDate: Date = new Date();
   heatmapLayerGroup: LayerGroup;
   fechaActual: string;
   fechaAyer: string;
@@ -114,8 +115,14 @@ export class LeafletComponent implements OnInit {
     );
   };
 
+  formatDate(date: any): string {
+    // Convertir la fecha al formato 'yyyy-MM-dd' utilizando el pipe 'date'
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  }
+
   getRecomendation(propId: number): void {
-    this.recomendationService.getPropertyById(propId).subscribe(data => {
+    this.recomendationService.getRecomendationByProp(propId).subscribe(data => {
+      console.log(data);
       this.todayRecom = data;
     });
   }

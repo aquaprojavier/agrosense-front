@@ -61,7 +61,7 @@
         <!-- <script src='//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/d3.min.js'></script><script>window.myWidgetParam ? window.myWidgetParam : window.myWidgetParam = [];  window.myWidgetParam.push({id: 11,cityid: '3844421',appid: '5f3a09c9c40ca76809a1cc96f5d1dff2',units: 'metric',containerid: 'openweathermap-widget-11',  });  (function() {var script = document.createElement('script');script.async = true;script.charset = "utf-8";script.src = "//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/weather-widget-generator.js";var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(script, s);  })();</script> -->
       </div>
     </div>
-    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
       <div class="card">
         <div class="card-body">
           <h4 class="card-title mb-5">Recomendaciones de Riego</h4>
@@ -82,13 +82,10 @@
                   </h5>
                 </div>
                 <div class="media-body">
-                  <!-- <div>
+                  <div>
                     Regar 5 horas 45 minutos el cuadro C6, equivalente a 12 mm
                     de lámina. Regar 2 horas 35 minutos el C7, equivalente a 5 mm
                     de lámina
-                  </div> -->
-                  <div>
-                    {{todayRecom?.[0]?.recom}}
                   </div>
                 </div>
               </div>
@@ -164,6 +161,64 @@
           </div>
         </div>
       </div>
+    </div> -->
+    <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-5">Recomendaciones de Riego</h4>
+          <ul class="verti-timeline list-unstyled">
+            <li class="event-list active" *ngFor="let recomendacion of todayRecom">
+              <div class="event-timeline-dot">
+                <i class="bx bxs-right-arrow-circle font-size-18 bx-fade-right"></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    {{ recomendacion.date | date: 'dd/MM/yyyy'}}
+                    <i class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>{{ recomendacion.recom }}</div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div class="text-center mt-4">
+            <a href="javascript: void(0);" class="btn btn-primary btn-sm">View More <i class="mdi mdi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-5">Recomendaciones de Riego</h4>
+          <ul class="verti-timeline list-unstyled">
+            <li class="event-list active" *ngFor="let recomendacion of todayRecom">
+              <div class="event-timeline-dot">
+                <i class="bx bxs-right-arrow-circle font-size-18" [ngClass]="{'bx-fade-right': formatDate(currentDate) === formatDate(recomendacion.date)}"></i>
+              </div>
+              <div class="media">
+                <div class="mr-3">
+                  <h5 class="font-size-14">
+                    {{ recomendacion.date | date: 'dd/MM/yyyy'}}
+                    <i class="bx bx-right-arrow-alt font-size-16 text-primary align-middle ms-2"></i>
+                  </h5>
+                </div>
+                <div class="media-body">
+                  <div>{{ recomendacion.recom }}</div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div class="text-center mt-4">
+            <a href="javascript: void(0);" class="btn btn-primary btn-sm">View More <i class="mdi mdi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
     </div>
+    
+    
   </div>
 </div>
