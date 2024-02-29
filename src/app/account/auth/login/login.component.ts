@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
     //   var element = document.getElementById('myVideo');
     //   element.muted= "muted";}
     this.loginForm = this.formBuilder.group({
-      username: ['tomi', [Validators.required]],
+      username: ['javier', [Validators.required]],
       password: ['123', [Validators.required]],
     });
      // reset login status

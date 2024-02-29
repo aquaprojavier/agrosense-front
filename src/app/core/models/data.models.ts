@@ -14,4 +14,6 @@ export class Data {
     serie?: string;
     cc?: number;
     pmp?: number;
+    flow?: number;
+    presion?: number;
 }

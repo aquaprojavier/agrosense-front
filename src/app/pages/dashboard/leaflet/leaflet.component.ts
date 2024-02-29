@@ -58,7 +58,8 @@ export class LeafletComponent implements OnInit {
   ur: number;
   wc: number;
   lastData: Data[] = [];
-  sanitizedUrl: SafeResourceUrl | null = null;
+  sanitizedUrlPronost: SafeResourceUrl | null = null;
+  sanitizedUrlWind: SafeResourceUrl | null = null;
   polygonLayer: LayerGroup;
   lastDatas: Data[];
   lastDataTempArray: Data[] = [];
@@ -86,18 +87,18 @@ export class LeafletComponent implements OnInit {
 
 
     this.cargaScript.carga(["loadFillGauge"]);
-    const hoy = new Date();
-    const ayer = new Date(hoy);
-    ayer.setDate(hoy.getDate() - 1);
-    const antier = new Date(hoy);
-    antier.setDate(hoy.getDate() - 2);
-    const antiantier = new Date(hoy);
-    antiantier.setDate(hoy.getDate() - 3);
+    // const hoy = new Date();
+    // const ayer = new Date(hoy);
+    // ayer.setDate(hoy.getDate() - 1);
+    // const antier = new Date(hoy);
+    // antier.setDate(hoy.getDate() - 2);
+    // const antiantier = new Date(hoy);
+    // antiantier.setDate(hoy.getDate() - 3);
 
-    this.fechaActual = formatDate(hoy, 'dd \'de\' MMMM', 'es');
-    this.fechaAyer = formatDate(ayer, 'dd \'de\' MMMM', 'es');
-    this.fechaAntier = formatDate(antier, 'dd \'de\' MMMM', 'es');
-    this.fechaAntiantier = formatDate(antiantier, 'dd \'de\' MMMM', 'es');
+    // this.fechaActual = formatDate(hoy, 'dd \'de\' MMMM', 'es');
+    // this.fechaAyer = formatDate(ayer, 'dd \'de\' MMMM', 'es');
+    // this.fechaAntier = formatDate(antier, 'dd \'de\' MMMM', 'es');
+    // this.fechaAntiantier = formatDate(antiantier, 'dd \'de\' MMMM', 'es');
   }
 
   ngOnInit(): void {
@@ -122,7 +123,6 @@ export class LeafletComponent implements OnInit {
 
   getRecomendation(propId: number): void {
     this.recomendationService.getRecomendationByProp(propId).subscribe(data => {
-      console.log(data);
       this.todayRecom = data;
     });
   }
@@ -138,7 +138,11 @@ export class LeafletComponent implements OnInit {
   getData(id: number) {
     this.propertyService.getPropertyById(id).subscribe(data => {
       this.property = data;
-      this.sanitizedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.meteoblue.com/en/weather/widget/daily/${this.property?.propUbic}?geoloc=fixed&days=7&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&precipunit=MILLIMETER&coloured=coloured&pictoicon=0&pictoicon=1&maxtemperature=0&maxtemperature=1&mintemperature=0&mintemperature=1&windspeed=0&windspeed=1&windgust=0&winddirection=0&winddirection=1&uv=0&humidity=0&precipitation=0&precipitation=1&precipitationprobability=0&precipitationprobability=1&spot=0&spot=1&pressure=0&layout=dark`);
+      console.log(this.property);
+      this.sanitizedUrlPronost = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.meteoblue.com/en/weather/widget/daily/${this.property?.propUbic}?geoloc=fixed&days=7&tempunit=CELSIUS&windunit=KILOMETER_PER_HOUR&precipunit=MILLIMETER&coloured=coloured&pictoicon=0&pictoicon=1&maxtemperature=0&maxtemperature=1&mintemperature=0&mintemperature=1&windspeed=0&windspeed=1&windgust=0&winddirection=0&winddirection=1&uv=0&humidity=0&precipitation=0&precipitation=1&precipitationprobability=0&precipitationprobability=1&spot=0&spot=1&pressure=0&layout=dark`);
+      
+      this.sanitizedUrlWind = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.meteoblue.com/en/weather/maps/widget/${this.property?.propUbic}?windAnimation=0&windAnimation=1&gust=0&gust=1&satellite=0&satellite=1&cloudsAndPrecipitation=0&cloudsAndPrecipitation=1&temperature=0&temperature=1&sunshine=0&extremeForecastIndex=0&geoloc=fixed&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=7&autowidth=auto`);
+
       this.operationService.getOperationsByPropertyId(id).subscribe(data => {
         this.operations = data;
         this.crearHeatMap(this.property).subscribe(() => {
@@ -157,85 +161,85 @@ export class LeafletComponent implements OnInit {
     }
   };
 
-  createValueChart(div, datos, color) {
+  createMiniChart(div, datos, color, campo) {
     this.browserOnly(() => {
-      // Dispose previously created Root element
-      this.maybeDisposeRoot(div);
+        // Dispose previously created Root element
+        this.maybeDisposeRoot(div);
 
-      let root = am5.Root.new(div);
-      root.setThemes([
-        am5themes_Animated.new(root),
-      ]);
+        let root = am5.Root.new(div);
+        root.setThemes([
+            am5themes_Animated.new(root),
+        ]);
 
-      let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        // panX: false,
-        // panY: false,
-        // wheelX: "none",
-        // wheelY: "none",
-      }));
+        let chart = root.container.children.push(am5xy.XYChart.new(root, {
+            // panX: false,
+            // panY: false,
+            // wheelX: "none",
+            // wheelY: "none",
+        }));
 
-      // Add cursor
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
-      let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-        // xAxis: xAxis,
-        // behavior: "zoomX"
-      }));
-      cursor.lineY.set("visible", false);
+        // Add cursor
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+        let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+            // xAxis: xAxis,
+            // behavior: "zoomX"
+        }));
+        cursor.lineY.set("visible", false);
 
-      // Create axes
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-      let xAxis = chart.xAxes.push(
-        am5xy.DateAxis.new(root, {
-          // groupData: true,
-          baseInterval: { timeUnit: "minute", count: 30 },
-          renderer: am5xy.AxisRendererX.new(root, {}),
-          // tooltip: am5.Tooltip.new(root, {})
-        })
-      );
+        // Create axes
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+        let xAxis = chart.xAxes.push(
+            am5xy.DateAxis.new(root, {
+                // groupData: true,
+                baseInterval: { timeUnit: "minute", count: 30 },
+                renderer: am5xy.AxisRendererX.new(root, {}),
+                // tooltip: am5.Tooltip.new(root, {})
+            })
+        );
 
-      let valueAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        strictMinMax: true,
-        extraMax: 0.1,
-        extraMin: 0.1,
-        renderer: am5xy.AxisRendererY.new(root, {}),
-        // tooltip: am5.Tooltip.new(root, {})
-      }));
+        let valueAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+            strictMinMax: true,
+            extraMax: 0.1,
+            extraMin: 0.1,
+            renderer: am5xy.AxisRendererY.new(root, {}),
+            // tooltip: am5.Tooltip.new(root, {})
+        }));
 
-      let series = chart.series.push(am5xy.LineSeries.new(root, {
-        xAxis: xAxis,
-        yAxis: valueAxis,
-        valueYField: "dataTemp",
-        valueXField: "dataFecha",
-        tooltip: am5.Tooltip.new(root, {
-          labelText: "{valueY}"
-        })
-      }));
+        let series = chart.series.push(am5xy.LineSeries.new(root, {
+            xAxis: xAxis,
+            yAxis: valueAxis,
+            valueYField: campo, // Utilizamos el nuevo campo pasado como argumento
+            valueXField: "dataFecha",
+            tooltip: am5.Tooltip.new(root, {
+                labelText: "{valueY}"
+            })
+        }));
 
-      series.fills.template.setAll({
-        fillOpacity: 0.2,
-        visible: true
-      });
-
-      series.bullets.push(function (root) {
-        return am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            radius: 4,
-            fill: series.get("fill")
-          })
+        series.fills.template.setAll({
+            fillOpacity: 0.2,
+            visible: true
         });
-      });
 
-      series.data.processor = am5.DataProcessor.new(root, {
-        dateFields: ["dataFecha"],
-        dateFormat: "yyyy-MM-dd HH:mm:ss"
-      });
+        series.bullets.push(function (root) {
+            return am5.Bullet.new(root, {
+                sprite: am5.Circle.new(root, {
+                    radius: 4,
+                    fill: series.get("fill")
+                })
+            });
+        });
 
-      // console.log(datos);
-      series.appear(1000);
-      chart.appear(1000, 100);
-      series.data.setAll(datos);
+        series.data.processor = am5.DataProcessor.new(root, {
+            dateFields: ["dataFecha"],
+            dateFormat: "yyyy-MM-dd HH:mm:ss"
+        });
+
+        // console.log(datos);
+        series.appear(1000);
+        chart.appear(1000, 100);
+        series.data.setAll(datos);
     });
-  }
+};
 
   getImagesApi(polygonId: string): Observable<string | undefined> {
     return this.agromonitoringService.searchImages(1586131200, 1586553600, polygonId).pipe(
@@ -268,7 +272,7 @@ export class LeafletComponent implements OnInit {
             // Actualizar el control de capas solo cuando se añada la primera capa NDVI
             if (ndviLayerGroup.getLayers().length === 1) {
               if (layerControl) {
-                layerControl.addOverlay(ndviLayerGroup, 'NDVI'); // Añadir el LayerGroup al control de capas con un nombre específico
+                layerControl.addOverlay(ndviLayerGroup, "<b><span style='color: #ba4806'>NDVI</span></b>"); // Añadir el LayerGroup al control de capas con un nombre específico
               }
             }
           } else {
@@ -308,6 +312,7 @@ export class LeafletComponent implements OnInit {
   }
 
   showMap(property: Property, operations: Operation[]) {
+    console.log(operations);
     if (this.myMap !== undefined && this.myMap !== null) {
       this.myMap.remove();
     }
@@ -330,15 +335,18 @@ export class LeafletComponent implements OnInit {
     const baseLayers = {
       'ArcGIS': arcgisTileLayer,
     };
-    // const heatmapLayerGroup = layerGroup();
+    
     // Capas vacías inicialmente
-    const overlayLayers = {
+    const overlayLayers: any = {
       'Operaciones riego': this.polygonLayer,
       'Sensores suelo': soilLayer,
       'Sensores ambiente': tempLayer,
       'Otros sensores': otherLayer,
-      'Heatmap': this.heatmapLayerGroup // Agregar la capa de heatmap al control de capas
     };
+    
+    if (this.heatmapLayerGroup) {
+      overlayLayers["<b><span style='color: #015161'>Mapa de calor</span></b>"] = this.heatmapLayerGroup;
+    }    
 
     //crea un control de capas 
     let layerControl = control.layers(baseLayers, overlayLayers).addTo(this.myMap);
@@ -368,12 +376,27 @@ export class LeafletComponent implements OnInit {
         let poligon = geoJSON(poligonDevice, { style: { color } }).addTo(this.myMap);
         // Formatear ope.operationArea con 2 decimales
         const formattedOperationArea = ope.operationArea.toFixed(2);
+        console.log(ope.operationArea);
+
+        let cropIcon;
+        switch (ope.crop.cropName.toLowerCase()) {
+          case 'durazno':
+            cropIcon = 'assets/images/durazno.png';
+            break;
+          case 'Vid vinífera':
+            cropIcon = 'assets/images/grapes.png';
+            break;
+          // Agrega más casos según los cultivos que tengas
+          default:
+            cropIcon = 'assets/images/grapes.png'; // Icono predeterminado si no coincide con ninguno
+            break;
+        };
 
         poligon.bindPopup(`
-        <div class="container text-center" style="width: 160px;line-height: 0.5;margin-left: 0px;margin-right: 0px;padding-right: 0px;padding-left: 0px;">
+        <div class="container text-center" style="width: 160px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
           <div class="row">
-            <div class="col-12" style="line-height: 0.5;">
-             <div class="text-center">
+            <div class="col-12" style="line-height: 1;">
+              <div class="text-center">
                 <img src="assets/images/location.png" alt=""><br><br>
                 Operacion: <b>${ope.operationName}</b><br><br>
               </div>
@@ -381,10 +404,12 @@ export class LeafletComponent implements OnInit {
                 <img src="assets/images/selection.png" alt=""> Superficie: <b>${formattedOperationArea} ha.</b><br>
               </div>
               <div class="text-center">
-                <img src="assets/images/grapes.png" alt=""> Cultivo: <b>${ope.crop.cropName}</b><br>
+                <img src="${cropIcon}" alt=""> Cultivo: <b>${ope.crop.cropName}</b> <br>
               </div>
-              ${dev ? `<div class="text-center">Variedad: <b>${dev.devicesCultivo}</b><br>
-              </div>` : ''}
+              ${dev ? `
+                <div class="text-center">
+                  Variedad: <b>${dev.devicesCultivo}</b><br>
+                </div>` : ''}
             </div>
           </div>
         </div>
@@ -397,10 +422,74 @@ export class LeafletComponent implements OnInit {
     this.devices = [];
 
     // Function to add markers
-    const addMarker = (dev: Device, data: Data, icon) => {
+    const addSoilMarker = (dev: Device, data: Data, icon) => {
       // Determine the text color based on the value of data.volt
       const textColor = data.volt < 3.2 ? 'red' : 'black';
-      let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+      if (dev.devicesNombre == "lse"){
+        let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
+      <div class="container text-center" style="width: 200px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
+
+          <div class="row">
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Dispositivo:<br><b>${dev.devicesNombre}</b></h5>
+              </div>
+            </div>
+            <div class="col-6">
+              <div>
+                <h5 style="color: black; margin-bottom: 0px;">Bateria:<br><b style="color: ${textColor};">${data.volt} V.</b></h5>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div id="soilId" style="width: 100%; height: 150px;"></div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <h2 style="margin-bottom: 0px; color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : icon === this.yellowIcon ? '#c9b802' : 'green'};">
+                ${icon === this.redIcon ? 'PELIGRO' : icon === this.blueIcon ? 'SATURADO' : icon === this.yellowIcon ? 'PRECAUCIÓN' : 'OPTIMO'}
+              </h2>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <img src="assets/images/root32px.png" alt="">
+            </div>
+            <div class="col-8">
+                  <h5 style="margin-bottom: 0px; margin-top: 5px; color: black; text-align: left;">30 cm: <b style="color: ${icon === this.redIcon ? 'red' : icon === this.blueIcon ? 'blue' : 'green'};">
+                      ${data.dataHum}%
+                    </b>
+                  </h5>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">Ce:<br><img src="assets/images/water.png" alt=""> <b>${data.dataConducSoil} Mm</b></h5>
+            </div>
+            <div class="col-6">
+              <h5 style="color: black; margin-bottom: 0px;">Temp:<br><img src="assets/images/termometro.png" alt=""> <b>${data.dataTempSoil} °C</b></h5>
+            </div>
+          </div>
+
+        </div>
+
+        `, { closeButton: false }).on('click', (e) => {
+        // console.log('Hiciste clic en el marcador', e.latlng);
+        this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
+          // console.log(lastdata);
+          this.createMiniChart("soilId", lastdata, "#3eedd3", "dataHum")
+        });
+      });
+      
+      loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, dev.soil.cc, dev.soil.ur, dev.soil.pmp);
+      soilLayer.addLayer(iconSoil);
+      // this.lastData.push(data);
+      }else {
+        let iconSoil = marker(dev.coordenadas, { icon }).addTo(this.myMap).bindPopup(`
       <div class="container text-center" style="width: 200px; line-height: 0.5; margin-left: 0px; margin-right: 0px; padding-right: 0px; padding-left: 0px;">
 
           <div class="row">
@@ -464,13 +553,16 @@ export class LeafletComponent implements OnInit {
         `, { closeButton: false }).on('click', (e) => {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
-          console.log(lastdata);
-          this.createValueChart("soilId", lastdata, "#3eedd3")
+          // console.log(lastdata);
+          this.createMiniChart("soilId", lastdata, "#3eedd3", "dataHum")
         });
       });
+     
       loadLiquidFillGauge(`fillgauge${dev.devicesId}`, data.dataHum, dev.soil.cc, dev.soil.ur, dev.soil.pmp);
       soilLayer.addLayer(iconSoil);
       // this.lastData.push(data);
+      }
+
     };
 
     // Function to add markers
@@ -512,7 +604,7 @@ export class LeafletComponent implements OnInit {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
           console.log(lastdata);
-          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+          this.createMiniChart("chartdiv", lastdata, "#3eedd3", "dataTemp")
         });
       });
       tempLayer.addLayer(iconTemp);
@@ -542,17 +634,17 @@ export class LeafletComponent implements OnInit {
             </div>    
             <div class="row">
             <div class="col-6">
-              <h5 style="color: black;margin-bottom: 0px;">Presion:<br><img src="assets/images/pressure.png" alt=""> <b>${data.dataHr}</b> Kg/cm2</h5>
+              <h5 style="color: black;margin-bottom: 0px;">Presion:<br><img src="assets/images/pressure.png" alt=""> <b>${data.presion}</b> Kg/cm2</h5>
             </div>
             <div class="col-6">
-              <h5 style="color: black;margin-bottom: 0px;">Caudal:<br><img src="assets/images/dial24.png" alt=""> <b>${data.dataTemp}</b> m3/h</h5>
+              <h5 style="color: black;margin-bottom: 0px;">Caudal:<br><img src="assets/images/dial24.png" alt=""> <b>${data.flow}</b> m3/h</h5>
             </div>
           </div>
       </div>
       `, { closeButton: false }).on('click', (e) => {
         // console.log('Hiciste clic en el marcador', e.latlng);
         this.dataService.lastDatasByDeviceId(dev.devicesId, 10).subscribe(lastdata => {
-          this.createValueChart("chartdiv", lastdata, "#3eedd3")
+          this.createMiniChart("chartdiv", lastdata, "#3eedd3", "flow")
         });
       });
       otherLayer.addLayer(gaugeIcon);
@@ -571,16 +663,16 @@ export class LeafletComponent implements OnInit {
                 const wur = (adt * (dev.soil.ur / 100)) + dev.soil.pmp
 
                 if (data.dataHum <= dev.soil.pmp) {
-                  addMarker(dev, data, this.redIcon);
+                  addSoilMarker(dev, data, this.redIcon);
                   addPolygons(ope, "#CB2B3E", this.redIcon, dev);
                 } else if (data.dataHum >= dev.soil.cc) {
-                  addMarker(dev, data, this.blueIcon);
+                  addSoilMarker(dev, data, this.blueIcon);
                   addPolygons(ope, "#0481bf", this.blueIcon, dev);
                 } else if (data.dataHum > dev.soil.pmp && data.dataHum <= wur) {
-                  addMarker(dev, data, this.yellowIcon);
+                  addSoilMarker(dev, data, this.yellowIcon);
                   addPolygons(ope, "#CAC428", this.yellowIcon, dev);
                 } else if (data.dataHum > wur && data.dataHum < dev.soil.cc) {
-                  addMarker(dev, data, this.greenIcon);
+                  addSoilMarker(dev, data, this.greenIcon);
                   addPolygons(ope, "#2AAD27", this.greenIcon, dev);
                 }
               },
@@ -610,8 +702,16 @@ export class LeafletComponent implements OnInit {
     })
 
   };
+
   crearHeatMap(property: Property): Observable<void> {
     return new Observable<void>(observer => {
+      if (!property.devices || !property.devices.length) {
+        // Si no hay dispositivos, no necesitamos crear un heatmap, así que completamos el observable y salimos
+        observer.next();
+        observer.complete();
+        return;
+      };
+
       // Tu lógica existente para crear el heatmap
       const heatDataArray: HeatData[] = [];
 

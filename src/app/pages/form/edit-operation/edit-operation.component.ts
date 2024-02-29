@@ -252,7 +252,7 @@ export class EditOperationComponent implements OnInit {
 
           console.log('Se ha guardado el formulario exitosamente:', response);
 
-          Swal.fire('Edición exitosa!', `El dispositivo ${this.form.value.operationName} se actualizó correctamente`, 'success')
+          Swal.fire('Edición exitosa!', `El dispositivo <strong>${this.form.value.operationName}</strong> se actualizó correctamente`, 'success')
             .then(() => {
               this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
             });

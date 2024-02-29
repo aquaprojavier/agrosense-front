@@ -65,6 +65,12 @@
   <!-- end page title -->
   <div *ngIf="device?.devicesType === 'Suelo'">
     <app-line-chart [datoschart]="datos" [device]="device"></app-line-chart>
+    <app-temp-hum-chart [datoschart]="datos"></app-temp-hum-chart>
   </div>
-  <app-temp-hum-chart [datoschart]="datos"></app-temp-hum-chart>
+  <div *ngIf="device?.devicesType === 'Caudal'">
+    <app-flow-chart [datoschart]="datos"></app-flow-chart>
+  </div>
+  <div *ngIf="device?.devicesType === 'Temp.'">
+    <app-temp-hum-chart [datoschart]="datos"></app-temp-hum-chart>
+  </div>
 </div>

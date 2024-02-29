@@ -1,11 +1,11 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
 import MetisMenu from 'metismenujs/dist/metismenujs';
-import { EventService } from '../../core/services/event.service';
+// import { EventService } from '../../core/services/event.service';
 import { LoginService } from '../../core/services/login.service';
-import { UserProfileService } from 'src/app/core/services/user.service';
+// import { UserProfileService } from 'src/app/core/services/user.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { PropertyService } from 'src/app/core/services/property.service';
-import { HttpClient } from '@angular/common/http';
+// import { HttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core/models/auth.models';
 import { Device } from 'src/app/core/models/device.models';

@@ -73,8 +73,13 @@ function liquidFillGaugeDefaultSettings() {
 
     
     value = ((value-pmp) * 100) / adt;
+    //si es menor de cero, muestra cero
     if (value < 0){
       value = 0
+    }
+    // si es mayor de cien, muestra 100
+    if (value > 100){
+      value = 100
     }
 
     var gauge = d3.select("#" + elementId);

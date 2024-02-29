@@ -22,6 +22,7 @@ import { LineChartComponent } from './charts/line-chart/line-chart.component';
 import { EditComponent } from './edit/edit.component';
 import { TempHumChartComponent } from './charts/temp-hum-chart/temp-hum-chart.component';
 import { ChartsComponent } from './charts/charts.component';
+import { FlowChartComponent } from './charts/flow-chart/flow-chart.component';
 
 FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   dayGridPlugin,
@@ -33,7 +34,7 @@ FullCalendarModule.registerPlugins([ // register FullCalendar plugins
   declarations: [ 
     LineChartComponent,
     EditComponent, 
-    TempHumChartComponent, ChartsComponent
+    TempHumChartComponent, ChartsComponent, FlowChartComponent
   ],
   imports: [
     // TableModule,

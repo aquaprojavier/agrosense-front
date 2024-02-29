@@ -55,7 +55,6 @@ export class EditComponent implements OnInit {
     )
   }
 
-
   areFreeSerialNumbers(serialId: string) {
     this.dataService.getSerialNumber(serialId).subscribe(data => {
       if (data.length === 0) {
@@ -240,7 +239,6 @@ export class EditComponent implements OnInit {
     return '';
   }
   
-  
   getScaleFactor(operations: Operation[]): number {
     let maxArea = 0;
     for (const operation of operations) {
@@ -310,12 +308,16 @@ export class EditComponent implements OnInit {
       })
     );
   }
+
   getOperationNameByDevId(devId: number): string {
-    const operation = this.operations.find(ope =>
+    if (!this.operations) {
+      return ''; // O maneja el caso según tus necesidades
+  }
+  const operation = this.operations.find(ope =>
       ope.polygons.some(poly =>
-        poly.devices && poly.devices.some(dev => dev.devicesId === devId)
+          poly.devices && poly.devices.some(dev => dev.devicesId === devId)
       )
-    );
+  );
   
     // Si se encuentra una operación asociada, devolver su nombre
     if (operation) {

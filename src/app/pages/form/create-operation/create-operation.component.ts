@@ -258,7 +258,7 @@ export class CreateOperationComponent implements OnInit {
 
           console.log('Se ha creado la operacion exitosamente:', response);
 
-          Swal.fire('Creación exitosa!', `La operation ${this.form.value.operationName} fue creado correctamente.\n
+          Swal.fire('Creación exitosa!', `La operation <strong>${this.form.value.operationName}</strong> fue creado correctamente.\n
           Área de operación: ${response.operationArea} ha.`, 'success')
             .then(() => {
               this.router.navigate([`dashboard/leaflet/${this.propId}`]); // Redirige a la página principal
