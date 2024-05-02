@@ -383,12 +383,12 @@ export class LeafletComponent implements OnInit {
           case 'durazno':
             cropIcon = 'assets/images/durazno.png';
             break;
-          case 'Vid vinífera':
+          case 'vid vinífera':
             cropIcon = 'assets/images/grapes.png';
             break;
           // Agrega más casos según los cultivos que tengas
           default:
-            cropIcon = 'assets/images/grapes.png'; // Icono predeterminado si no coincide con ninguno
+            cropIcon = 'assets/images/generalcrop.png'; // Icono predeterminado si no coincide con ninguno
             break;
         };
 

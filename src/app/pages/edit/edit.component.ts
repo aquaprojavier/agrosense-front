@@ -22,7 +22,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 })
 export class EditComponent implements OnInit {
 
-  timeWithoutConexion: number = 2 * 60 * 60 * 1000;
+  timeWithoutConexion: number = 480 * 60 * 60 * 1000;
   actualDate: Date = new Date();
   argentinaTimezoneOffset = -3; // GMT-3
   actualDateInArgentina: Date = new Date(this.actualDate.getTime() + this.argentinaTimezoneOffset * 60 * 60 * 1000);

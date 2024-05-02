@@ -43,7 +43,7 @@
           </li>
         </ul>
       </li>
-      <li>
+      <li *ngIf="authorizationService.hasRole('admin')">
         <a
           class="is-parent"
           routerLink="/edit/{{ propertyId }}"

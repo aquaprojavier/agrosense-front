@@ -9,6 +9,7 @@ import { PropertyService } from 'src/app/core/services/property.service';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core/models/auth.models';
 import { Device } from 'src/app/core/models/device.models';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -31,10 +32,12 @@ export class SidebarComponent implements OnInit, AfterViewInit, OnChanges {
   devices: Device[];
   propertyId: number;
   menuItems = [];
+  // userRole: string;
 
   @ViewChild('sideMenu') sideMenu: ElementRef;
 
   constructor(
+    public authorizationService: AuthorizationService,
     private propertyService: PropertyService,
     private loginService: LoginService,
     private router: Router,
